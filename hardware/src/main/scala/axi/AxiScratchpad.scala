@@ -1,0 +1,272 @@
+package fgramemfp.axi
+
+import fgramemfp._
+import fgramemfp.dsa._
+
+import chisel3._
+import chisel3.util._
+
+/**
+ * Address space:
+ *  SRAM:       baseAddr + 0x0100 ~ baseAddr + lgSizeSpadBank - log2Ceil(axiBeatBytes) 
+ *  Last sram:  baseAddr + lgSizeSpadBank - log2Ceil(axiBeatBytes) ~ baseAddr + lgSizeSpadBank - log2Ceil(axiBeatBytes) + lgSizeSpadBank - log2Ceil(bPortBytes)
+ *  Registers:  baseAddr + 0x0000 ~ baseAddr + 0xFF
+ */
+class AXI4Scratchpad(
+              // val AddrWidth         : Int,
+              // val DataWidth         : Int
+              //// axi port parameters
+              idWidth : Int = 2,
+              baseAddr: BigInt = 0,
+              spadBanksNum: Int,
+              lgSizeSpadBank: Int = 13, /// log Byte
+              lgSizeLastBlock: Int = 10, /// log Bytes
+              axiBeatBytes: Int = 8, /// 64bit
+
+              //// B port parameters
+              bPortBytes: Int = 4, /// 32bit
+              hasMask: Boolean = true
+          ) extends Module {
+
+  /// set axi4 Parameters
+  // val AxiAddrWidth = log2Ceil(baseAddr + spadBanksNum * (1 << lgSizeSpadBank) + lgSizeLastBlock - 1) - log2Ceil(axiBeatBytes)
+  val AxiAddrWidth = log2Ceil(baseAddr + spadBanksNum * (1 << lgSizeSpadBank) + lgSizeLastBlock - 1)
+  val SPMAddrWidth = lgSizeSpadBank - log2Ceil(axiBeatBytes) 
+  val lgAPortBytes = log2Ceil(axiBeatBytes)
+
+  val DataWidth = axiBeatBytes * 8
+  val cfgSpadBanks = {
+    if(lgSizeLastBlock <= lgSizeSpadBank) 1
+    else 1 << (lgSizeLastBlock - lgSizeSpadBank)
+  }
+  val lgCfgSpadBanks = log2Ceil(cfgSpadBanks)
+  // require(cfgSpadBanks == 1) /// now we only handle one cfg bank
+
+  val lgDepthLast = lgSizeLastBlock - log2Ceil(axiBeatBytes)
+
+  println("AxiAddrWidth", AxiAddrWidth)
+  println("lgSizeLastBlock", lgSizeLastBlock)
+  println("cfgSpadBanks", cfgSpadBanks)
+  println("lgDepthLast", lgDepthLast)
+
+  require(isPow2(DataWidth))
+  val axi4Param = new AXI4BundleParameters(
+                      addrBits = AxiAddrWidth,
+                      dataBits = axiBeatBytes * 8,
+                      idBits   = idWidth) 
+  // println("AxiAddrWidth", AxiAddrWidth)
+  // println("SPMAddrWidth", SPMAddrWidth)
+
+  // =========================================================================
+  // I/O
+  // =========================================================================
+  val io = IO( new Bundle{
+    // Clock and Reset
+    val aclk        = Input(Clock())
+    val aresetn     = Input(Bool())
+
+    // AXI4 Interface
+    val s_axi = Flipped(new AXI4Bundle(axi4Param))
+
+    // SRAM Interface
+    val srams = Vec(spadBanksNum, new SRAMIO(
+                      bPortBytes * 8,
+                      lgSizeSpadBank - log2Ceil(bPortBytes),
+                      hasMask))
+
+    val sram_last = new SRAMIO(
+                      DataWidth,
+                      lgDepthLast,
+                      hasMask)
+
+    // Broadcast side-band signals (from AuFORACGRAController / AuFORAController)
+    val bcast_en        = Input(Bool())
+    val bcast_bank_mask = Input(UInt(spadBanksNum.W))
+    val bcast_base_addr = Input(Vec(spadBanksNum, UInt(SPMAddrWidth.W)))
+  })
+
+  val spads = Seq.fill(spadBanksNum){
+    Module(new TrueDualPortSRAMAsym(
+        /*aWidth=*/ axiBeatBytes * 8, 
+        /*lgDepth=*/lgSizeSpadBank - log2Ceil(axiBeatBytes), 
+        /*bWidth=*/ bPortBytes * 8, 
+        /*hasMask=*/hasMask)
+    ).io}
+
+  val spad_last_bank_io = Module(new TrueDualPortSRAM(
+        /*aWidth=*/axiBeatBytes * 8, 
+        /*lgDepth=*/lgDepthLast, 
+        hasMask)).io
+
+  /// b port connection
+  io.srams.zipWithIndex.foreach{ case (sram, i) =>
+    spads(i).b <> io.srams(i)
+    // sram <> spads(i).b
+  }
+
+  spad_last_bank_io.b <> io.sram_last
+
+  // =========================================================================
+  // Chisel Work-Around for Active-Low Reset
+  // =========================================================================
+  val asyncReset       = (!io.aresetn).asAsyncReset
+
+  // =========================================================================
+  // Internal Logic
+  // =========================================================================
+  val axi4RdView = Wire(new AXI4RdIntfView(axi4Param))
+  axi4RdView.ar <> io.s_axi.ar
+  axi4RdView.r  <> io.s_axi.r
+
+  val axi4WrView  = Wire(new AXI4WrIntfView(axi4Param))
+  axi4WrView.aw <> io.s_axi.aw
+  axi4WrView.w  <> io.s_axi.w
+  axi4WrView.b  <> io.s_axi.b
+
+  val rdBankIdxSyn = RegInit(0.U((AxiAddrWidth-lgSizeSpadBank).W))
+
+  withClockAndReset(io.aclk, asyncReset) {
+    val wrIE    = Module(new WriteEngine(axi4Param))
+    val rdIE    = Module(new ReadEngine(axi4Param))
+    val arbiter = Module(new SramArbiter(spadBanksNum + cfgSpadBanks))
+
+    println("spadBanksNum:", spadBanksNum)
+    println("lgDepthLast:", lgDepthLast)
+    // require(spadBanksNum > lgDepthLast)
+    val wr_csel       = wrIE.addr(AxiAddrWidth - 1, SPMAddrWidth + log2Ceil(axiBeatBytes))
+    val wr_spad_addr  = wrIE.addr(SPMAddrWidth + log2Ceil(axiBeatBytes) - 1, log2Ceil(axiBeatBytes))
+    val rd_csel       = rdIE.addr(AxiAddrWidth - 1, SPMAddrWidth + log2Ceil(axiBeatBytes))
+    val rd_spad_addr  = rdIE.addr(SPMAddrWidth + log2Ceil(axiBeatBytes) - 1, log2Ceil(axiBeatBytes))
+    // val wr_csel       = wrIE.addr(AxiAddrWidth - 1, SPMAddrWidth)
+    // val wr_spad_addr  = wrIE.addr(SPMAddrWidth - 1, 0)
+    // val rd_csel       = rdIE.addr(AxiAddrWidth - 1, SPMAddrWidth)
+    // val rd_spad_addr  = rdIE.addr(SPMAddrWidth - 1, 0)
+
+    wrIE.aclk       := io.aclk
+    wrIE.aresetn    := io.aresetn
+    wrIE.s_axi      <> axi4WrView
+    wrIE.ready      := arbiter.wrready
+
+    rdIE.aclk       := io.aclk
+    rdIE.aresetn    := io.aresetn
+    rdIE.s_axi      <> axi4RdView
+    rdIE.ready      := arbiter.rdready
+
+    /// connect the chip select signals to arbiter
+    /// In broadcast mode, wr_cs is forced to 0 so that arbiter never treats the write as
+    /// targeting the last config bank, and read/write address collision on a single bank
+    /// is benign -- broadcast writes hit multiple banks and are independent from reads.
+    arbiter.wr_cs := Mux(io.bcast_en, 0.U, wr_csel)
+    arbiter.rd_cs := rd_csel
+
+    //////////////////////////
+    /// Broadcast beat counter
+    //////////////////////////
+    // Counts actual AXI W data beats across the entire broadcast transfer (may
+    // span multiple AXI bursts). Resets only when broadcast is disabled.
+    // IMPORTANT: use io.s_axi.w.valid && io.s_axi.w.ready (actual W handshake),
+    // NOT wrIE.valid -- the WriteEngine asserts valid as soon as AW is accepted,
+    // before the first W beat arrives, which would cause phantom counter increments.
+    val bcast_beat_cnt = RegInit(0.U(SPMAddrWidth.W))
+    when(!io.bcast_en) {
+      bcast_beat_cnt := 0.U
+    }.elsewhen(io.s_axi.w.valid && io.s_axi.w.ready) {
+      bcast_beat_cnt := bcast_beat_cnt + 1.U
+    }
+
+    val doutTable1 = spads.zipWithIndex.map{ case (sp, i) => (i.U -> sp.a.dout) }
+    val doutTable2 = (0 until cfgSpadBanks).map{ i => ((i+spadBanksNum).U -> spad_last_bank_io.a.dout) }
+    val doutTable = doutTable1 ++ doutTable2
+
+    val currentRdBank = RegNext(rd_csel)
+    rdIE.data := MuxLookup(currentRdBank, 0.U, doutTable)
+
+    // arbiter.aclk    := io.aclk
+    // arbiter.aresetn := io.aresetn
+    arbiter.wrvalid := wrIE.valid
+    arbiter.rdvalid := rdIE.valid
+
+    spads.zipWithIndex.foreach{ case (sp, i) =>
+      /// Bank selection:
+      ///   normal:    wr_csel === i.U  (address-decoded single bank)
+      ///   broadcast: bcast_bank_mask(i) (bitmask, multiple banks may hit)
+      val wr_bank_hit = Mux(io.bcast_en,
+                            io.bcast_bank_mask(i),
+                            wr_csel === i.U)
+      /// Write address:
+      ///   normal:    wr_spad_addr (from AXI address)
+      ///   broadcast: per-bank base + beat counter
+      val wr_addr_bank = Mux(io.bcast_en,
+                             io.bcast_base_addr(i) + bcast_beat_cnt,
+                             wr_spad_addr)
+
+      // In broadcast mode, gate write signals with actual W handshake to avoid
+      // phantom writes during the AW-to-W gap (wrIE.valid is true but no data yet)
+      val wr_data_valid = Mux(io.bcast_en,
+                              io.s_axi.w.valid && io.s_axi.w.ready,  // broadcast: actual W beat
+                              wrIE.ready & wrIE.valid)                 // normal: WriteEngine internal
+      val en = (wr_bank_hit & wr_data_valid) | (rd_csel === i.U & rdIE.ready)
+      val we = wr_data_valid & wr_bank_hit
+      val re = rdIE.ready & rdIE.valid & rd_csel === i.U
+      when(en){
+        sp.a.addr       := Mux(we, wr_addr_bank, rd_spad_addr)
+        sp.a.en         := we | re
+        sp.a.din        := wrIE.data
+        sp.a.we         := {if(hasMask) wrIE.strb & Fill(wrIE.strb.getWidth, we) else we}
+        // sp.a.strb       := ~wrIE.strb
+      }.otherwise{
+        sp.a.addr       := DontCare
+        sp.a.en         := false.B
+        sp.a.din        := DontCare
+        sp.a.we         := 0.U
+      }
+    }
+  
+    /////////////////////
+    /// last config spad
+    /////////////////////
+    val wr_last_addr = wrIE.addr(SPMAddrWidth + log2Ceil(axiBeatBytes) - 1, log2Ceil(axiBeatBytes))
+    val rd_last_addr = rdIE.addr(SPMAddrWidth + log2Ceil(axiBeatBytes) - 1, log2Ceil(axiBeatBytes))
+    // val wr_last_addr = wrIE.addr(SPMAddrWidth - 1, log2Ceil(axiBeatBytes))
+    // val rd_last_addr = rdIE.addr(SPMAddrWidth - 1, log2Ceil(axiBeatBytes))
+
+    // val en_last = (!io.bcast_en & wr_csel === spadBanksNum.U & wrIE.ready) | (rd_csel === spadBanksNum.U & rdIE.ready)
+    // val we_last = !io.bcast_en & wrIE.ready & wrIE.valid & wr_csel === spadBanksNum.U
+    // val re_last = rdIE.ready & rdIE.valid & wr_csel === spadBanksNum.U
+    val cfgCselMin = spadBanksNum.U
+    val cfgCselMax = (spadBanksNum + cfgSpadBanks - 1).U
+    val wrCfgSel = wr_csel >= cfgCselMin && wr_csel <= cfgCselMax
+    val rdCfgSel = rd_csel >= cfgCselMin && rd_csel <= cfgCselMax
+    val wrCfgBankOff = if(cfgSpadBanks == 1) 0.U(1.W) else (wr_csel - cfgCselMin)(lgCfgSpadBanks - 1, 0)
+    val rdCfgBankOff = if(cfgSpadBanks == 1) 0.U(1.W) else (rd_csel - cfgCselMin)(lgCfgSpadBanks - 1, 0)
+    val wr_last_addr_full = if(cfgSpadBanks == 1) wr_last_addr else Cat(wrCfgBankOff, wr_last_addr)
+    val rd_last_addr_full = if(cfgSpadBanks == 1) rd_last_addr else Cat(rdCfgBankOff, rd_last_addr)
+
+    val en_last = (!io.bcast_en & wrCfgSel & wrIE.ready) | (rdCfgSel & rdIE.ready)
+    val we_last = !io.bcast_en & wrIE.ready & wrIE.valid & wrCfgSel
+    val re_last = rdIE.ready & rdIE.valid & rdCfgSel
+
+
+    when(en_last){
+      // spad_last_bank_io.a.addr   := Mux(we_last, wr_last_addr, rd_last_addr)
+      spad_last_bank_io.a.addr   := Mux(we_last, wr_last_addr_full, rd_last_addr_full)
+      spad_last_bank_io.a.en     := we_last | re_last
+      spad_last_bank_io.a.din    := wrIE.data
+      spad_last_bank_io.a.we     := {if(hasMask) wrIE.strb & Fill(wrIE.strb.getWidth, we_last) else we_last}
+      // sp.a.strb       := ~wrIE.strb
+    }.otherwise{
+      spad_last_bank_io.a.addr   := DontCare
+      spad_last_bank_io.a.en     := false.B
+      spad_last_bank_io.a.din    := DontCare
+      spad_last_bank_io.a.we     := 0.U
+    }
+    // val last_arbiter = Module(new SramArbiter(cfgSpadBanks))
+    // val wr_last_csel  = wrIE.addr(AxiAddrWidth - 1, lgDepthLast)
+    // val rd_last_csel  = rdIE.addr(AxiAddrWidth - 1, lgDepthLast)
+    
+    // /// connect the chip select signals to arbiter
+    // last_arbiter.wr_cs := wr_last_csel === spadBanksNum << SPMAddrWidth - lgDepthLast
+    // last_arbiter.rd_cs := rd_last_csel === spadBanksNum << SPMAddrWidth - lgDepthLast
+
+  } // withClockAndReset(aclk, asyncReset)
+}
