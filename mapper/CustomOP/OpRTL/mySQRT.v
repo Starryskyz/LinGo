@@ -1,12 +1,21 @@
 module mySQRT();
 
 wire [31:0] internal_wire_0;
+wire [31:0] internal_wire_1;
 wire [31:0] internal_wire_3;
 
 \INPUT #(
     .Y_WIDTH(32)
 ) input_0 (
     .Y(internal_wire_0)
+);
+
+// XCore opcode 5 implements pow(A, B). sqrt(x) is therefore x^0.5.
+\CONST #(
+    .Y_WIDTH(32),
+    .VALUE(32'h3f000000)
+) const_half (
+    .Y(internal_wire_1)
 );
 
 \XCore #(
@@ -33,6 +42,7 @@ wire [31:0] internal_wire_3;
     .OPC(3'b101)
 )Xcore_1(
     .A(internal_wire_0),
+    .B(internal_wire_1),
     .Y(internal_wire_3)
 );
 
