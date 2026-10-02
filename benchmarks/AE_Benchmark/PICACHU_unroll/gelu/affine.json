@@ -1,0 +1,1143 @@
+{
+  "name": "G",
+  "directed": true,
+  "strict": false,
+  "_subgraph_cnt": 0,
+  "objects": [
+    {
+      "_gvid": 0,
+      "name": "Input9",
+      "label": "\\N",
+      "multiport": "0",
+      "offset": "0, 0",
+      "opcode": "Input",
+      "pattern": "0, 8, 4, 32, 4, 32",
+      "ref_name": "D",
+      "size": "4096"
+    },
+    {
+      "_gvid": 1,
+      "name": "FADD10",
+      "label": "\\N",
+      "opcode": "FADD"
+    },
+    {
+      "_gvid": 2,
+      "name": "FMUL11",
+      "label": "\\N",
+      "opcode": "FMUL"
+    },
+    {
+      "_gvid": 3,
+      "name": "FMUL12",
+      "label": "\\N",
+      "opcode": "FMUL"
+    },
+    {
+      "_gvid": 4,
+      "name": "FADD13",
+      "label": "\\N",
+      "opcode": "FADD"
+    },
+    {
+      "_gvid": 5,
+      "name": "FMUL14",
+      "label": "\\N",
+      "opcode": "FMUL"
+    },
+    {
+      "_gvid": 6,
+      "name": "FMUL15",
+      "label": "\\N",
+      "opcode": "FMUL"
+    },
+    {
+      "_gvid": 7,
+      "name": "FPTOSI16",
+      "label": "\\N",
+      "opcode": "FPTOSI"
+    },
+    {
+      "_gvid": 8,
+      "name": "SITOFP17",
+      "label": "\\N",
+      "opcode": "SITOFP"
+    },
+    {
+      "_gvid": 9,
+      "name": "FADD19",
+      "label": "\\N",
+      "opcode": "FADD"
+    },
+    {
+      "_gvid": 10,
+      "name": "SHL20",
+      "label": "\\N",
+      "opcode": "SHL"
+    },
+    {
+      "_gvid": 11,
+      "name": "ADD21",
+      "label": "\\N",
+      "opcode": "ADD"
+    },
+    {
+      "_gvid": 12,
+      "name": "FADD23",
+      "label": "\\N",
+      "opcode": "FADD"
+    },
+    {
+      "_gvid": 13,
+      "name": "FADD24",
+      "label": "\\N",
+      "opcode": "FADD"
+    },
+    {
+      "_gvid": 14,
+      "name": "FADD25",
+      "label": "\\N",
+      "opcode": "FADD"
+    },
+    {
+      "_gvid": 15,
+      "name": "FADD26",
+      "label": "\\N",
+      "opcode": "FADD"
+    },
+    {
+      "_gvid": 16,
+      "name": "FMUL27",
+      "label": "\\N",
+      "opcode": "FMUL"
+    },
+    {
+      "_gvid": 17,
+      "name": "FSUB28",
+      "label": "\\N",
+      "opcode": "FSUB"
+    },
+    {
+      "_gvid": 18,
+      "name": "FADD29",
+      "label": "\\N",
+      "opcode": "FADD"
+    },
+    {
+      "_gvid": 19,
+      "name": "FDIV30",
+      "label": "\\N",
+      "opcode": "FDIV"
+    },
+    {
+      "_gvid": 20,
+      "name": "FMUL31",
+      "label": "\\N",
+      "opcode": "FMUL"
+    },
+    {
+      "_gvid": 21,
+      "name": "FADD32",
+      "label": "\\N",
+      "opcode": "FADD"
+    },
+    {
+      "_gvid": 22,
+      "name": "FMUL33",
+      "label": "\\N",
+      "opcode": "FMUL"
+    },
+    {
+      "_gvid": 23,
+      "name": "Output35",
+      "label": "\\N",
+      "multiport": "0",
+      "offset": "0, 0",
+      "opcode": "Output",
+      "pattern": "0, 8, 4, 32, 4, 32",
+      "ref_name": "igelu_C",
+      "size": "4096"
+    },
+    {
+      "_gvid": 24,
+      "name": "Input42",
+      "label": "\\N",
+      "multiport": "1",
+      "offset": "0, 0",
+      "opcode": "Input",
+      "pattern": "16, 8, -112, 32, 16, 32",
+      "ref_name": "A",
+      "size": "4096"
+    },
+    {
+      "_gvid": 25,
+      "name": "Input44",
+      "label": "\\N",
+      "multiport": "1",
+      "offset": "0, 0",
+      "opcode": "Input",
+      "pattern": "512, 8, -3580, 32, -3708, 32",
+      "ref_name": "B",
+      "size": "4096"
+    },
+    {
+      "_gvid": 26,
+      "name": "FADD45",
+      "label": "\\N",
+      "opcode": "FADD"
+    },
+    {
+      "_gvid": 27,
+      "name": "Input48",
+      "label": "\\N",
+      "multiport": "1",
+      "offset": "0, 4",
+      "opcode": "Input",
+      "pattern": "16, 8, -112, 32, 16, 32",
+      "ref_name": "A",
+      "size": "4096"
+    },
+    {
+      "_gvid": 28,
+      "name": "Input50",
+      "label": "\\N",
+      "multiport": "1",
+      "offset": "0, 128",
+      "opcode": "Input",
+      "pattern": "512, 8, -3580, 32, -3708, 32",
+      "ref_name": "B",
+      "size": "4096"
+    },
+    {
+      "_gvid": 29,
+      "name": "FADD51",
+      "label": "\\N",
+      "opcode": "FADD"
+    },
+    {
+      "_gvid": 30,
+      "name": "Input54",
+      "label": "\\N",
+      "multiport": "1",
+      "offset": "0, 8",
+      "opcode": "Input",
+      "pattern": "16, 8, -112, 32, 16, 32",
+      "ref_name": "A",
+      "size": "4096"
+    },
+    {
+      "_gvid": 31,
+      "name": "Input56",
+      "label": "\\N",
+      "multiport": "1",
+      "offset": "0, 256",
+      "opcode": "Input",
+      "pattern": "512, 8, -3580, 32, -3708, 32",
+      "ref_name": "B",
+      "size": "4096"
+    },
+    {
+      "_gvid": 32,
+      "name": "FADD57",
+      "label": "\\N",
+      "opcode": "FADD"
+    },
+    {
+      "_gvid": 33,
+      "name": "Input60",
+      "label": "\\N",
+      "multiport": "1",
+      "offset": "0, 12",
+      "opcode": "Input",
+      "pattern": "16, 8, -112, 32, 16, 32",
+      "ref_name": "A",
+      "size": "4096"
+    },
+    {
+      "_gvid": 34,
+      "name": "Input62",
+      "label": "\\N",
+      "multiport": "1",
+      "offset": "0, 384",
+      "opcode": "Input",
+      "pattern": "512, 8, -3580, 32, -3708, 32",
+      "ref_name": "B",
+      "size": "4096"
+    },
+    {
+      "_gvid": 35,
+      "name": "Const69",
+      "label": "Const69, Const=0.044714998",
+      "opcode": "Const",
+      "value": "0.044714998"
+    },
+    {
+      "_gvid": 36,
+      "name": "Const70",
+      "label": "Const70, Const=-1.595769167",
+      "opcode": "Const",
+      "value": "-1.595769167"
+    },
+    {
+      "_gvid": 37,
+      "name": "Const71",
+      "label": "Const71, Const=1.442695022",
+      "opcode": "Const",
+      "value": "1.442695022"
+    },
+    {
+      "_gvid": 38,
+      "name": "Const72",
+      "label": "Const72, Const=-0.693147182",
+      "opcode": "Const",
+      "value": "-0.693147182"
+    },
+    {
+      "_gvid": 39,
+      "name": "Const73",
+      "label": "Const73, Const=23",
+      "opcode": "Const",
+      "value": "23"
+    },
+    {
+      "_gvid": 40,
+      "name": "Const74",
+      "label": "Const74, Const=1065353216",
+      "opcode": "Const",
+      "value": "1065353216"
+    },
+    {
+      "_gvid": 41,
+      "name": "Const75",
+      "label": "Const75, Const=0.041666668",
+      "opcode": "Const",
+      "value": "0.041666668"
+    },
+    {
+      "_gvid": 42,
+      "name": "Const76",
+      "label": "Const76, Const=0.166666672",
+      "opcode": "Const",
+      "value": "0.166666672"
+    },
+    {
+      "_gvid": 43,
+      "name": "Const77",
+      "label": "Const77, Const=0.500000000",
+      "opcode": "Const",
+      "value": "0.500000000"
+    },
+    {
+      "_gvid": 44,
+      "name": "Const78",
+      "label": "Const78, Const=1.000000000",
+      "opcode": "Const",
+      "value": "1.000000000"
+    },
+    {
+      "_gvid": 45,
+      "name": "Const79",
+      "label": "Const79, Const=1.000000000",
+      "opcode": "Const",
+      "value": "1.000000000"
+    },
+    {
+      "_gvid": 46,
+      "name": "Const80",
+      "label": "Const80, Const=1.000000000",
+      "opcode": "Const",
+      "value": "1.000000000"
+    },
+    {
+      "_gvid": 47,
+      "name": "Const81",
+      "label": "Const81, Const=1.000000000",
+      "opcode": "Const",
+      "value": "1.000000000"
+    },
+    {
+      "_gvid": 48,
+      "name": "Const82",
+      "label": "Const82, Const=0.500000000",
+      "opcode": "Const",
+      "value": "0.500000000"
+    },
+    {
+      "_gvid": 49,
+      "name": "Const83",
+      "label": "Const83, Const=1.000000000",
+      "opcode": "Const",
+      "value": "1.000000000"
+    },
+    {
+      "_gvid": 50,
+      "name": "FMUL91",
+      "label": "\\N",
+      "opcode": "FMUL"
+    },
+    {
+      "_gvid": 51,
+      "name": "FMUL92",
+      "label": "\\N",
+      "opcode": "FMUL"
+    },
+    {
+      "_gvid": 52,
+      "name": "FMUL93",
+      "label": "\\N",
+      "opcode": "FMUL"
+    },
+    {
+      "_gvid": 53,
+      "name": "FMUL94",
+      "label": "\\N",
+      "opcode": "FMUL"
+    },
+    {
+      "_gvid": 54,
+      "name": "FMUL95",
+      "label": "\\N",
+      "opcode": "FMUL"
+    },
+    {
+      "_gvid": 55,
+      "name": "FMUL96",
+      "label": "\\N",
+      "opcode": "FMUL"
+    },
+    {
+      "_gvid": 56,
+      "name": "FMUL97",
+      "label": "\\N",
+      "opcode": "FMUL"
+    },
+    {
+      "_gvid": 57,
+      "name": "FMUL98",
+      "label": "\\N",
+      "opcode": "FMUL"
+    },
+    {
+      "_gvid": 58,
+      "name": "FMUL99",
+      "label": "\\N",
+      "opcode": "FMUL"
+    },
+    {
+      "_gvid": 59,
+      "name": "FMUL100",
+      "label": "\\N",
+      "opcode": "FMUL"
+    },
+    {
+      "_gvid": 60,
+      "name": "FACC113",
+      "acc_first": "1",
+      "acc_params": "0, 8, 1, 1024",
+      "label": "\\N",
+      "opcode": "FACC"
+    }
+  ],
+  "edges": [
+    {
+      "_gvid": 0,
+      "tail": 0,
+      "head": 1,
+      "Width": "32",
+      "color": "black",
+      "label": "Op=1",
+      "operand": "1",
+      "style": "bold"
+    },
+    {
+      "_gvid": 1,
+      "tail": 1,
+      "head": 2,
+      "Width": "32",
+      "color": "black",
+      "label": "Op=0",
+      "operand": "0",
+      "style": "bold"
+    },
+    {
+      "_gvid": 2,
+      "tail": 1,
+      "head": 3,
+      "Width": "32",
+      "color": "black",
+      "label": "Op=0",
+      "operand": "0",
+      "style": "bold"
+    },
+    {
+      "_gvid": 3,
+      "tail": 1,
+      "head": 4,
+      "Width": "32",
+      "color": "black",
+      "label": "Op=1",
+      "operand": "1",
+      "style": "bold"
+    },
+    {
+      "_gvid": 4,
+      "tail": 1,
+      "head": 20,
+      "Width": "32",
+      "color": "black",
+      "label": "Op=0",
+      "operand": "0",
+      "style": "bold"
+    },
+    {
+      "_gvid": 5,
+      "tail": 1,
+      "head": 50,
+      "Width": "32",
+      "color": "black",
+      "label": "Op=1",
+      "operand": "1",
+      "style": "bold"
+    },
+    {
+      "_gvid": 6,
+      "tail": 2,
+      "head": 3,
+      "Width": "32",
+      "color": "black",
+      "label": "Op=1",
+      "operand": "1",
+      "style": "bold"
+    },
+    {
+      "_gvid": 7,
+      "tail": 3,
+      "head": 50,
+      "Width": "32",
+      "color": "black",
+      "label": "Op=0",
+      "operand": "0",
+      "style": "bold"
+    },
+    {
+      "_gvid": 8,
+      "tail": 4,
+      "head": 5,
+      "Width": "32",
+      "color": "black",
+      "label": "Op=0",
+      "operand": "0",
+      "style": "bold"
+    },
+    {
+      "_gvid": 9,
+      "tail": 5,
+      "head": 6,
+      "Width": "32",
+      "color": "black",
+      "label": "Op=0",
+      "operand": "0",
+      "style": "bold"
+    },
+    {
+      "_gvid": 10,
+      "tail": 5,
+      "head": 9,
+      "Width": "32",
+      "color": "black",
+      "label": "Op=1",
+      "operand": "1",
+      "style": "bold"
+    },
+    {
+      "_gvid": 11,
+      "tail": 6,
+      "head": 7,
+      "Width": "32",
+      "color": "black",
+      "label": "Op=0",
+      "operand": "0",
+      "style": "bold"
+    },
+    {
+      "_gvid": 12,
+      "tail": 7,
+      "head": 8,
+      "Width": "32",
+      "color": "black",
+      "label": "Op=0",
+      "operand": "0",
+      "style": "bold"
+    },
+    {
+      "_gvid": 13,
+      "tail": 7,
+      "head": 10,
+      "Width": "32",
+      "color": "black",
+      "label": "Op=0",
+      "operand": "0",
+      "style": "bold"
+    },
+    {
+      "_gvid": 14,
+      "tail": 8,
+      "head": 51,
+      "Width": "32",
+      "color": "black",
+      "label": "Op=0",
+      "operand": "0",
+      "style": "bold"
+    },
+    {
+      "_gvid": 15,
+      "tail": 9,
+      "head": 52,
+      "Width": "32",
+      "color": "black",
+      "label": "Op=0",
+      "operand": "0",
+      "style": "bold"
+    },
+    {
+      "_gvid": 16,
+      "tail": 9,
+      "head": 53,
+      "Width": "32",
+      "color": "black",
+      "label": "Op=0",
+      "operand": "0",
+      "style": "bold"
+    },
+    {
+      "_gvid": 17,
+      "tail": 9,
+      "head": 54,
+      "Width": "32",
+      "color": "black",
+      "label": "Op=0",
+      "operand": "0",
+      "style": "bold"
+    },
+    {
+      "_gvid": 18,
+      "tail": 9,
+      "head": 55,
+      "Width": "32",
+      "color": "black",
+      "label": "Op=0",
+      "operand": "0",
+      "style": "bold"
+    },
+    {
+      "_gvid": 19,
+      "tail": 10,
+      "head": 11,
+      "Width": "32",
+      "color": "black",
+      "label": "Op=0",
+      "operand": "0",
+      "style": "bold"
+    },
+    {
+      "_gvid": 20,
+      "tail": 11,
+      "head": 16,
+      "Width": "32",
+      "color": "black",
+      "label": "Op=1",
+      "operand": "1",
+      "style": "bold"
+    },
+    {
+      "_gvid": 21,
+      "tail": 12,
+      "head": 53,
+      "Width": "32",
+      "color": "black",
+      "label": "Op=1",
+      "operand": "1",
+      "style": "bold"
+    },
+    {
+      "_gvid": 22,
+      "tail": 13,
+      "head": 54,
+      "Width": "32",
+      "color": "black",
+      "label": "Op=1",
+      "operand": "1",
+      "style": "bold"
+    },
+    {
+      "_gvid": 23,
+      "tail": 14,
+      "head": 55,
+      "Width": "32",
+      "color": "black",
+      "label": "Op=1",
+      "operand": "1",
+      "style": "bold"
+    },
+    {
+      "_gvid": 24,
+      "tail": 15,
+      "head": 16,
+      "Width": "32",
+      "color": "black",
+      "label": "Op=0",
+      "operand": "0",
+      "style": "bold"
+    },
+    {
+      "_gvid": 25,
+      "tail": 16,
+      "head": 17,
+      "Width": "32",
+      "color": "black",
+      "label": "Op=1",
+      "operand": "1",
+      "style": "bold"
+    },
+    {
+      "_gvid": 26,
+      "tail": 16,
+      "head": 18,
+      "Width": "32",
+      "color": "black",
+      "label": "Op=0",
+      "operand": "0",
+      "style": "bold"
+    },
+    {
+      "_gvid": 27,
+      "tail": 17,
+      "head": 19,
+      "Width": "32",
+      "color": "black",
+      "label": "Op=0",
+      "operand": "0",
+      "style": "bold"
+    },
+    {
+      "_gvid": 28,
+      "tail": 18,
+      "head": 19,
+      "Width": "32",
+      "color": "black",
+      "label": "Op=1",
+      "operand": "1",
+      "style": "bold"
+    },
+    {
+      "_gvid": 29,
+      "tail": 19,
+      "head": 21,
+      "Width": "32",
+      "color": "black",
+      "label": "Op=0",
+      "operand": "0",
+      "style": "bold"
+    },
+    {
+      "_gvid": 30,
+      "tail": 20,
+      "head": 22,
+      "Width": "32",
+      "color": "black",
+      "label": "Op=0",
+      "operand": "0",
+      "style": "bold"
+    },
+    {
+      "_gvid": 31,
+      "tail": 21,
+      "head": 22,
+      "Width": "32",
+      "color": "black",
+      "label": "Op=1",
+      "operand": "1",
+      "style": "bold"
+    },
+    {
+      "_gvid": 32,
+      "tail": 22,
+      "head": 23,
+      "Width": "32",
+      "color": "black",
+      "label": "Op=0",
+      "operand": "0",
+      "style": "bold"
+    },
+    {
+      "_gvid": 33,
+      "tail": 24,
+      "head": 56,
+      "Width": "32",
+      "color": "black",
+      "label": "Op=0",
+      "operand": "0",
+      "style": "bold"
+    },
+    {
+      "_gvid": 34,
+      "tail": 25,
+      "head": 56,
+      "Width": "32",
+      "color": "black",
+      "label": "Op=1",
+      "operand": "1",
+      "style": "bold"
+    },
+    {
+      "_gvid": 35,
+      "tail": 26,
+      "head": 60,
+      "Width": "32",
+      "color": "black",
+      "label": "Op=0",
+      "operand": "0",
+      "style": "bold"
+    },
+    {
+      "_gvid": 36,
+      "tail": 27,
+      "head": 57,
+      "Width": "32",
+      "color": "black",
+      "label": "Op=0",
+      "operand": "0",
+      "style": "bold"
+    },
+    {
+      "_gvid": 37,
+      "tail": 28,
+      "head": 57,
+      "Width": "32",
+      "color": "black",
+      "label": "Op=1",
+      "operand": "1",
+      "style": "bold"
+    },
+    {
+      "_gvid": 38,
+      "tail": 29,
+      "head": 26,
+      "Width": "32",
+      "color": "black",
+      "label": "Op=1",
+      "operand": "1",
+      "style": "bold"
+    },
+    {
+      "_gvid": 39,
+      "tail": 30,
+      "head": 58,
+      "Width": "32",
+      "color": "black",
+      "label": "Op=0",
+      "operand": "0",
+      "style": "bold"
+    },
+    {
+      "_gvid": 40,
+      "tail": 31,
+      "head": 58,
+      "Width": "32",
+      "color": "black",
+      "label": "Op=1",
+      "operand": "1",
+      "style": "bold"
+    },
+    {
+      "_gvid": 41,
+      "tail": 32,
+      "head": 29,
+      "Width": "32",
+      "color": "black",
+      "label": "Op=1",
+      "operand": "1",
+      "style": "bold"
+    },
+    {
+      "_gvid": 42,
+      "tail": 33,
+      "head": 59,
+      "Width": "32",
+      "color": "black",
+      "label": "Op=0",
+      "operand": "0",
+      "style": "bold"
+    },
+    {
+      "_gvid": 43,
+      "tail": 34,
+      "head": 59,
+      "Width": "32",
+      "color": "black",
+      "label": "Op=1",
+      "operand": "1",
+      "style": "bold"
+    },
+    {
+      "_gvid": 44,
+      "tail": 35,
+      "head": 2,
+      "Width": "32",
+      "color": "black",
+      "label": "Op=1",
+      "operand": "1",
+      "style": "bold"
+    },
+    {
+      "_gvid": 45,
+      "tail": 36,
+      "head": 5,
+      "Width": "32",
+      "color": "black",
+      "label": "Op=1",
+      "operand": "1",
+      "style": "bold"
+    },
+    {
+      "_gvid": 46,
+      "tail": 37,
+      "head": 6,
+      "Width": "32",
+      "color": "black",
+      "label": "Op=1",
+      "operand": "1",
+      "style": "bold"
+    },
+    {
+      "_gvid": 47,
+      "tail": 38,
+      "head": 51,
+      "Width": "32",
+      "color": "black",
+      "label": "Op=1",
+      "operand": "1",
+      "style": "bold"
+    },
+    {
+      "_gvid": 48,
+      "tail": 39,
+      "head": 10,
+      "Width": "32",
+      "color": "black",
+      "label": "Op=1",
+      "operand": "1",
+      "style": "bold"
+    },
+    {
+      "_gvid": 49,
+      "tail": 40,
+      "head": 11,
+      "Width": "32",
+      "color": "black",
+      "label": "Op=1",
+      "operand": "1",
+      "style": "bold"
+    },
+    {
+      "_gvid": 50,
+      "tail": 41,
+      "head": 52,
+      "Width": "32",
+      "color": "black",
+      "label": "Op=1",
+      "operand": "1",
+      "style": "bold"
+    },
+    {
+      "_gvid": 51,
+      "tail": 42,
+      "head": 12,
+      "Width": "32",
+      "color": "black",
+      "label": "Op=1",
+      "operand": "1",
+      "style": "bold"
+    },
+    {
+      "_gvid": 52,
+      "tail": 43,
+      "head": 13,
+      "Width": "32",
+      "color": "black",
+      "label": "Op=1",
+      "operand": "1",
+      "style": "bold"
+    },
+    {
+      "_gvid": 53,
+      "tail": 44,
+      "head": 14,
+      "Width": "32",
+      "color": "black",
+      "label": "Op=1",
+      "operand": "1",
+      "style": "bold"
+    },
+    {
+      "_gvid": 54,
+      "tail": 45,
+      "head": 15,
+      "Width": "32",
+      "color": "black",
+      "label": "Op=1",
+      "operand": "1",
+      "style": "bold"
+    },
+    {
+      "_gvid": 55,
+      "tail": 46,
+      "head": 17,
+      "Width": "32",
+      "color": "black",
+      "label": "Op=0",
+      "operand": "0",
+      "style": "bold"
+    },
+    {
+      "_gvid": 56,
+      "tail": 47,
+      "head": 18,
+      "Width": "32",
+      "color": "black",
+      "label": "Op=1",
+      "operand": "1",
+      "style": "bold"
+    },
+    {
+      "_gvid": 57,
+      "tail": 48,
+      "head": 20,
+      "Width": "32",
+      "color": "black",
+      "label": "Op=1",
+      "operand": "1",
+      "style": "bold"
+    },
+    {
+      "_gvid": 58,
+      "tail": 49,
+      "head": 21,
+      "Width": "32",
+      "color": "black",
+      "label": "Op=1",
+      "operand": "1",
+      "style": "bold"
+    },
+    {
+      "_gvid": 59,
+      "tail": 50,
+      "head": 4,
+      "Width": "32",
+      "color": "black",
+      "label": "Op=0",
+      "operand": "0",
+      "style": "bold"
+    },
+    {
+      "_gvid": 60,
+      "tail": 51,
+      "head": 9,
+      "Width": "32",
+      "color": "black",
+      "label": "Op=0",
+      "operand": "0",
+      "style": "bold"
+    },
+    {
+      "_gvid": 61,
+      "tail": 52,
+      "head": 12,
+      "Width": "32",
+      "color": "black",
+      "label": "Op=0",
+      "operand": "0",
+      "style": "bold"
+    },
+    {
+      "_gvid": 62,
+      "tail": 53,
+      "head": 13,
+      "Width": "32",
+      "color": "black",
+      "label": "Op=0",
+      "operand": "0",
+      "style": "bold"
+    },
+    {
+      "_gvid": 63,
+      "tail": 54,
+      "head": 14,
+      "Width": "32",
+      "color": "black",
+      "label": "Op=0",
+      "operand": "0",
+      "style": "bold"
+    },
+    {
+      "_gvid": 64,
+      "tail": 55,
+      "head": 15,
+      "Width": "32",
+      "color": "black",
+      "label": "Op=0",
+      "operand": "0",
+      "style": "bold"
+    },
+    {
+      "_gvid": 65,
+      "tail": 56,
+      "head": 26,
+      "Width": "32",
+      "color": "black",
+      "label": "Op=0",
+      "operand": "0",
+      "style": "bold"
+    },
+    {
+      "_gvid": 66,
+      "tail": 57,
+      "head": 29,
+      "Width": "32",
+      "color": "black",
+      "label": "Op=0",
+      "operand": "0",
+      "style": "bold"
+    },
+    {
+      "_gvid": 67,
+      "tail": 58,
+      "head": 32,
+      "Width": "32",
+      "color": "black",
+      "label": "Op=0",
+      "operand": "0",
+      "style": "bold"
+    },
+    {
+      "_gvid": 68,
+      "tail": 59,
+      "head": 32,
+      "Width": "32",
+      "color": "black",
+      "label": "Op=1",
+      "operand": "1",
+      "style": "bold"
+    },
+    {
+      "_gvid": 69,
+      "tail": 60,
+      "head": 1,
+      "Width": "32",
+      "color": "black",
+      "label": "Op=0",
+      "operand": "0",
+      "style": "bold"
+    }
+  ]
+}

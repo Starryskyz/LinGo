@@ -1,0 +1,652 @@
+{
+  "fgra_cfg_addr_width" : 14,
+  "rs_store_queue_depth" : 8,
+  "fgra_iob_ag_nest_levels" : 3,
+  "axi_id_width" : 8,
+  "fgra_gib_connect_flexibility_fg" : {
+    "num_itrack_per_ipin" : 2,
+    "num_otrack_per_opin" : 4,
+    "num_ipin_per_opin" : 4
+  },
+  "axilite_data_width" : 32,
+  "fgra_fg_gibs" : [ [ {
+    "diag_iopin_connect" : true,
+    "fclist" : [ 2, 2, 2 ]
+  }, {
+    "diag_iopin_connect" : true,
+    "fclist" : [ 2, 2, 2 ]
+  }, {
+    "diag_iopin_connect" : true,
+    "fclist" : [ 2, 2, 2 ]
+  }, {
+    "diag_iopin_connect" : true,
+    "fclist" : [ 2, 2, 2 ]
+  }, {
+    "diag_iopin_connect" : true,
+    "fclist" : [ 2, 2, 2 ]
+  }, {
+    "diag_iopin_connect" : true,
+    "fclist" : [ 2, 2, 2 ]
+  }, {
+    "diag_iopin_connect" : true,
+    "fclist" : [ 2, 2, 2 ]
+  } ], [ {
+    "diag_iopin_connect" : true,
+    "fclist" : [ 2, 2, 2 ]
+  }, {
+    "diag_iopin_connect" : true,
+    "fclist" : [ 2, 2, 2 ]
+  }, {
+    "diag_iopin_connect" : true,
+    "fclist" : [ 2, 2, 2 ]
+  }, {
+    "diag_iopin_connect" : true,
+    "fclist" : [ 2, 2, 2 ]
+  }, {
+    "diag_iopin_connect" : true,
+    "fclist" : [ 2, 2, 2 ]
+  }, {
+    "diag_iopin_connect" : true,
+    "fclist" : [ 2, 2, 2 ]
+  }, {
+    "diag_iopin_connect" : true,
+    "fclist" : [ 2, 2, 2 ]
+  } ], [ {
+    "diag_iopin_connect" : true,
+    "fclist" : [ 2, 2, 2 ]
+  }, {
+    "diag_iopin_connect" : true,
+    "fclist" : [ 2, 2, 2 ]
+  }, {
+    "diag_iopin_connect" : true,
+    "fclist" : [ 2, 2, 2 ]
+  }, {
+    "diag_iopin_connect" : true,
+    "fclist" : [ 2, 2, 2 ]
+  }, {
+    "diag_iopin_connect" : true,
+    "fclist" : [ 2, 2, 2 ]
+  }, {
+    "diag_iopin_connect" : true,
+    "fclist" : [ 2, 2, 2 ]
+  }, {
+    "diag_iopin_connect" : true,
+    "fclist" : [ 2, 2, 2 ]
+  } ], [ {
+    "diag_iopin_connect" : true,
+    "fclist" : [ 2, 2, 2 ]
+  }, {
+    "diag_iopin_connect" : true,
+    "fclist" : [ 2, 2, 2 ]
+  }, {
+    "diag_iopin_connect" : true,
+    "fclist" : [ 2, 2, 2 ]
+  }, {
+    "diag_iopin_connect" : true,
+    "fclist" : [ 2, 2, 2 ]
+  }, {
+    "diag_iopin_connect" : true,
+    "fclist" : [ 2, 2, 2 ]
+  }, {
+    "diag_iopin_connect" : true,
+    "fclist" : [ 2, 2, 2 ]
+  }, {
+    "diag_iopin_connect" : true,
+    "fclist" : [ 2, 2, 2 ]
+  } ], [ {
+    "diag_iopin_connect" : true,
+    "fclist" : [ 2, 2, 2 ]
+  }, {
+    "diag_iopin_connect" : true,
+    "fclist" : [ 2, 2, 2 ]
+  }, {
+    "diag_iopin_connect" : true,
+    "fclist" : [ 2, 2, 2 ]
+  }, {
+    "diag_iopin_connect" : true,
+    "fclist" : [ 2, 2, 2 ]
+  }, {
+    "diag_iopin_connect" : true,
+    "fclist" : [ 2, 2, 2 ]
+  }, {
+    "diag_iopin_connect" : true,
+    "fclist" : [ 2, 2, 2 ]
+  }, {
+    "diag_iopin_connect" : true,
+    "fclist" : [ 2, 2, 2 ]
+  } ], [ {
+    "diag_iopin_connect" : true,
+    "fclist" : [ 2, 2, 2 ]
+  }, {
+    "diag_iopin_connect" : true,
+    "fclist" : [ 2, 2, 2 ]
+  }, {
+    "diag_iopin_connect" : true,
+    "fclist" : [ 2, 2, 2 ]
+  }, {
+    "diag_iopin_connect" : true,
+    "fclist" : [ 2, 2, 2 ]
+  }, {
+    "diag_iopin_connect" : true,
+    "fclist" : [ 2, 2, 2 ]
+  }, {
+    "diag_iopin_connect" : true,
+    "fclist" : [ 2, 2, 2 ]
+  }, {
+    "diag_iopin_connect" : true,
+    "fclist" : [ 2, 2, 2 ]
+  } ], [ {
+    "diag_iopin_connect" : true,
+    "fclist" : [ 2, 2, 2 ]
+  }, {
+    "diag_iopin_connect" : true,
+    "fclist" : [ 2, 2, 2 ]
+  }, {
+    "diag_iopin_connect" : true,
+    "fclist" : [ 2, 2, 2 ]
+  }, {
+    "diag_iopin_connect" : true,
+    "fclist" : [ 2, 2, 2 ]
+  }, {
+    "diag_iopin_connect" : true,
+    "fclist" : [ 2, 2, 2 ]
+  }, {
+    "diag_iopin_connect" : true,
+    "fclist" : [ 2, 2, 2 ]
+  }, {
+    "diag_iopin_connect" : true,
+    "fclist" : [ 2, 2, 2 ]
+  } ] ],
+  "fgra_cfg_sram_add_reg" : false,
+  "id_width" : 8,
+  "fgra_gib_track_reged_mode_fg" : 1,
+  "fgra_data_width" : 32,
+  "fgra_gpe_out_to_dir" : [ 4, 5, 7, 6 ],
+  "fgra_gib_num_track_cg" : 1,
+  "system_bus_beat_bits" : 128,
+  "fgra_gib_diag_iopin_connect_cg" : true,
+  "spad_num_banks" : 12,
+  "fgra_iob_sram_banks_coalesce" : 6,
+  "fgra_iob_lg_max_cycles" : 13,
+  "axilite_addrspace" : 88,
+  "fgra_gpe_in_from_dir" : [ 4, 5, 7, 6 ],
+  "spad_cfg_lg_size" : 12,
+  "fgra_iob_mode" : 3,
+  "fgra_cfg_blk_offset" : 6,
+  "fgra_iob_lg_max_ii" : 4,
+  "fgra_cg_gibs" : [ [ {
+    "diag_iopin_connect" : true,
+    "fclist" : [ 2, 2, 2 ]
+  }, {
+    "diag_iopin_connect" : true,
+    "fclist" : [ 2, 2, 2 ]
+  }, {
+    "diag_iopin_connect" : true,
+    "fclist" : [ 2, 2, 2 ]
+  }, {
+    "diag_iopin_connect" : true,
+    "fclist" : [ 2, 2, 2 ]
+  }, {
+    "diag_iopin_connect" : true,
+    "fclist" : [ 2, 2, 2 ]
+  }, {
+    "diag_iopin_connect" : true,
+    "fclist" : [ 2, 2, 2 ]
+  }, {
+    "diag_iopin_connect" : true,
+    "fclist" : [ 2, 2, 2 ]
+  } ], [ {
+    "diag_iopin_connect" : true,
+    "fclist" : [ 2, 2, 2 ]
+  }, {
+    "diag_iopin_connect" : true,
+    "fclist" : [ 2, 2, 2 ]
+  }, {
+    "diag_iopin_connect" : true,
+    "fclist" : [ 2, 2, 2 ]
+  }, {
+    "diag_iopin_connect" : true,
+    "fclist" : [ 2, 2, 2 ]
+  }, {
+    "diag_iopin_connect" : true,
+    "fclist" : [ 2, 2, 2 ]
+  }, {
+    "diag_iopin_connect" : true,
+    "fclist" : [ 2, 2, 2 ]
+  }, {
+    "diag_iopin_connect" : true,
+    "fclist" : [ 2, 2, 2 ]
+  } ], [ {
+    "diag_iopin_connect" : true,
+    "fclist" : [ 2, 2, 2 ]
+  }, {
+    "diag_iopin_connect" : true,
+    "fclist" : [ 2, 2, 2 ]
+  }, {
+    "diag_iopin_connect" : true,
+    "fclist" : [ 2, 2, 2 ]
+  }, {
+    "diag_iopin_connect" : true,
+    "fclist" : [ 2, 2, 2 ]
+  }, {
+    "diag_iopin_connect" : true,
+    "fclist" : [ 2, 2, 2 ]
+  }, {
+    "diag_iopin_connect" : true,
+    "fclist" : [ 2, 2, 2 ]
+  }, {
+    "diag_iopin_connect" : true,
+    "fclist" : [ 2, 2, 2 ]
+  } ], [ {
+    "diag_iopin_connect" : true,
+    "fclist" : [ 2, 2, 2 ]
+  }, {
+    "diag_iopin_connect" : true,
+    "fclist" : [ 2, 2, 2 ]
+  }, {
+    "diag_iopin_connect" : true,
+    "fclist" : [ 2, 2, 2 ]
+  }, {
+    "diag_iopin_connect" : true,
+    "fclist" : [ 2, 2, 2 ]
+  }, {
+    "diag_iopin_connect" : true,
+    "fclist" : [ 2, 2, 2 ]
+  }, {
+    "diag_iopin_connect" : true,
+    "fclist" : [ 2, 2, 2 ]
+  }, {
+    "diag_iopin_connect" : true,
+    "fclist" : [ 2, 2, 2 ]
+  } ], [ {
+    "diag_iopin_connect" : true,
+    "fclist" : [ 2, 2, 2 ]
+  }, {
+    "diag_iopin_connect" : true,
+    "fclist" : [ 2, 2, 2 ]
+  }, {
+    "diag_iopin_connect" : true,
+    "fclist" : [ 2, 2, 2 ]
+  }, {
+    "diag_iopin_connect" : true,
+    "fclist" : [ 2, 2, 2 ]
+  }, {
+    "diag_iopin_connect" : true,
+    "fclist" : [ 2, 2, 2 ]
+  }, {
+    "diag_iopin_connect" : true,
+    "fclist" : [ 2, 2, 2 ]
+  }, {
+    "diag_iopin_connect" : true,
+    "fclist" : [ 2, 2, 2 ]
+  } ], [ {
+    "diag_iopin_connect" : true,
+    "fclist" : [ 2, 2, 2 ]
+  }, {
+    "diag_iopin_connect" : true,
+    "fclist" : [ 2, 2, 2 ]
+  }, {
+    "diag_iopin_connect" : true,
+    "fclist" : [ 2, 2, 2 ]
+  }, {
+    "diag_iopin_connect" : true,
+    "fclist" : [ 2, 2, 2 ]
+  }, {
+    "diag_iopin_connect" : true,
+    "fclist" : [ 2, 2, 2 ]
+  }, {
+    "diag_iopin_connect" : true,
+    "fclist" : [ 2, 2, 2 ]
+  }, {
+    "diag_iopin_connect" : true,
+    "fclist" : [ 2, 2, 2 ]
+  } ], [ {
+    "diag_iopin_connect" : true,
+    "fclist" : [ 2, 2, 2 ]
+  }, {
+    "diag_iopin_connect" : true,
+    "fclist" : [ 2, 2, 2 ]
+  }, {
+    "diag_iopin_connect" : true,
+    "fclist" : [ 2, 2, 2 ]
+  }, {
+    "diag_iopin_connect" : true,
+    "fclist" : [ 2, 2, 2 ]
+  }, {
+    "diag_iopin_connect" : true,
+    "fclist" : [ 2, 2, 2 ]
+  }, {
+    "diag_iopin_connect" : true,
+    "fclist" : [ 2, 2, 2 ]
+  }, {
+    "diag_iopin_connect" : true,
+    "fclist" : [ 2, 2, 2 ]
+  } ] ],
+  "axilite_addr_width" : 7,
+  "rs_load_queue_depth" : 8,
+  "fgra_gpe_num_reg_rf_for_alu" : 1,
+  "fgra_num_row" : 6,
+  "fgra_gib_num_track_fg" : 1,
+  "fgra_gpe_num_reg_rf_for_lut" : 1,
+  "fgra_gpe_fg_columns" : [ 0, 1, 2, 3, 4, 5 ],
+  "axilite_datawidth" : 32,
+  "fgra_max_delay_cg" : 4,
+  "fgra_gib_track_reged_mode_cg" : 1,
+  "operation_set_filename" : "verilog/lingo-spec/operations.json",
+  "dma_num_req_in_flight" : 8,
+  "fgra_gpe_fg_rows" : [ 0, 1, 2, 3, 4, 5 ],
+  "fgra_gib_diag_iopin_connect_fg" : true,
+  "ls_stream_queue_depth" : 2,
+  "fgra_iob_sram_addr_width" : 15,
+  "fgra_gpe_mode" : 0,
+  "fgra_iob_has_io_fg" : true,
+  "axi_addr_width" : 16,
+  "fgra_gpes" : [ [ {
+    "max_delay_cg" : 16,
+    "max_delay_fg" : 8,
+    "num_input_lut" : 0,
+    "gpe_mode" : 0,
+    "operations" : [ "PASS", "ADD", "SUB", "ULE", "ULT", "UGE", "UGT", "SLT", "SGE", "SGT", "SLE", "AND", "OR", "XOR", "XNOR", "NE", "EQ", "MUL", "SHL", "LSHR", "ASHR", "CSHL", "CSHR", "SEL", "FMAX", "FMIN", "FPTOSI", "SITOFP", "FEQ", "FLT", "FLE", "FMUL", "FADD", "FSUB" ]
+  }, {
+    "max_delay_cg" : 16,
+    "max_delay_fg" : 8,
+    "num_input_lut" : 0,
+    "gpe_mode" : 0,
+    "operations" : [ "PASS", "ADD", "SUB", "ULE", "ULT", "UGE", "UGT", "SLT", "SGE", "SGT", "SLE", "AND", "OR", "XOR", "XNOR", "NE", "EQ", "MUL", "SHL", "LSHR", "ASHR", "CSHL", "CSHR", "SEL", "FMAX", "FMIN", "FPTOSI", "SITOFP", "FEQ", "FLT", "FLE", "FMUL", "FADD", "FSUB" ]
+  }, {
+    "max_delay_cg" : 16,
+    "max_delay_fg" : 8,
+    "num_input_lut" : 0,
+    "gpe_mode" : 0,
+    "operations" : [ "PASS", "ADD", "SUB", "ULE", "ULT", "UGE", "UGT", "SLT", "SGE", "SGT", "SLE", "AND", "OR", "XOR", "XNOR", "NE", "EQ", "MUL", "SHL", "LSHR", "ASHR", "CSHL", "CSHR", "SEL", "FMAX", "FMIN", "FPTOSI", "SITOFP", "FEQ", "FLT", "FLE", "FMUL", "FADD", "FSUB" ]
+  }, {
+    "max_delay_cg" : 16,
+    "max_delay_fg" : 8,
+    "num_input_lut" : 0,
+    "gpe_mode" : 0,
+    "operations" : [ "PASS", "ADD", "SUB", "ULE", "ULT", "UGE", "UGT", "SLT", "SGE", "SGT", "SLE", "AND", "OR", "XOR", "XNOR", "NE", "EQ", "MUL", "SHL", "LSHR", "ASHR", "CSHL", "CSHR", "SEL", "FMAX", "FMIN", "FPTOSI", "SITOFP", "FEQ", "FLT", "FLE", "FMUL", "FADD", "FSUB" ]
+  }, {
+    "max_delay_cg" : 16,
+    "max_delay_fg" : 8,
+    "num_input_lut" : 0,
+    "gpe_mode" : 0,
+    "operations" : [ "PASS", "ADD", "SUB", "ULE", "ULT", "UGE", "UGT", "SLT", "SGE", "SGT", "SLE", "AND", "OR", "XOR", "XNOR", "NE", "EQ", "MUL", "SHL", "LSHR", "ASHR", "CSHL", "CSHR", "SEL", "FMAX", "FMIN", "FPTOSI", "SITOFP", "FEQ", "FLT", "FLE", "FMUL", "FADD", "FSUB" ]
+  }, {
+    "max_delay_cg" : 16,
+    "max_delay_fg" : 8,
+    "num_input_lut" : 0,
+    "gpe_mode" : 0,
+    "operations" : [ "PASS", "ADD", "SUB", "ULE", "ULT", "UGE", "UGT", "SLT", "SGE", "SGT", "SLE", "AND", "OR", "XOR", "XNOR", "NE", "EQ", "MUL", "SHL", "LSHR", "ASHR", "CSHL", "CSHR", "SEL", "FMAX", "FMIN", "FPTOSI", "SITOFP", "FEQ", "FLT", "FLE", "FMUL", "FADD", "FSUB" ]
+  } ], [ {
+    "max_delay_cg" : 16,
+    "max_delay_fg" : 8,
+    "num_input_lut" : 0,
+    "gpe_mode" : 1,
+    "operations" : [ "FMUL", "FADD", "FSUB" ]
+  }, {
+    "max_delay_cg" : 16,
+    "max_delay_fg" : 8,
+    "num_input_lut" : 0,
+    "gpe_mode" : 1,
+    "operations" : [ "FMUL", "FADD", "FSUB" ]
+  }, {
+    "max_delay_cg" : 16,
+    "max_delay_fg" : 8,
+    "num_input_lut" : 0,
+    "gpe_mode" : 2,
+    "operations" : [ "XCORE" ]
+  }, {
+    "max_delay_cg" : 16,
+    "max_delay_fg" : 8,
+    "num_input_lut" : 0,
+    "gpe_mode" : 1,
+    "operations" : [ "FMUL", "FADD", "FSUB" ]
+  }, {
+    "max_delay_cg" : 16,
+    "max_delay_fg" : 8,
+    "num_input_lut" : 0,
+    "gpe_mode" : 1,
+    "operations" : [ "FMUL", "FADD", "FSUB" ]
+  }, {
+    "max_delay_cg" : 16,
+    "max_delay_fg" : 8,
+    "num_input_lut" : 0,
+    "gpe_mode" : 1,
+    "operations" : [ "FMUL", "FADD", "FSUB" ]
+  } ], [ {
+    "max_delay_cg" : 16,
+    "max_delay_fg" : 8,
+    "num_input_lut" : 2,
+    "gpe_mode" : 0,
+    "operations" : [ "PASS", "ADD", "SUB", "ULE", "ULT", "UGE", "UGT", "SLT", "SGE", "SGT", "SLE", "AND", "OR", "XOR", "XNOR", "NE", "EQ", "MUL", "SHL", "LSHR", "ASHR", "CSHL", "CSHR", "SEL", "ACC", "ISEL", "FMAX", "FMIN", "FPTOSI", "SITOFP", "FMUL", "FADD", "FSUB", "FACC", "AND", "OR", "NOT", "XOR", "XNOR" ]
+  }, {
+    "max_delay_cg" : 16,
+    "max_delay_fg" : 8,
+    "num_input_lut" : 2,
+    "gpe_mode" : 0,
+    "operations" : [ "PASS", "ADD", "SUB", "ULE", "ULT", "UGE", "UGT", "SLT", "SGE", "SGT", "SLE", "AND", "OR", "XOR", "XNOR", "NE", "EQ", "MUL", "SHL", "LSHR", "ASHR", "CSHL", "CSHR", "SEL", "ACC", "ISEL", "FMAX", "FMIN", "FPTOSI", "SITOFP", "FMUL", "FADD", "FSUB", "FACC", "AND", "OR", "NOT", "XOR", "XNOR" ]
+  }, {
+    "max_delay_cg" : 16,
+    "max_delay_fg" : 8,
+    "num_input_lut" : 2,
+    "gpe_mode" : 0,
+    "operations" : [ "PASS", "ADD", "SUB", "ULE", "ULT", "UGE", "UGT", "SLT", "SGE", "SGT", "SLE", "AND", "OR", "XOR", "XNOR", "NE", "EQ", "MUL", "SHL", "LSHR", "ASHR", "CSHL", "CSHR", "SEL", "ACC", "ISEL", "FMAX", "FMIN", "FPTOSI", "SITOFP", "FMUL", "FADD", "FSUB", "FACC", "AND", "OR", "NOT", "XOR", "XNOR" ]
+  }, {
+    "max_delay_cg" : 16,
+    "max_delay_fg" : 8,
+    "num_input_lut" : 2,
+    "gpe_mode" : 0,
+    "operations" : [ "PASS", "ADD", "SUB", "ULE", "ULT", "UGE", "UGT", "SLT", "SGE", "SGT", "SLE", "AND", "OR", "XOR", "XNOR", "NE", "EQ", "MUL", "SHL", "LSHR", "ASHR", "CSHL", "CSHR", "SEL", "ACC", "ISEL", "FMAX", "FMIN", "FPTOSI", "SITOFP", "FMUL", "FADD", "FSUB", "FACC", "AND", "OR", "NOT", "XOR", "XNOR" ]
+  }, {
+    "max_delay_cg" : 16,
+    "max_delay_fg" : 8,
+    "num_input_lut" : 2,
+    "gpe_mode" : 0,
+    "operations" : [ "PASS", "ADD", "SUB", "ULE", "ULT", "UGE", "UGT", "SLT", "SGE", "SGT", "SLE", "AND", "OR", "XOR", "XNOR", "NE", "EQ", "MUL", "SHL", "LSHR", "ASHR", "CSHL", "CSHR", "SEL", "ACC", "ISEL", "FMAX", "FMIN", "FPTOSI", "SITOFP", "FMUL", "FADD", "FSUB", "FACC", "AND", "OR", "NOT", "XOR", "XNOR" ]
+  }, {
+    "max_delay_cg" : 16,
+    "max_delay_fg" : 8,
+    "num_input_lut" : 2,
+    "gpe_mode" : 0,
+    "operations" : [ "PASS", "ADD", "SUB", "ULE", "ULT", "UGE", "UGT", "SLT", "SGE", "SGT", "SLE", "AND", "OR", "XOR", "XNOR", "NE", "EQ", "MUL", "SHL", "LSHR", "ASHR", "CSHL", "CSHR", "SEL", "ACC", "ISEL", "FMAX", "FMIN", "FPTOSI", "SITOFP", "FMUL", "FADD", "FSUB", "FACC", "AND", "OR", "NOT", "XOR", "XNOR" ]
+  } ], [ {
+    "max_delay_cg" : 16,
+    "max_delay_fg" : 8,
+    "num_input_lut" : 0,
+    "gpe_mode" : 0,
+    "operations" : [ "PASS", "ADD", "SUB", "ULE", "ULT", "UGE", "UGT", "SLT", "SGE", "SGT", "SLE", "AND", "OR", "XOR", "XNOR", "NE", "EQ", "MUL", "SHL", "LSHR", "ASHR", "CSHL", "CSHR", "SEL", "FMAX", "FMIN", "FPTOSI", "SITOFP", "FEQ", "FLT", "FLE", "FMUL", "FADD", "FSUB" ]
+  }, {
+    "max_delay_cg" : 16,
+    "max_delay_fg" : 8,
+    "num_input_lut" : 0,
+    "gpe_mode" : 1,
+    "operations" : [ "FMUL", "FADD", "FSUB" ]
+  }, {
+    "max_delay_cg" : 16,
+    "max_delay_fg" : 8,
+    "num_input_lut" : 0,
+    "gpe_mode" : 1,
+    "operations" : [ "FMUL", "FADD", "FSUB" ]
+  }, {
+    "max_delay_cg" : 16,
+    "max_delay_fg" : 8,
+    "num_input_lut" : 0,
+    "gpe_mode" : 2,
+    "operations" : [ "XCORE" ]
+  }, {
+    "max_delay_cg" : 16,
+    "max_delay_fg" : 8,
+    "num_input_lut" : 0,
+    "gpe_mode" : 1,
+    "operations" : [ "FMUL", "FADD", "FSUB" ]
+  }, {
+    "max_delay_cg" : 16,
+    "max_delay_fg" : 8,
+    "num_input_lut" : 0,
+    "gpe_mode" : 0,
+    "operations" : [ "PASS", "ADD", "SUB", "ULE", "ULT", "UGE", "UGT", "SLT", "SGE", "SGT", "SLE", "AND", "OR", "XOR", "XNOR", "NE", "EQ", "MUL", "SHL", "LSHR", "ASHR", "CSHL", "CSHR", "SEL", "FMAX", "FMIN", "FPTOSI", "SITOFP", "FEQ", "FLT", "FLE", "FMUL", "FADD", "FSUB" ]
+  } ], [ {
+    "max_delay_cg" : 16,
+    "max_delay_fg" : 8,
+    "num_input_lut" : 2,
+    "gpe_mode" : 0,
+    "operations" : [ "PASS", "ADD", "SUB", "ULE", "ULT", "UGE", "UGT", "SLT", "SGE", "SGT", "SLE", "AND", "OR", "XOR", "XNOR", "NE", "EQ", "MUL", "SHL", "LSHR", "ASHR", "CSHL", "CSHR", "SEL", "FMAX", "FMIN", "FPTOSI", "SITOFP", "FMUL", "FADD", "FSUB", "FDIV", "AND", "OR", "NOT", "XOR", "XNOR" ]
+  }, {
+    "max_delay_cg" : 16,
+    "max_delay_fg" : 8,
+    "num_input_lut" : 2,
+    "gpe_mode" : 0,
+    "operations" : [ "PASS", "ADD", "SUB", "ULE", "ULT", "UGE", "UGT", "SLT", "SGE", "SGT", "SLE", "AND", "OR", "XOR", "XNOR", "NE", "EQ", "MUL", "SHL", "LSHR", "ASHR", "CSHL", "CSHR", "SEL", "FMAX", "FMIN", "FPTOSI", "SITOFP", "FADD", "FSUB", "FDIV", "AND", "OR", "NOT", "XOR", "XNOR" ]
+  }, {
+    "max_delay_cg" : 16,
+    "max_delay_fg" : 8,
+    "num_input_lut" : 2,
+    "gpe_mode" : 0,
+    "operations" : [ "PASS", "ADD", "SUB", "ULE", "ULT", "UGE", "UGT", "SLT", "SGE", "SGT", "SLE", "AND", "OR", "XOR", "XNOR", "NE", "EQ", "MUL", "SHL", "LSHR", "ASHR", "CSHL", "CSHR", "SEL", "FMAX", "FMIN", "FPTOSI", "SITOFP", "FADD", "FSUB", "FDIV", "AND", "OR", "NOT", "XOR", "XNOR" ]
+  }, {
+    "max_delay_cg" : 16,
+    "max_delay_fg" : 8,
+    "num_input_lut" : 2,
+    "gpe_mode" : 0,
+    "operations" : [ "PASS", "ADD", "SUB", "ULE", "ULT", "UGE", "UGT", "SLT", "SGE", "SGT", "SLE", "AND", "OR", "XOR", "XNOR", "NE", "EQ", "MUL", "SHL", "LSHR", "ASHR", "CSHL", "CSHR", "SEL", "FMAX", "FMIN", "FPTOSI", "SITOFP", "FADD", "FSUB", "FDIV", "AND", "OR", "NOT", "XOR", "XNOR" ]
+  }, {
+    "max_delay_cg" : 16,
+    "max_delay_fg" : 8,
+    "num_input_lut" : 2,
+    "gpe_mode" : 0,
+    "operations" : [ "PASS", "ADD", "SUB", "ULE", "ULT", "UGE", "UGT", "SLT", "SGE", "SGT", "SLE", "AND", "OR", "XOR", "XNOR", "NE", "EQ", "MUL", "SHL", "LSHR", "ASHR", "CSHL", "CSHR", "SEL", "FMAX", "FMIN", "FPTOSI", "SITOFP", "FADD", "FSUB", "FDIV", "AND", "OR", "NOT", "XOR", "XNOR" ]
+  }, {
+    "max_delay_cg" : 16,
+    "max_delay_fg" : 8,
+    "num_input_lut" : 2,
+    "gpe_mode" : 0,
+    "operations" : [ "PASS", "ADD", "SUB", "ULE", "ULT", "UGE", "UGT", "SLT", "SGE", "SGT", "SLE", "AND", "OR", "XOR", "XNOR", "NE", "EQ", "MUL", "SHL", "LSHR", "ASHR", "CSHL", "CSHR", "SEL", "FMAX", "FMIN", "FPTOSI", "SITOFP", "FMUL", "FADD", "FSUB", "FDIV", "AND", "OR", "NOT", "XOR", "XNOR" ]
+  } ], [ {
+    "max_delay_cg" : 16,
+    "max_delay_fg" : 8,
+    "num_input_lut" : 0,
+    "gpe_mode" : 0,
+    "operations" : [ "PASS", "ADD", "SUB", "ULE", "ULT", "UGE", "UGT", "SLT", "SGE", "SGT", "SLE", "AND", "OR", "XOR", "XNOR", "NE", "EQ", "MUL", "SHL", "LSHR", "ASHR", "CSHL", "CSHR", "SEL", "FMAX", "FMIN", "FPTOSI", "SITOFP", "FEQ", "FLT", "FLE", "FMUL", "FADD", "FSUB" ]
+  }, {
+    "max_delay_cg" : 16,
+    "max_delay_fg" : 8,
+    "num_input_lut" : 0,
+    "gpe_mode" : 0,
+    "operations" : [ "PASS", "ADD", "SUB", "ULE", "ULT", "UGE", "UGT", "SLT", "SGE", "SGT", "SLE", "AND", "OR", "XOR", "XNOR", "NE", "EQ", "MUL", "SHL", "LSHR", "ASHR", "CSHL", "CSHR", "SEL", "FMAX", "FMIN", "FPTOSI", "SITOFP", "FEQ", "FLT", "FLE", "FMUL", "FADD", "FSUB" ]
+  }, {
+    "max_delay_cg" : 16,
+    "max_delay_fg" : 8,
+    "num_input_lut" : 0,
+    "gpe_mode" : 0,
+    "operations" : [ "PASS", "ADD", "SUB", "ULE", "ULT", "UGE", "UGT", "SLT", "SGE", "SGT", "SLE", "AND", "OR", "XOR", "XNOR", "NE", "EQ", "MUL", "SHL", "LSHR", "ASHR", "CSHL", "CSHR", "SEL", "FMAX", "FMIN", "FPTOSI", "SITOFP", "FEQ", "FLT", "FLE", "FMUL", "FADD", "FSUB" ]
+  }, {
+    "max_delay_cg" : 16,
+    "max_delay_fg" : 8,
+    "num_input_lut" : 0,
+    "gpe_mode" : 0,
+    "operations" : [ "PASS", "ADD", "SUB", "ULE", "ULT", "UGE", "UGT", "SLT", "SGE", "SGT", "SLE", "AND", "OR", "XOR", "XNOR", "NE", "EQ", "MUL", "SHL", "LSHR", "ASHR", "CSHL", "CSHR", "SEL", "FMAX", "FMIN", "FPTOSI", "SITOFP", "FEQ", "FLT", "FLE", "FMUL", "FADD", "FSUB" ]
+  }, {
+    "max_delay_cg" : 16,
+    "max_delay_fg" : 8,
+    "num_input_lut" : 0,
+    "gpe_mode" : 0,
+    "operations" : [ "PASS", "ADD", "SUB", "ULE", "ULT", "UGE", "UGT", "SLT", "SGE", "SGT", "SLE", "AND", "OR", "XOR", "XNOR", "NE", "EQ", "MUL", "SHL", "LSHR", "ASHR", "CSHL", "CSHR", "SEL", "FMAX", "FMIN", "FPTOSI", "SITOFP", "FEQ", "FLT", "FLE", "FMUL", "FADD", "FSUB" ]
+  }, {
+    "max_delay_cg" : 16,
+    "max_delay_fg" : 8,
+    "num_input_lut" : 0,
+    "gpe_mode" : 0,
+    "operations" : [ "PASS", "ADD", "SUB", "ULE", "ULT", "UGE", "UGT", "SLT", "SGE", "SGT", "SLE", "AND", "OR", "XOR", "XNOR", "NE", "EQ", "MUL", "SHL", "LSHR", "ASHR", "CSHL", "CSHR", "SEL", "FMAX", "FMIN", "FPTOSI", "SITOFP", "FEQ", "FLT", "FLE", "FMUL", "FADD", "FSUB" ]
+  } ] ],
+  "axi_data_width" : 128,
+  "fgra_support_multiple_precision" : false,
+  "fgra_max_delay_fg" : 8,
+  "spad_bank_lg_size" : 12,
+  "dumpADG" : true,
+  "fgra_iob_num_sides" : 2,
+  "tlb_num_ways" : 32,
+  "maxSeg" : 6,
+  "fgra_cfg_data_width" : 32,
+  "fgra_iob_sram_add_reg" : true,
+  "fgra_gib_connect_flexibility_cg" : {
+    "num_itrack_per_ipin" : 2,
+    "num_otrack_per_opin" : 4,
+    "num_ipin_per_opin" : 4
+  },
+  "fgra_num_colum" : 6,
+  "fgra_iob_lg_max_lat" : 6,
+  "fgra_iob_sram_has_mask" : true,
+  "dma_lg_max_burst_size" : 5,
+  "fgra_gpe_num_input_lut" : 0,
+  "tlb_is_shared" : true,
+  "spad_data_width" : 128,
+  "fgra_gpe_operations" : [ "PASS", "ADD", "SUB", "ULE", "ULT", "UGE", "UGT", "SLT", "SGE", "SGT", "SLE", "AND", "OR", "XOR", "XNOR", "NE", "EQ", "SHL", "LSHR", "ASHR", "CSHL", "CSHR", "MUL" ],
+  "rs_exe_queue_depth" : 4,
+  "fgra_cfg_addr_width_align" : 16,
+  "fgra_iobs" : [ [ {
+    "iob_mode" : 2,
+    "has_io_fg" : true,
+    "max_delay_cg" : 2,
+    "max_delay_fg" : 2
+  }, {
+    "iob_mode" : 2,
+    "has_io_fg" : true,
+    "max_delay_cg" : 2,
+    "max_delay_fg" : 2
+  }, {
+    "iob_mode" : 2,
+    "has_io_fg" : true,
+    "max_delay_cg" : 2,
+    "max_delay_fg" : 2
+  }, {
+    "iob_mode" : 2,
+    "has_io_fg" : true,
+    "max_delay_cg" : 2,
+    "max_delay_fg" : 2
+  }, {
+    "iob_mode" : 2,
+    "has_io_fg" : true,
+    "max_delay_cg" : 2,
+    "max_delay_fg" : 2
+  }, {
+    "iob_mode" : 2,
+    "has_io_fg" : true,
+    "max_delay_cg" : 2,
+    "max_delay_fg" : 2
+  } ], [ {
+    "iob_mode" : 2,
+    "has_io_fg" : true,
+    "max_delay_cg" : 2,
+    "max_delay_fg" : 2
+  }, {
+    "iob_mode" : 2,
+    "has_io_fg" : true,
+    "max_delay_cg" : 2,
+    "max_delay_fg" : 2
+  }, {
+    "iob_mode" : 2,
+    "has_io_fg" : true,
+    "max_delay_cg" : 2,
+    "max_delay_fg" : 2
+  }, {
+    "iob_mode" : 2,
+    "has_io_fg" : true,
+    "max_delay_cg" : 2,
+    "max_delay_fg" : 2
+  }, {
+    "iob_mode" : 2,
+    "has_io_fg" : true,
+    "max_delay_cg" : 2,
+    "max_delay_fg" : 2
+  }, {
+    "iob_mode" : 2,
+    "has_io_fg" : true,
+    "max_delay_cg" : 2,
+    "max_delay_fg" : 2
+  } ] ],
+  "logWidth" : 32,
+  "fgra_iob_lg_max_stride" : 11,
+  "dumpOperationSet" : true,
+  "fgra_adg_filename" : "verilog/lingo-spec/lingo_adg.json",
+  "spad_addr_num" : 5
+}

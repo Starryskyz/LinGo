@@ -1,0 +1,6 @@
+<testsuites name="results">
+  <testsuite name="all" package="all">
+    <property name="random_seed" value="1790934536" />
+    <testcase name="cgra_run_top_intvecadd_001" classname="test_cgra" file="/home/jrzhang/miniforge3/envs/cocotb/lib/python3.12/site-packages/cocotb/regression.py" lineno="727" time="0.2959864139556885" sim_time_ns="350.001" ratio_time="1182.4900856848042" />
+  </testsuite>
+</testsuites>

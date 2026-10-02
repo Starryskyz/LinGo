@@ -1,0 +1,148 @@
+{
+  "name": "G",
+  "directed": true,
+  "strict": false,
+  "_subgraph_cnt": 0,
+  "objects": [
+    {
+      "_gvid": 0,
+      "name": "Input2",
+      "label": "\\N",
+      "multiport": "1",
+      "offset": "0, 0",
+      "opcode": "Input",
+      "pattern": "8, 512",
+      "ref_name": "y",
+      "size": "4096"
+    },
+    {
+      "_gvid": 1,
+      "name": "Input4",
+      "label": "\\N",
+      "multiport": "1",
+      "offset": "0, 0",
+      "opcode": "Input",
+      "pattern": "8, 512",
+      "ref_name": "z",
+      "size": "4096"
+    },
+    {
+      "_gvid": 2,
+      "name": "ADD5",
+      "label": "\\N",
+      "opcode": "ADD"
+    },
+    {
+      "_gvid": 3,
+      "name": "Output7",
+      "label": "\\N",
+      "multiport": "1",
+      "offset": "0, 0",
+      "opcode": "Output",
+      "pattern": "8, 512",
+      "ref_name": "x",
+      "size": "4096"
+    },
+    {
+      "_gvid": 4,
+      "name": "Input10",
+      "label": "\\N",
+      "multiport": "1",
+      "offset": "0, 4",
+      "opcode": "Input",
+      "pattern": "8, 512",
+      "ref_name": "y",
+      "size": "4096"
+    },
+    {
+      "_gvid": 5,
+      "name": "Input12",
+      "label": "\\N",
+      "multiport": "1",
+      "offset": "0, 4",
+      "opcode": "Input",
+      "pattern": "8, 512",
+      "ref_name": "z",
+      "size": "4096"
+    },
+    {
+      "_gvid": 6,
+      "name": "ADD13",
+      "label": "\\N",
+      "opcode": "ADD"
+    },
+    {
+      "_gvid": 7,
+      "name": "Output15",
+      "label": "\\N",
+      "multiport": "1",
+      "offset": "0, 4",
+      "opcode": "Output",
+      "pattern": "8, 512",
+      "ref_name": "x",
+      "size": "4096"
+    }
+  ],
+  "edges": [
+    {
+      "_gvid": 0,
+      "tail": 0,
+      "head": 2,
+      "Width": "32",
+      "color": "black",
+      "label": "Op=1",
+      "operand": "1",
+      "style": "bold"
+    },
+    {
+      "_gvid": 1,
+      "tail": 1,
+      "head": 2,
+      "Width": "32",
+      "color": "black",
+      "label": "Op=0",
+      "operand": "0",
+      "style": "bold"
+    },
+    {
+      "_gvid": 2,
+      "tail": 2,
+      "head": 3,
+      "Width": "32",
+      "color": "black",
+      "label": "Op=0",
+      "operand": "0",
+      "style": "bold"
+    },
+    {
+      "_gvid": 3,
+      "tail": 4,
+      "head": 6,
+      "Width": "32",
+      "color": "black",
+      "label": "Op=1",
+      "operand": "1",
+      "style": "bold"
+    },
+    {
+      "_gvid": 4,
+      "tail": 5,
+      "head": 6,
+      "Width": "32",
+      "color": "black",
+      "label": "Op=0",
+      "operand": "0",
+      "style": "bold"
+    },
+    {
+      "_gvid": 5,
+      "tail": 6,
+      "head": 7,
+      "Width": "32",
+      "color": "black",
+      "label": "Op=0",
+      "operand": "0",
+      "style": "bold"
+    }
+  ]
+}

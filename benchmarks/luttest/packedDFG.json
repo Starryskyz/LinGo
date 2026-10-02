@@ -1,0 +1,303 @@
+{
+  "name": "G",
+  "directed": true,
+  "strict": false,
+  "_subgraph_cnt": 0,
+  "objects": [
+    {
+      "_gvid": 0,
+      "name": "ACC28",
+      "id": "1",
+      "label": "\\N\\nlat=1",
+      "opcode": "ACC"
+    },
+    {
+      "_gvid": 1,
+      "name": "const_1",
+      "label": "\\N",
+      "opcode": "CONST",
+      "value": "1"
+    },
+    {
+      "_gvid": 2,
+      "name": "ADD38",
+      "id": "2",
+      "label": "\\N\\nlat=1",
+      "opcode": "ADD"
+    },
+    {
+      "_gvid": 3,
+      "name": "CInput14",
+      "id": "4",
+      "label": "\\N\\nlat=2",
+      "opcode": "CINPUT"
+    },
+    {
+      "_gvid": 4,
+      "name": "SEL16",
+      "id": "6",
+      "label": "\\N\\nlat=1",
+      "opcode": "SEL"
+    },
+    {
+      "_gvid": 5,
+      "name": "CInput10",
+      "id": "3",
+      "label": "\\N\\nlat=2",
+      "opcode": "CINPUT"
+    },
+    {
+      "_gvid": 6,
+      "name": "ULT1",
+      "id": "8",
+      "label": "\\N\\nlat=1",
+      "opcode": "ULT"
+    },
+    {
+      "_gvid": 7,
+      "name": "abc74autoblifparse.cc:557:parse_blif76",
+      "LUT_config": "01",
+      "LUT_size": "1",
+      "id": "11",
+      "label": "\\N\\nlat=1",
+      "opcode": "LUT"
+    },
+    {
+      "_gvid": 8,
+      "name": "Output5",
+      "id": "5",
+      "label": "\\N\\nlat=1",
+      "opcode": "OUTPUT"
+    },
+    {
+      "_gvid": 9,
+      "name": "SEL29",
+      "id": "7",
+      "label": "\\N\\nlat=1",
+      "opcode": "SEL"
+    },
+    {
+      "_gvid": 10,
+      "name": "abc74autoblifparse.cc:557:parse_blif75",
+      "LUT_config": "0100",
+      "LUT_size": "2",
+      "id": "10",
+      "label": "\\N\\nlat=1",
+      "opcode": "LUT"
+    },
+    {
+      "_gvid": 11,
+      "name": "pass12",
+      "id": "12",
+      "label": "\\N\\nlat=1",
+      "opcode": "PASS"
+    },
+    {
+      "_gvid": 12,
+      "name": "const_6",
+      "label": "\\N",
+      "opcode": "CONST",
+      "value": "0"
+    },
+    {
+      "_gvid": 13,
+      "name": "const_8",
+      "label": "\\N",
+      "opcode": "CONST",
+      "value": "10"
+    },
+    {
+      "_gvid": 14,
+      "name": "ULT12",
+      "id": "9",
+      "label": "\\N\\nlat=1",
+      "opcode": "ULT"
+    },
+    {
+      "_gvid": 15,
+      "name": "const_9",
+      "label": "\\N",
+      "opcode": "CONST",
+      "value": "5"
+    },
+    {
+      "_gvid": 16,
+      "name": "const_12",
+      "label": "\\N",
+      "opcode": "CONST",
+      "value": "10"
+    }
+  ],
+  "edges": [
+    {
+      "_gvid": 0,
+      "tail": 0,
+      "head": 6,
+      "Width": "32",
+      "color": "black",
+      "label": "op = 1\\ndelay = 0",
+      "operand": "1"
+    },
+    {
+      "_gvid": 1,
+      "tail": 0,
+      "head": 14,
+      "Width": "32",
+      "color": "black",
+      "label": "op = 1\\ndelay = 0",
+      "operand": "1"
+    },
+    {
+      "_gvid": 2,
+      "tail": 1,
+      "head": 0,
+      "label": "op = 0",
+      "operand": "0"
+    },
+    {
+      "_gvid": 3,
+      "tail": 2,
+      "head": 9,
+      "Width": "32",
+      "color": "black",
+      "label": "op = 1\\ndelay = 0",
+      "operand": "1"
+    },
+    {
+      "_gvid": 4,
+      "tail": 3,
+      "head": 2,
+      "Width": "32",
+      "color": "black",
+      "label": "op = 0\\ndelay = 0",
+      "operand": "0"
+    },
+    {
+      "_gvid": 5,
+      "tail": 4,
+      "head": 2,
+      "Width": "32",
+      "color": "black",
+      "label": "op = 1\\ndelay = 0",
+      "operand": "1"
+    },
+    {
+      "_gvid": 6,
+      "tail": 5,
+      "head": 9,
+      "Width": "32",
+      "color": "black",
+      "label": "op = 0\\ndelay = 0",
+      "operand": "0"
+    },
+    {
+      "_gvid": 7,
+      "tail": 6,
+      "head": 5,
+      "Width": "1",
+      "color": "red",
+      "label": "op = 0\\ndelay = 0",
+      "operand": "0"
+    },
+    {
+      "_gvid": 8,
+      "tail": 6,
+      "head": 7,
+      "Width": "1",
+      "color": "red",
+      "label": "op = 0\\ndelay = 0",
+      "operand": "0"
+    },
+    {
+      "_gvid": 9,
+      "tail": 6,
+      "head": 9,
+      "Width": "1",
+      "color": "red",
+      "label": "op = 2\\ndelay = 0",
+      "operand": "2"
+    },
+    {
+      "_gvid": 10,
+      "tail": 6,
+      "head": 10,
+      "Width": "1",
+      "color": "red",
+      "label": "op = 0\\ndelay = 0",
+      "operand": "0"
+    },
+    {
+      "_gvid": 11,
+      "tail": 7,
+      "head": 3,
+      "Width": "1",
+      "color": "red",
+      "label": "op = 0\\ndelay = 0",
+      "operand": "0"
+    },
+    {
+      "_gvid": 12,
+      "tail": 9,
+      "head": 8,
+      "Width": "32",
+      "color": "black",
+      "label": "op = 0\\ndelay = 0",
+      "operand": "0"
+    },
+    {
+      "_gvid": 13,
+      "tail": 10,
+      "head": 4,
+      "Width": "1",
+      "color": "red",
+      "label": "op = 2\\ndelay = 0",
+      "operand": "2"
+    },
+    {
+      "_gvid": 14,
+      "tail": 11,
+      "head": 4,
+      "Width": "32",
+      "color": "black",
+      "label": "op = 1\\ndelay = 0",
+      "operand": "1"
+    },
+    {
+      "_gvid": 15,
+      "tail": 12,
+      "head": 4,
+      "label": "op = 0",
+      "operand": "0"
+    },
+    {
+      "_gvid": 16,
+      "tail": 13,
+      "head": 6,
+      "label": "op = 0",
+      "operand": "0"
+    },
+    {
+      "_gvid": 17,
+      "tail": 14,
+      "head": 10,
+      "Width": "1",
+      "color": "red",
+      "label": "op = 1\\ndelay = 0",
+      "operand": "1"
+    },
+    {
+      "_gvid": 18,
+      "tail": 15,
+      "head": 14,
+      "label": "op = 0",
+      "operand": "0"
+    },
+    {
+      "_gvid": 19,
+      "tail": 16,
+      "head": 11,
+      "label": "op = 0",
+      "operand": "0"
+    }
+  ]
+}

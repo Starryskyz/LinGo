@@ -1,0 +1,200 @@
+{
+  "name": "G",
+  "directed": true,
+  "strict": false,
+  "_subgraph_cnt": 0,
+  "objects": [
+    {
+      "_gvid": 0,
+      "name": "MUL8",
+      "label": "\\N",
+      "opcode": "MUL"
+    },
+    {
+      "_gvid": 1,
+      "name": "Input10",
+      "label": "\\N",
+      "multiport": "1",
+      "offset": "0, 0",
+      "opcode": "Input",
+      "pattern": "0, 8, 4, 8, 4, 8",
+      "ref_name": "output",
+      "size": "256"
+    },
+    {
+      "_gvid": 2,
+      "name": "SHL11",
+      "label": "\\N",
+      "opcode": "SHL"
+    },
+    {
+      "_gvid": 3,
+      "name": "ADD12",
+      "label": "\\N",
+      "opcode": "ADD"
+    },
+    {
+      "_gvid": 4,
+      "name": "Output13",
+      "label": "\\N",
+      "multiport": "1",
+      "offset": "0, 0",
+      "opcode": "Output",
+      "pattern": "0, 8, 4, 8, 4, 8",
+      "ref_name": "output",
+      "size": "256"
+    },
+    {
+      "_gvid": 5,
+      "name": "Input20",
+      "label": "\\N",
+      "multiport": "0",
+      "offset": "0, 0",
+      "opcode": "Input",
+      "pattern": "4, 8, -28, 8, 4, 8",
+      "ref_name": "inputX",
+      "size": "256"
+    },
+    {
+      "_gvid": 6,
+      "name": "Input22",
+      "label": "\\N",
+      "multiport": "0",
+      "offset": "0, 0",
+      "opcode": "Input",
+      "pattern": "32, 8, -220, 8, -252, 8",
+      "ref_name": "inputY",
+      "size": "256"
+    },
+    {
+      "_gvid": 7,
+      "name": "MUL23",
+      "label": "\\N",
+      "opcode": "MUL"
+    },
+    {
+      "_gvid": 8,
+      "name": "Const30",
+      "label": "Const30, Const=3",
+      "opcode": "Const",
+      "value": "3"
+    },
+    {
+      "_gvid": 9,
+      "name": "Const31",
+      "label": "Const31, Const=1",
+      "opcode": "Const",
+      "value": "1"
+    },
+    {
+      "_gvid": 10,
+      "name": "ACC48",
+      "acc_first": "1",
+      "acc_params": "0, 8, 1, 64",
+      "label": "\\N",
+      "opcode": "ACC"
+    }
+  ],
+  "edges": [
+    {
+      "_gvid": 0,
+      "tail": 0,
+      "head": 3,
+      "Width": "32",
+      "color": "black",
+      "label": "Op=1",
+      "operand": "1",
+      "style": "bold"
+    },
+    {
+      "_gvid": 1,
+      "tail": 1,
+      "head": 2,
+      "Width": "32",
+      "color": "black",
+      "label": "Op=0",
+      "operand": "0",
+      "style": "bold"
+    },
+    {
+      "_gvid": 2,
+      "tail": 2,
+      "head": 3,
+      "Width": "32",
+      "color": "black",
+      "label": "Op=0",
+      "operand": "0",
+      "style": "bold"
+    },
+    {
+      "_gvid": 3,
+      "tail": 3,
+      "head": 4,
+      "Width": "32",
+      "color": "black",
+      "label": "Op=0",
+      "operand": "0",
+      "style": "bold"
+    },
+    {
+      "_gvid": 4,
+      "tail": 5,
+      "head": 7,
+      "Width": "32",
+      "color": "black",
+      "label": "Op=1",
+      "operand": "1",
+      "style": "bold"
+    },
+    {
+      "_gvid": 5,
+      "tail": 6,
+      "head": 7,
+      "Width": "32",
+      "color": "black",
+      "label": "Op=0",
+      "operand": "0",
+      "style": "bold"
+    },
+    {
+      "_gvid": 6,
+      "tail": 7,
+      "head": 10,
+      "Width": "32",
+      "color": "black",
+      "label": "Op=0",
+      "operand": "0",
+      "style": "bold"
+    },
+    {
+      "_gvid": 7,
+      "tail": 8,
+      "head": 0,
+      "Width": "32",
+      "color": "black",
+      "label": "Op=1",
+      "operand": "1",
+      "style": "bold"
+    },
+    {
+      "_gvid": 8,
+      "tail": 9,
+      "head": 2,
+      "Width": "32",
+      "color": "black",
+      "label": "Op=1",
+      "operand": "1",
+      "style": "bold"
+    },
+    {
+      "_gvid": 9,
+      "tail": 10,
+      "head": 0,
+      "Width": "32",
+      "color": "black",
+      "label": "Op=0",
+      "operand": "0",
+      "style": "bold"
+    }
+  ]
+}
