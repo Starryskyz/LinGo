@@ -3,4 +3,4 @@ set -euo pipefail
 
 script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 cd "$script_dir"
-conda run -n cocotb sbt "runMain fgramemfp.VerilogGen"
+conda run -n lingo sbt "runMain fgramemfp.VerilogGen"

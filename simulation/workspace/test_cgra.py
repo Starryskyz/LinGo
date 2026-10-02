@@ -138,7 +138,7 @@ async def cgra_run_top_intvecadd(dut) -> None:
 
 
     base_dir = os.path.dirname(os.path.abspath(__file__))
-    reg_json_path = os.path.join(base_dir, "../circuits/lingo_spec.json")
+    reg_json_path = os.path.join(base_dir, "../circuits/axilite_spec.json")
     adg_json_path = os.path.join(base_dir, "../circuits/lingo_cgra_adg.json")
     device1 = test_runif.create_device_info_factory(
         reg_json_path=reg_json_path, adg_json_path=adg_json_path
@@ -157,8 +157,8 @@ async def cgra_run_top_intvecadd(dut) -> None:
     start_time = get_sim_time(units="ns")
     # await IntVecAdd(runtime, a, b, c)
     # await gemm(runtime, x, y, oc)
-    # await luttest(runtime, a, b, c1)
-    await logsigmod(runtime, input, output2)
+    await luttest(runtime, a, b, c1)
+    # await logsigmod(runtime, input, output2)
 
     await runtime.synchronize_all()
     await RisingEdge(dut.clk)
@@ -176,9 +176,9 @@ async def cgra_run_top_intvecadd(dut) -> None:
     
 
 
-    # for i in range(0,20):
-    #     if c1[i] != c2[i]:
-    #         print(f"Mismatch at ({i}): {c1[i]} != {c2[i]}")
+    for i in range(0,20):
+        if c1[i] != c2[i]:
+            print(f"Mismatch at ({i}): {c1[i]} != {c2[i]}")
     # for i in range(0,8):
     #     for j in range(0,8):
     #         abs_diff = abs(output1[i][j] - output2[i][j])
@@ -187,8 +187,8 @@ async def cgra_run_top_intvecadd(dut) -> None:
     # print("Test completed successfully.")
 
 
-    for i in range(0,16):
-        print(f"input: {input[i]}, output1: {output1[i]}, output2: {output2[i]}, abs_diff={abs(output1[i]-output2[i])}")
+    # for i in range(0,16):
+    #     print(f"input: {input[i]}, output1: {output1[i]}, output2: {output2[i]}, abs_diff={abs(output1[i]-output2[i])}")
 
 # ==============================
 # TestFactory registration

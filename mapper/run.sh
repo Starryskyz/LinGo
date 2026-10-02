@@ -10,8 +10,8 @@ fi
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 BENCHMARK_NAME="$1"
 OUTPUT_TYPE="${2:-all}"
-DFG_FILE="$SCRIPT_DIR/../fgra/benchmarks/$BENCHMARK_NAME/affine.json"
-SPEC_DIR="$SCRIPT_DIR/../AuFORApro/verilog/auforapro-spec"
+DFG_FILE="$SCRIPT_DIR/../benchmarks/$BENCHMARK_NAME/affine.json"
+SPEC_DIR="$SCRIPT_DIR/../hardware/verilog/lingo-spec"
 
 
 
@@ -22,10 +22,11 @@ fi
 
 
 OLD_PATH="$PATH"
-export PATH=/data/jrzhang/oss-cad-suite/bin/:$PATH
+export PATH="$(pwd)/../oss-cad-suite/bin/":$PATH
 
 
-conda run -n lora "$SCRIPT_DIR/build/mapperPro" SPDLOG_LEVEL=off \
+# conda run -n lora "$SCRIPT_DIR/build/mapperPro" SPDLOG_LEVEL=off \
+"$SCRIPT_DIR/build/mapperPro" SPDLOG_LEVEL=off \
     -c true -m true -o true \
     -t 6000000 \
     -i 15 \
@@ -34,8 +35,11 @@ conda run -n lora "$SCRIPT_DIR/build/mapperPro" SPDLOG_LEVEL=off \
     -C false \
     -e "$OUTPUT_TYPE" \
     -p "$SPEC_DIR/operations.json" \
-    -a "$SPEC_DIR/auforapro_adg.json" \
+    -a "$SPEC_DIR/lingo_adg.json" \
     -d "$DFG_FILE"
+
+dot -Tpng ../benchmarks/${BENCHMARK_NAME}/mapped_dfg.dot -o ../benchmarks/${BENCHMARK_NAME}/mapped_dfg.png
+
 
 export PATH="$OLD_PATH"
 unset OLD_PATH

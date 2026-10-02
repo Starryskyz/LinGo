@@ -1,7 +1,12 @@
 # set env for built LLVM
-export LLVM_HOME=/data/jrzhang/auforapro/llvm-project/build/bin
+OLD_PATH="$PATH"
+export LLVM_HOME="$(pwd)/llvm-project/install/bin"
 export PATH=$LLVM_HOME:$PATH
 
 # cmake & make
 cmake -B build -G Ninja
 cmake --build build
+
+
+export PATH="$OLD_PATH"
+unset OLD_PATH

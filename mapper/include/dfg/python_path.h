@@ -1,1 +1,1 @@
-#define PROJECT_PATH "/data/jrzhang/auforapro/mapperPro"
+#define PROJECT_PATH "/data/jrzhang/LinGo/mapper"

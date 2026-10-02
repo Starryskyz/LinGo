@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.10)
-set(CMAKE_CXX_STANDARD 23)
+set(CMAKE_CXX_STANDARD 17)
 project(mapperPro VERSION 0.1.0 LANGUAGES C CXX)
 list(INSERT CMAKE_PREFIX_PATH 0 "/usr/local" "/usr" "/usr/share")
 find_package(nlohmann_json REQUIRED)

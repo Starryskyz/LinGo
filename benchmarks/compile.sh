@@ -5,13 +5,18 @@ set -euo pipefail
 #   ../compile.sh <prog_name> <kernel_fn>
 # Example:
 #   cd benchmarks/add && ../compile.sh add kernel
-export PATH=/data/jrzhang/auforapro/llvm-project/build/bin:$PATH
+# export PATH=/data/jrzhang/auforapro/llvm-project/build/bin:$PATH
+
+OLD_PATH="$PATH"
+export LLVM_HOME="$(pwd)/../../llvm-project/install/bin"
+export PATH=$LLVM_HOME:$PATH
+
 PROG_NAME=${1:-add}
 KERNEL_FN=${2:-kernel}
 
 # Resolve paths relative to this script so it works from subdirs
 SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
-PASS_SO="${SCRIPT_DIR}/../app-compiler/build/llvm-pass/libCDFGPass.so"
+PASS_SO="${SCRIPT_DIR}/../compiler/build/llvm-pass/libCDFGPass.so"
 
 # IR filenames in the current working directory (the benchmark folder)
 IR0="${PROG_NAME}.ll"
@@ -34,3 +39,6 @@ opt --enable-new-pm=0 -load "${PASS_SO}" -fn "${KERNEL_FN}" -cdfg \
   "${IR1}" -S -o "${IR2}"
 
 echo "Generated ${IR2}"
+
+export PATH="$OLD_PATH"
+unset OLD_PATH

@@ -1,5 +1,5 @@
 
-autoidx 77
+autoidx 75
 
 module \affine
 
@@ -141,13 +141,6 @@ module \affine
     connect \Y $10_0
   end
 
-  attribute \keep "coarse_node_15"
-  cell \CONST $Const37
-    parameter \Y_WIDTH 32
-    parameter \VALUE "0"
-    connect \Y $15_0
-  end
-
   attribute \keep "coarse_node_16"
   cell \ADD $ADD38
     parameter \A_WIDTH 32
@@ -156,6 +149,13 @@ module \affine
     connect \A $5_0
     connect \B $6_0
     connect \Y $16_0
+  end
+
+  attribute \keep "coarse_node_15"
+  cell \CONST $Const37
+    parameter \Y_WIDTH 32
+    parameter \VALUE "0"
+    connect \Y $15_0
   end
 
   attribute \keep "coarse_node_13"
@@ -180,14 +180,14 @@ module \affine
     connect \Y $14_0
   end
 
-  cell $lut $abc$74$auto$blifparse.cc:557:parse_blif$76
+  cell $lut $abc$74$blif$74$1
     parameter \WIDTH 1
     parameter \LUT 2'01
     connect \Y $12_0
     connect \A $1_0
   end
 
-  cell $lut $abc$74$auto$blifparse.cc:557:parse_blif$75
+  cell $lut $abc$74$blif$74$0
     parameter \WIDTH 2
     parameter \LUT 4'0100
     connect \Y $11_0
