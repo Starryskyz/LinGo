@@ -86,6 +86,7 @@ bash build.sh
 
 ```
 cd ./hardware
+conda activate lingo
 bash genRTL.sh
 bash export-cocotb.sh
 ```
@@ -111,6 +112,7 @@ cp ../benchmarks/[example]/xxx_cocotb.py ../simulation/workspace/[example].py
 
 ```
 cd simulation
+conda activate lingo
 export PYTHONPATH=$(pwd)/server:$PYTHONPATH
 export PYTHONPATH=$(pwd)/workspace:$PYTHONPATH
 make [-j8]
