@@ -55,7 +55,7 @@
     },
     {
       "_gvid": 7,
-      "name": "abc74autoblifparse.cc:557:parse_blif76",
+      "name": "abc74blif741",
       "LUT_config": "01",
       "LUT_size": "1",
       "id": "11",
@@ -78,7 +78,7 @@
     },
     {
       "_gvid": 10,
-      "name": "abc74autoblifparse.cc:557:parse_blif75",
+      "name": "abc74blif740",
       "LUT_config": "0100",
       "LUT_size": "2",
       "id": "10",

@@ -17,9 +17,9 @@
     },
     {
       "_gvid": 1,
-      "name": "myExp3",
+      "name": "mySqrt3",
       "label": "\\N",
-      "opcode": "myExp"
+      "opcode": "mySqrt"
     },
     {
       "_gvid": 2,

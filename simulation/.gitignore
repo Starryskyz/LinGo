@@ -1,3 +1,2 @@
 sim_build
-workspace/__pycache__
-server/__pycache__
+**/__pycache__/

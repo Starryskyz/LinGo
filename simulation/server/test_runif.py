@@ -48,6 +48,7 @@ class DeviceInfo:
     reg_exe_start: int
     reg_exe_done_0: int
 
+    cfg_chain_stages: int = 0
     cfg_addr_width: int = 16
     cfg_data_width: int = 32
 
@@ -105,6 +106,16 @@ def create_device_info_factory(reg_json_path: str, adg_json_path: str) -> Device
 
     cfg_spad_data_bytewidth = arch_cfg["cfg_spad_data_width"] // 8
 
+    # The ADG x coordinate is the configuration-distribution row. Row 0
+    # receives the config bus directly, so the farthest row's x coordinate is
+    # also the number of pipeline registers a config word must traverse.
+    cfg_rows = [
+        instance.get("x")
+        for instance in arch_cfg.get("instances", [])
+        if isinstance(instance.get("x"), int)
+    ]
+    cfg_chain_stages = max(cfg_rows, default=0)
+
     # 目前假设
     # reg_cfg_base_addr_0, reg_cfg_num_0  长度为 reg_cfg_num_reglength
     # reg_cfg_en_tile_0, reg_exe_done_0 长度为 "tile_num"/ "reg_bit_width"
@@ -155,6 +166,7 @@ def create_device_info_factory(reg_json_path: str, adg_json_path: str) -> Device
         reg_exe_iob_ens_0=reg_exe_iob_ens_0,
         reg_exe_start=reg_exe_start,
         reg_exe_done_0=reg_exe_done_0,
+        cfg_chain_stages=cfg_chain_stages,
     )
 
     if (
@@ -1151,6 +1163,15 @@ class DeviceRuntime:
         await cocotb.triggers.Timer(delay, units="ns")
         event.set()
 
+    async def set_event_after_config(
+        self, event: DeviceEvent, transfer_delay: float, cfg_chain_stages: int
+    ):
+        """Release the config lock after transfer and config-chain drain."""
+        await cocotb.triggers.Timer(transfer_delay, units="ns")
+        for _ in range(cfg_chain_stages):
+            await cocotb.triggers.RisingEdge(self.dut.clk)
+        event.set()
+
     # TODO
     async def enable_config(self, handler: ResourceMappingHandler, id: int):
         """Switch a configuration on the device"""
@@ -1210,7 +1231,11 @@ class DeviceRuntime:
             )
 
             cocotb.start_soon(
-                self.set_event_after(self._axil_wait_event, config_ptr.size // 3)
+                self.set_event_after_config(
+                    self._axil_wait_event,
+                    config_ptr.size // 3,
+                    device.cfg_chain_stages,
+                )
             )
 
         return
