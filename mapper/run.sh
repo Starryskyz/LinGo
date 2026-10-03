@@ -20,6 +20,8 @@ if [ ! -f "$DFG_FILE" ]; then
     exit 1
 fi
 
+cp "$DFG_FILE" "$SCRIPT_DIR/../benchmarks/${BENCHMARK_NAME}/${BENCHMARK_NAME}.json"
+DFG_FILE="$SCRIPT_DIR/../benchmarks/${BENCHMARK_NAME}/${BENCHMARK_NAME}.json"
 
 OLD_PATH="$PATH"
 export PATH="$(pwd)/../oss-cad-suite/bin/":$PATH

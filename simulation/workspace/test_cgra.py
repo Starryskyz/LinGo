@@ -43,7 +43,7 @@ import test_runif
 # from IntVecAdd import IntVecAdd
 from gemm import gemm
 from luttest import luttest
-from logsigmod import logsigmod
+from sqrt import sqrt
 from exp import exp
 # from fir import fir
 
@@ -90,7 +90,7 @@ async def cgra_run_top_intvecadd(dut) -> None:
     logging.getLogger("cocotb.test_cgra.axil").disabled = True
     # logging.getLogger("test_runif").setLevel(logging.DEBUG)
 
-    # gemm test
+    # gemm test prepare begin
     x=ri32((8,8))
     y=ri32((8,8))
     o=zi32((8,8))
@@ -102,9 +102,9 @@ async def cgra_run_top_intvecadd(dut) -> None:
                 sum += x[i][k]*y[k][j]
             o[i][j] = 3 *sum+2*o[i][j]
 
-    # gemm test end
+    # gemm end
 
-    ## luttest begin
+    ## luttest prepare begin
 
     c1=zi32(20)
     c2=zi32(20)
@@ -122,7 +122,7 @@ async def cgra_run_top_intvecadd(dut) -> None:
 
     ## luttest end
 
-    ## logsigmod begin
+    ## sqrt/exp test prepare begin
     input= np.random.uniform(0.5, 4.0, size=16).astype(np.float32)
     output1= np.zeros(16, dtype=np.float32)
     output2= np.zeros(16, dtype=np.float32)
@@ -130,15 +130,8 @@ async def cgra_run_top_intvecadd(dut) -> None:
         # output1[i] = np.sqrt(input[i])
         output1[i] = np.exp(input[i])
         # output1[i] = -np.log(1.0 + np.exp(-input[i]))
-    # for i in range(0,8):
-    #     for j in range(0,8):
-    #         sum = input[i][j]
-    #         # if(sum > 5.0):
-    #         #     sum = 5.0
-    #         # elif (sum < -5.0):
-    #         #     sum = -5.0
-    #         output1[i][j] = -np.log(1.0 + np.exp(-sum))
 
+    #  sqrt/exp test prepare end
 
     base_dir = os.path.dirname(os.path.abspath(__file__))
     reg_json_path = os.path.join(base_dir, "../circuits/axilite_spec.json")
@@ -160,9 +153,10 @@ async def cgra_run_top_intvecadd(dut) -> None:
     start_time = get_sim_time(units="ns")
     # await IntVecAdd(runtime, a, b, c)
     # await gemm(runtime, x, y, oc)
-    # await luttest(runtime, a, b, c1)
-    await exp(runtime, input, output2)
-    # await logsigmod(runtime, input, output2)
+    await luttest(runtime, a, b, c1)
+    # await sqrt(runtime, input, output2)
+    # await exp(runtime, input, output2)
+    
 
     await runtime.synchronize_all()
     await RisingEdge(dut.clk)
@@ -180,9 +174,14 @@ async def cgra_run_top_intvecadd(dut) -> None:
     
 
 
-    # for i in range(0,20):
-    #     if c1[i] != c2[i]:
-    #         print(f"Mismatch at ({i}): {c1[i]} != {c2[i]}")
+    for i in range(0,20):
+        if c1[i] != c2[i]:
+            print(f"Mismatch at ({i}): {c1[i]} != {c2[i]}")
+
+
+    # for i in range(0,16):
+    #     print(f"input: {input[i]}, output1: {output1[i]}, output2: {output2[i]}")
+    #     print(f"abs_diff: {abs(output1[i] - output2[i])}")
 
 
     # for i in range(0,8):
@@ -193,9 +192,7 @@ async def cgra_run_top_intvecadd(dut) -> None:
     # print("Test completed successfully.")
 
 
-    for i in range(0,16):
-        print(f"input: {input[i]}, output1: {output1[i]}, output2: {output2[i]}")
-        print(f"abs_diff: {abs(output1[i] - output2[i])}")
+
 
 # ==============================
 # TestFactory registration

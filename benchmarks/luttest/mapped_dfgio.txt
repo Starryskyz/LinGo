@@ -1,4 +1,0 @@
-# format: DFG-IO-Tag, DFG-IO-Name, ADG-IOB-Id, ADG-IOB-Index, DFG-IO-Latency, Spad-Bank
-CINPUT_0, $CInput10, 153, 11, 4, 6
-CINPUT_1, $CInput14, 150, 8, 5, 7
-OUTPUT_2, $Output5, 152, 10, 12, 0

@@ -1,3 +1,7 @@
 *.ll
 *.dot
 *.png
+*.json
+*.bit
+*.txt
+*.il

@@ -1,6 +1,6 @@
 <testsuites name="results">
   <testsuite name="all" package="all">
-    <property name="random_seed" value="1790990547" />
-    <testcase name="cgra_run_top_intvecadd_001" classname="test_cgra" file="/home/jrzhang/miniforge3/envs/lingo/lib/python3.12/site-packages/cocotb/regression.py" lineno="727" time="0.3891603946685791" sim_time_ns="488.001" ratio_time="1253.9842355119322" />
+    <property name="random_seed" value="1790992580" />
+    <testcase name="cgra_run_top_intvecadd_001" classname="test_cgra" file="/home/jrzhang/miniforge3/envs/lingo/lib/python3.12/site-packages/cocotb/regression.py" lineno="727" time="1.5469694137573242" sim_time_ns="2466.001" ratio_time="1594.085169409074" />
   </testsuite>
 </testsuites>
