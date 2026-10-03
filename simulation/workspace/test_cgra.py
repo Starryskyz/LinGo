@@ -44,6 +44,7 @@ import test_runif
 from gemm import gemm
 from luttest import luttest
 from logsigmod import logsigmod
+from exp import exp
 # from fir import fir
 
 
@@ -126,7 +127,9 @@ async def cgra_run_top_intvecadd(dut) -> None:
     output1= np.zeros(16, dtype=np.float32)
     output2= np.zeros(16, dtype=np.float32)
     for i in range(0,16):
-        output1[i] = np.sqrt(input[i])
+        # output1[i] = np.sqrt(input[i])
+        output1[i] = np.exp(input[i])
+        # output1[i] = -np.log(1.0 + np.exp(-input[i]))
     # for i in range(0,8):
     #     for j in range(0,8):
     #         sum = input[i][j]
@@ -158,7 +161,8 @@ async def cgra_run_top_intvecadd(dut) -> None:
     # await IntVecAdd(runtime, a, b, c)
     # await gemm(runtime, x, y, oc)
     # await luttest(runtime, a, b, c1)
-    await logsigmod(runtime, input, output2)
+    await exp(runtime, input, output2)
+    # await logsigmod(runtime, input, output2)
 
     await runtime.synchronize_all()
     await RisingEdge(dut.clk)
@@ -190,7 +194,8 @@ async def cgra_run_top_intvecadd(dut) -> None:
 
 
     for i in range(0,16):
-        print(f"input: {input[i]}, output1: {output1[i]}, output2: {output2[i]}, abs_diff={abs(output1[i]-output2[i])}")
+        print(f"input: {input[i]}, output1: {output1[i]}, output2: {output2[i]}")
+        print(f"abs_diff: {abs(output1[i] - output2[i])}")
 
 # ==============================
 # TestFactory registration

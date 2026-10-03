@@ -1,3 +1,0 @@
-void* cgra_din_addr[2] = {data, data0};
-void* cgra_dout_addr[3] = {dfx, dfy, z};
-cgra_execute(cgra_din_addr, cgra_dout_addr);

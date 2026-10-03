@@ -39,6 +39,10 @@
 // }
 
 
+// #define __CGRA_HARDWARE_OP(x) __attribute__((annotate("___CGRA_HARDWARE_OP__"x"___"), noinline, optnone))
+// __CGRA_HARDWARE_OP("mylogsigmoid") float mylogsigmoid(float exp) {return *(float *) __hardware_imp();}
+
+
 #define __CGRA_HARDWARE_OP(x) __attribute__((annotate("___CGRA_HARDWARE_OP__"x"___"), noinline, optnone))
 __CGRA_HARDWARE_OP("mySqrt") float mySqrt(float x) {return *(float *) __hardware_imp();}
 // #define __CGRA_HARDWARE_OP(x) __attribute__((annotate("___CGRA_HARDWARE_OP__"x"___"), noinline, optnone))
