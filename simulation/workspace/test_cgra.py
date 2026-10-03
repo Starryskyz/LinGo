@@ -177,6 +177,7 @@ async def cgra_run_top_intvecadd(dut) -> None:
     for i in range(0,20):
         if c1[i] != c2[i]:
             print(f"Mismatch at ({i}): {c1[i]} != {c2[i]}")
+    print(c1)
 
 
     # for i in range(0,16):
