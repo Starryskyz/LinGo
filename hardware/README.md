@@ -23,6 +23,16 @@ cocotb wrapper 应读取生成规格并随硬件更新。
 
 ## 生成 Verilog
 
+输入架构规格可用 Python 独立生成，默认结果与当前 `fgra_spec.json` 逐字节一致：
+
+```sh
+python3 generate_fgra_spec.py --check src/main/resources/fgra_spec.json
+python3 generate_fgra_spec.py
+```
+
+修改 PE 模板、异构布局、IOB/GIB 或生成其他尺寸的架构，参见
+[架构规格生成器说明](generate_fgra_spec.md)。
+
 要求已存在名为 `cocotb` 的 conda 环境，并且环境中可运行 JDK 和 sbt。
 
 ```sh
