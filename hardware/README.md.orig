@@ -64,14 +64,6 @@ coalescing 只改变 FGRA IOB 到 bank 的连接关系，不改变以上 AXI 地
 
 ## AXI-Lite CSR
 
-IOB enable 和 broadcast bank mask 按 32 bit 自动分片。令
-`E = ceil(IOB数量 / 32)`，则 `reg_exe_iob_ens_0 .. E-1` 从 `0x10`
-开始连续排列，后续执行寄存器整体后移；broadcast mask 同样占用 `E` 个连续
-word，broadcast base address 寄存器位于其后。生成的 `axilite_spec.json` 会输出
-每个 word 的独立地址以及 `*_num_regs`、`*_reglength`。当 IOB 数量不超过 32
-时，地址与下表完全一致。
-
-下表是默认 12-IOB 配置：
 | 地址 | JSON 字段 | 作用 |
 | ---: | --- | --- |
 | `0x00` | `reg_cfg_base_addr_0` | 配置在 AXI 空间中的字节地址 |

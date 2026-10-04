@@ -185,13 +185,6 @@ async def cgra_run_top_intvecadd(dut) -> None:
     #     print(f"abs_diff: {abs(output1[i] - output2[i])}")
 
 
-    # for i in range(0,8):
-    #     for j in range(0,8):
-    #         abs_diff = abs(output1[i][j] - output2[i][j])
-    #         if abs_diff > 1e-5:
-    #             print(f"Mismatch at ({i}, {j}): {output1[i][j]} != {output2[i][j]}, abs_diff={abs_diff}")
-    # print("Test completed successfully.")
-
 
 
 

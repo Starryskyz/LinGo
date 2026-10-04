@@ -39,7 +39,10 @@ class LinGoWithAXI extends Module {
   val spadDataWidth = attrs("spad_data_width").asInstanceOf[Int]
   val nBanks = attrs("fgra_iob_num_sides").asInstanceOf[Int] *
     attrs("fgra_num_colum").asInstanceOf[Int]
-  attrs("axilite_addrspace") = 0x28 + nBanks * 4
+  val axilDataWidth = 32
+  val csrWordBytes = axilDataWidth / 8
+  val numBankMaskRegs = (nBanks + axilDataWidth - 1) / axilDataWidth
+  attrs("axilite_addrspace") = 0x20 + nBanks * csrWordBytes + 2 * numBankMaskRegs * csrWordBytes
   attrs("axilite_datawidth") = 32
   val bankLgBytes = attrs("spad_bank_lg_size").asInstanceOf[Int]
   val cfgLgBytes = attrs("spad_cfg_lg_size").asInstanceOf[Int]

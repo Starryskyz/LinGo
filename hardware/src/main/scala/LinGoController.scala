@@ -32,8 +32,9 @@ class LinGoController(attrs: mutable.Map[String, Any], regSpecFile: String)
   require(axilDataWidth == 32, "cocotb compatibility requires 32-bit AXI-Lite")
   require(coalesceBanks == nColumns,
     "AuFORA-style grouping requires one coalesced group per IOB side")
-  require(nBanks <= axilDataWidth,
-    "The compact broadcast mask CSR requires no more than 32 banks")
+  val csrWordBytes = axilDataWidth / 8
+  val numIobEnRegs = (nBanks + axilDataWidth - 1) / axilDataWidth
+  val numBcastMaskRegs = (nBanks + axilDataWidth - 1) / axilDataWidth
 
   val axilParam = AXI4BundleParameters(
     addrBits = axilAddrWidth, dataBits = axilDataWidth, idBits = 1)
@@ -54,20 +55,20 @@ class LinGoController(attrs: mutable.Map[String, Any], regSpecFile: String)
   val RegCfgTileEn = 0x08
   val RegCfgStart = 0x0c
   val RegExeIobEn = 0x10
-  val RegExeTileEn = 0x14
-  val RegExeStart = 0x18
-  val RegExeDone = 0x1c
-  val RegBcastEn = 0x20
-  val RegBcastMask = 0x24
-  val RegBcastBase = 0x28
+  val RegExeTileEn = RegExeIobEn + csrWordBytes * numIobEnRegs
+  val RegExeStart = RegExeTileEn + csrWordBytes
+  val RegExeDone = RegExeStart + csrWordBytes
+  val RegBcastEn = RegExeDone + csrWordBytes
+  val RegBcastMask = RegBcastEn + csrWordBytes
+  val RegBcastBase = RegBcastMask + csrWordBytes * numBcastMaskRegs
 
   val cfgBase = RegInit(0.U(axilDataWidth.W))
   val cfgNum = RegInit(0.U(axilDataWidth.W))
   val cfgTileEn = RegInit(0.U(axilDataWidth.W))
-  val exeIobEn = RegInit(0.U(axilDataWidth.W))
+  val exeIobEn = Seq.fill(numIobEnRegs)(RegInit(0.U(axilDataWidth.W)))
   val exeTileEn = RegInit(0.U(axilDataWidth.W))
   val bcastEn = RegInit(0.U(axilDataWidth.W))
-  val bcastMask = RegInit(0.U(axilDataWidth.W))
+  val bcastMask = Seq.fill(numBcastMaskRegs)(RegInit(0.U(axilDataWidth.W)))
   val bcastBase = Seq.fill(nBanks)(RegInit(0.U(axilDataWidth.W)))
 
   val fgra = Module(new FGRA(attrs))
@@ -87,7 +88,7 @@ class LinGoController(attrs: mutable.Map[String, Any], regSpecFile: String)
   fgra.io.srams <> sramCoalesce.io.coal
   io.sram_cfg <> cfgCtrl.io.sram
   io.bcast_en := bcastEn(0)
-  io.bcast_bank_mask := bcastMask(nBanks - 1, 0)
+  io.bcast_bank_mask := Cat(bcastMask.reverse)(nBanks - 1, 0)
   io.bcast_base_addr.zip(bcastBase).foreach {
     case (out, reg) => out := reg(spmAddrWidth - 1, 0)
   }
@@ -113,7 +114,7 @@ class LinGoController(attrs: mutable.Map[String, Any], regSpecFile: String)
   switch(exeState) {
     is(sExeIdle) {
       when(exeStartPulse && exeTileEn(0)) {
-        activeIobEn := exeIobEn(nBanks - 1, 0)
+        activeIobEn := Cat(exeIobEn.reverse)(nBanks - 1, 0)
         exeDone := false.B
         exeState := sExeStart
       }
@@ -157,14 +158,24 @@ class LinGoController(attrs: mutable.Map[String, Any], regSpecFile: String)
           is(RegCfgNum.U) { cfgNum := mergeBytes(cfgNum, io.s_axilite.w.bits.data, io.s_axilite.w.bits.strb) }
           is(RegCfgTileEn.U) { cfgTileEn := mergeBytes(cfgTileEn, io.s_axilite.w.bits.data, io.s_axilite.w.bits.strb) }
           is(RegCfgStart.U) { cfgStartPulse := io.s_axilite.w.bits.data(0) && io.s_axilite.w.bits.strb(0) }
-          is(RegExeIobEn.U) { exeIobEn := mergeBytes(exeIobEn, io.s_axilite.w.bits.data, io.s_axilite.w.bits.strb) }
           is(RegExeTileEn.U) { exeTileEn := mergeBytes(exeTileEn, io.s_axilite.w.bits.data, io.s_axilite.w.bits.strb) }
           is(RegExeStart.U) { exeStartPulse := io.s_axilite.w.bits.data(0) && io.s_axilite.w.bits.strb(0) }
           is(RegBcastEn.U) { bcastEn := mergeBytes(bcastEn, io.s_axilite.w.bits.data, io.s_axilite.w.bits.strb) }
-          is(RegBcastMask.U) { bcastMask := mergeBytes(bcastMask, io.s_axilite.w.bits.data, io.s_axilite.w.bits.strb) }
+        }
+        for (i <- 0 until numIobEnRegs) {
+          when(writeAddr === (RegExeIobEn + csrWordBytes * i).U) {
+            exeIobEn(i) := mergeBytes(
+              exeIobEn(i), io.s_axilite.w.bits.data, io.s_axilite.w.bits.strb)
+          }
+        }
+        for (i <- 0 until numBcastMaskRegs) {
+          when(writeAddr === (RegBcastMask + csrWordBytes * i).U) {
+            bcastMask(i) := mergeBytes(
+              bcastMask(i), io.s_axilite.w.bits.data, io.s_axilite.w.bits.strb)
+          }
         }
         for (i <- 0 until nBanks) {
-          when(writeAddr === (RegBcastBase + 4 * i).U) {
+          when(writeAddr === (RegBcastBase + csrWordBytes * i).U) {
             bcastBase(i) := mergeBytes(
               bcastBase(i), io.s_axilite.w.bits.data, io.s_axilite.w.bits.strb)
           }
@@ -191,14 +202,22 @@ class LinGoController(attrs: mutable.Map[String, Any], regSpecFile: String)
           RegCfgNum.U -> cfgNum,
           RegCfgTileEn.U -> cfgTileEn,
           RegCfgStart.U -> 0.U,
-          RegExeIobEn.U -> exeIobEn,
           RegExeTileEn.U -> exeTileEn,
           RegExeStart.U -> 0.U,
           RegExeDone.U -> exeDone.asUInt,
-          RegBcastEn.U -> bcastEn,
-          RegBcastMask.U -> bcastMask))
+          RegBcastEn.U -> bcastEn))
+        for (i <- 0 until numIobEnRegs) {
+          when(io.s_axilite.ar.bits.addr === (RegExeIobEn + csrWordBytes * i).U) {
+            readData := exeIobEn(i)
+          }
+        }
+        for (i <- 0 until numBcastMaskRegs) {
+          when(io.s_axilite.ar.bits.addr === (RegBcastMask + csrWordBytes * i).U) {
+            readData := bcastMask(i)
+          }
+        }
         for (i <- 0 until nBanks) {
-          when(io.s_axilite.ar.bits.addr === (RegBcastBase + 4 * i).U) {
+          when(io.s_axilite.ar.bits.addr === (RegBcastBase + csrWordBytes * i).U) {
             readData := bcastBase(i)
           }
         }
@@ -217,15 +236,27 @@ class LinGoController(attrs: mutable.Map[String, Any], regSpecFile: String)
   apply("reg_cfg_num_0", f"0x$RegCfgNum%X")
   apply("reg_cfg_en_tile_0", f"0x$RegCfgTileEn%X")
   apply("reg_cfg_en", f"0x$RegCfgStart%X")
-  apply("reg_exe_iob_ens_0", f"0x$RegExeIobEn%X")
+  apply("reg_exe_iob_ens_num_regs", numIobEnRegs)
+  apply("reg_exe_iob_ens_reglength", numIobEnRegs * csrWordBytes)
+  for (i <- 0 until numIobEnRegs) {
+    apply(s"reg_exe_iob_ens_$i",
+      f"0x${RegExeIobEn + csrWordBytes * i}%X")
+  }
   apply("reg_exe_tile_ens_0", f"0x$RegExeTileEn%X")
   apply("reg_exe_start", f"0x$RegExeStart%X")
   apply("reg_exe_done_0", f"0x$RegExeDone%X")
   apply("bcast_base_addr_num", nBanks)
   apply("reg_bcast_en", f"0x$RegBcastEn%X")
-  apply("reg_bcast_bank_mask_0", f"0x$RegBcastMask%X")
+  apply("reg_bcast_bank_mask_num_regs", numBcastMaskRegs)
+  apply("reg_bcast_bank_mask_reglength", numBcastMaskRegs * csrWordBytes)
+  for (i <- 0 until numBcastMaskRegs) {
+    apply(s"reg_bcast_bank_mask_$i",
+      f"0x${RegBcastMask + csrWordBytes * i}%X")
+  }
   apply("reg_bcast_base_addr", f"0x$RegBcastBase%X")
-  for (i <- 0 until nBanks)
-    apply(s"reg_bcast_base_addr_$i", f"0x${RegBcastBase + 4 * i}%X")
+  // for (i <- 0 until nBanks) {
+  //   apply(s"reg_bcast_base_addr_$i",
+  //     f"0x${RegBcastBase + csrWordBytes * i}%X")
+  // }
   printIR(regSpecFile)
 }
