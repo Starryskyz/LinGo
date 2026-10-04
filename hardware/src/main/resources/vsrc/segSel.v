@@ -1,4 +1,4 @@
-`timescale 1ns / 1ps
+// `timescale 1ns / 1ps
 //@yuan: adding support for float-point number
 //TODO: adding support for NaN, Inf
 module segSel #(parameter WIDTH32 = 32  

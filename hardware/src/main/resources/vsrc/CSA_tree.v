@@ -1,4 +1,4 @@
-`timescale 1ns / 1ps
+// `timescale 1ns / 1ps
 
 module CSA_tree#(parameter WIDTH = 32,
                  parameter WIDTH32 = 32  

@@ -1718,6 +1718,7 @@ module  APP_22_17_8_4_28_anticonv1(
             5'd25: begin A1 = {3'b000, f[21:7]}; A2 = {5'b00000, f[21:9]}; A3 = {9'b111111111, neg_9}; end
             5'd26: begin A1 = {2'b00, f[21:6]}; A2 = {4'b1111, neg_14}; A3 = {6'b111111, neg_12}; end
             5'd27: begin A1 = {2'b00, f[21:6]}; A2 = {4'b1111, neg_14}; A3 = {8'b11111111, neg_10}; end
+            default: begin A1 = 18'b0; A2 = 18'b0; A3 = 18'b0; end //fixed default case to avoid latches
       endcase
     end
 
@@ -2393,6 +2394,7 @@ module  APP_22_18_9_4_32_anticonv2(
             6'd29: begin A1 = {3'b000, f[21:6]}; A2 = {5'b00000, f[21:8]}; A3 = {8'b00000000, f[21:11]}; end
             6'd30: begin A1 = {2'b00, f[21:5]}; A2 = {4'b1111, neg_15}; A3 = {6'b111111, neg_13}; end
             6'd31: begin A1 = {2'b00, f[21:5]}; A2 = {4'b1111, neg_15}; A3 = {10'b1111111111, neg_9}; end
+            default: begin A1 = 19'b0; A2 = 19'b0; A3 = 19'b0; end //fixed default case to avoid latches
       endcase
     end
 
@@ -3069,6 +3071,7 @@ module  APP_22_19_9_5_32_anticonv3(
             6'd29: begin A1 = {3'b000, f[21:5]}; A2 = {5'b00000, f[21:7]}; A3 = {8'b00000000, f[21:10]}; A4 = {10'b0000000000, f[21:12]}; end
             6'd30: begin A1 = {2'b00, f[21:4]}; A2 = {4'b1111, neg_16}; A3 = {6'b111111, neg_14}; A4 = {9'b000000000, f[21:11]}; end
             6'd31: begin A1 = {2'b00, f[21:4]}; A2 = {4'b1111, neg_16}; A3 = {10'b1111111111, neg_10}; A4 = {13'b0000000000000, f[21:15]}; end
+            default begin A1 = 20'b0; A2 = 20'b0; A3 = 20'b0; A4 = 20'b0; end  //fixed: default case to avoid latches
       endcase
     end
 

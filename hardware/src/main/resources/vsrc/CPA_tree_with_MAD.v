@@ -1,4 +1,4 @@
-`timescale 1ns / 1ps
+// `timescale 1ns / 1ps
 module CPA_tree_with_MAD#(parameter WIDTH32 = 32  
 )(
     input clk,

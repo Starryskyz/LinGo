@@ -1,4 +1,4 @@
-`timescale 1ns / 1ps
+// `timescale 1ns / 1ps
 //@zou:多项式系数通过配置输入，最大支持段数为6段
 module LNS_Top #(parameter WIDTH = 32,
              parameter WIDTH32 = 32  
