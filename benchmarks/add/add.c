@@ -1,7 +1,7 @@
 #define size 1024
-    int x[size];
-    int y[size];
-    int z[size];
+    float x[size];
+    float y[size];
+    float z[size];
    //kernel 23
 void kernel() { 
     #ifdef CGRA_COMPILER

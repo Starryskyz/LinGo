@@ -4,3 +4,4 @@ set -euo pipefail
 script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 cd "$script_dir"
 conda run -n lingo sbt "runMain fgramemfp.VerilogGen"
+sed 's/\/\/[[:space:]]*@.*$//' ./verilog/LinGoWithAXI.v > ./verilog/clean.v
