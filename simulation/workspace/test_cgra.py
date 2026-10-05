@@ -45,6 +45,7 @@ from gemm import gemm
 from luttest import luttest
 from sqrt import sqrt
 from exp import exp
+from MLIRgemm import MLIRgemm
 # from fir import fir
 
 
@@ -95,6 +96,7 @@ async def cgra_run_top_intvecadd(dut) -> None:
     y=ri32((8,8))
     o=zi32((8,8))
     oc=zi32((8,8))
+    tmp=zi32(2)
     for i in range(0,8):
         for j in range(0,8):
             sum = 0 
@@ -152,8 +154,9 @@ async def cgra_run_top_intvecadd(dut) -> None:
     # Start kernel execution
     start_time = get_sim_time(units="ns")
     # await IntVecAdd(runtime, a, b, c)
-    # await gemm(runtime, x, y, oc)
-    await luttest(runtime, a, b, c1)
+    await gemm(runtime, x, y, oc)
+    # await MLIRgemm(runtime, x, y, oc, tmp, oc)
+    # await luttest(runtime, a, b, c1)
     # await sqrt(runtime, input, output2)
     # await exp(runtime, input, output2)
     
@@ -167,17 +170,17 @@ async def cgra_run_top_intvecadd(dut) -> None:
     axibus.log.info(f"Sim time: {end_time - start_time} ns")
 
 
-    # for i in range(0,8):
-    #     for j in range(0,8):
-    #         if oc[i][j] != o[i][j]:
-    #             print(f"Mismatch at ({i}, {j}): {oc[i][j]} != {o[i][j]}")
+    for i in range(0,8):
+        for j in range(0,8):
+            if oc[i][j] != o[i][j]:
+                print(f"Mismatch at ({i}, {j}): {oc[i][j]} != {o[i][j]}")
     
 
 
-    for i in range(0,20):
-        if c1[i] != c2[i]:
-            print(f"Mismatch at ({i}): {c1[i]} != {c2[i]}")
-    print(c1)
+    # for i in range(0,20):
+    #     if c1[i] != c2[i]:
+    #         print(f"Mismatch at ({i}): {c1[i]} != {c2[i]}")
+    # print(c1)
 
 
     # for i in range(0,16):

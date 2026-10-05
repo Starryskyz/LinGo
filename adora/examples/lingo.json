@@ -1,0 +1,582 @@
+{
+  "name": "G",
+  "directed": true,
+  "strict": false,
+  "_draw_": [
+    {
+      "op": "c",
+      "grad": "none",
+      "color": "#fffffe00"
+    },
+    {
+      "op": "C",
+      "grad": "none",
+      "color": "#ffffff"
+    },
+    {
+      "op": "P",
+      "points": [
+        [
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          210.0
+        ],
+        [
+          184.19,
+          210.0
+        ],
+        [
+          184.19,
+          0.0
+        ]
+      ]
+    }
+  ],
+  "bb": "0,0,184.19,210",
+  "xdotversion": "1.7",
+  "_subgraph_cnt": 0,
+  "objects": [
+    {
+      "_gvid": 0,
+      "name": "Input0",
+      "_draw_": [
+        {
+          "op": "c",
+          "grad": "none",
+          "color": "#000000"
+        },
+        {
+          "op": "e",
+          "rect": [
+            41.6,
+            192.0,
+            41.69,
+            18.0
+          ]
+        }
+      ],
+      "_ldraw_": [
+        {
+          "op": "F",
+          "size": 14.0,
+          "face": "Times-Roman"
+        },
+        {
+          "op": "c",
+          "grad": "none",
+          "color": "#000000"
+        },
+        {
+          "op": "T",
+          "pt": [
+            41.6,
+            188.3
+          ],
+          "align": "c",
+          "width": 48.0,
+          "text": "Input0"
+        }
+      ],
+      "color": "black",
+      "height": "0.5",
+      "label": "\\N",
+      "offset": "0,0",
+      "opcode": "INPUT",
+      "pattern": "4,20",
+      "pos": "41.596,192",
+      "ref_name": "vecadd:0",
+      "size": "80",
+      "width": "1.1555"
+    },
+    {
+      "_gvid": 1,
+      "name": "Input1",
+      "_draw_": [
+        {
+          "op": "c",
+          "grad": "none",
+          "color": "#000000"
+        },
+        {
+          "op": "e",
+          "rect": [
+            142.6,
+            192.0,
+            41.69,
+            18.0
+          ]
+        }
+      ],
+      "_ldraw_": [
+        {
+          "op": "F",
+          "size": 14.0,
+          "face": "Times-Roman"
+        },
+        {
+          "op": "c",
+          "grad": "none",
+          "color": "#000000"
+        },
+        {
+          "op": "T",
+          "pt": [
+            142.6,
+            188.3
+          ],
+          "align": "c",
+          "width": 48.0,
+          "text": "Input1"
+        }
+      ],
+      "color": "black",
+      "height": "0.5",
+      "label": "\\N",
+      "offset": "0,0",
+      "opcode": "INPUT",
+      "pattern": "4,20",
+      "pos": "142.6,192",
+      "ref_name": "vecadd:1",
+      "size": "80",
+      "width": "1.1555"
+    },
+    {
+      "_gvid": 2,
+      "name": "ADD2",
+      "_draw_": [
+        {
+          "op": "c",
+          "grad": "none",
+          "color": "#000000"
+        },
+        {
+          "op": "e",
+          "rect": [
+            91.6,
+            105.0,
+            37.89,
+            18.0
+          ]
+        }
+      ],
+      "_ldraw_": [
+        {
+          "op": "F",
+          "size": 14.0,
+          "face": "Times-Roman"
+        },
+        {
+          "op": "c",
+          "grad": "none",
+          "color": "#000000"
+        },
+        {
+          "op": "T",
+          "pt": [
+            91.6,
+            101.3
+          ],
+          "align": "c",
+          "width": 42.0,
+          "text": "ADD2"
+        }
+      ],
+      "color": "black",
+      "height": "0.5",
+      "label": "\\N",
+      "opcode": "ADD",
+      "pos": "91.596,105",
+      "width": "1.0471"
+    },
+    {
+      "_gvid": 3,
+      "name": "Output3",
+      "_draw_": [
+        {
+          "op": "c",
+          "grad": "none",
+          "color": "#000000"
+        },
+        {
+          "op": "e",
+          "rect": [
+            91.6,
+            18.0,
+            49.29,
+            18.0
+          ]
+        }
+      ],
+      "_ldraw_": [
+        {
+          "op": "F",
+          "size": 14.0,
+          "face": "Times-Roman"
+        },
+        {
+          "op": "c",
+          "grad": "none",
+          "color": "#000000"
+        },
+        {
+          "op": "T",
+          "pt": [
+            91.6,
+            14.3
+          ],
+          "align": "c",
+          "width": 60.0,
+          "text": "Output3"
+        }
+      ],
+      "color": "black",
+      "height": "0.5",
+      "label": "\\N",
+      "offset": "0,0",
+      "opcode": "OUTPUT",
+      "pattern": "4,20",
+      "pos": "91.596,18",
+      "ref_name": "vecadd:2",
+      "size": "80",
+      "width": "1.3721"
+    }
+  ],
+  "edges": [
+    {
+      "_gvid": 0,
+      "tail": 0,
+      "head": 2,
+      "_draw_": [
+        {
+          "op": "S",
+          "style": "setlinewidth(2)"
+        },
+        {
+          "op": "c",
+          "grad": "none",
+          "color": "#000000"
+        },
+        {
+          "op": "b",
+          "points": [
+            [
+              51.47,
+              174.21
+            ],
+            [
+              58.71,
+              161.9
+            ],
+            [
+              68.66,
+              145.0
+            ],
+            [
+              76.84,
+              131.09
+            ]
+          ]
+        }
+      ],
+      "_hdraw_": [
+        {
+          "op": "S",
+          "style": "setlinewidth(2)"
+        },
+        {
+          "op": "S",
+          "style": "solid"
+        },
+        {
+          "op": "c",
+          "grad": "none",
+          "color": "#000000"
+        },
+        {
+          "op": "C",
+          "grad": "none",
+          "color": "#000000"
+        },
+        {
+          "op": "P",
+          "points": [
+            [
+              79.86,
+              132.86
+            ],
+            [
+              81.91,
+              122.47
+            ],
+            [
+              73.82,
+              129.31
+            ]
+          ]
+        }
+      ],
+      "_ldraw_": [
+        {
+          "op": "F",
+          "size": 14.0,
+          "face": "Times-Roman"
+        },
+        {
+          "op": "c",
+          "grad": "none",
+          "color": "#000000"
+        },
+        {
+          "op": "T",
+          "pt": [
+            90.6,
+            144.8
+          ],
+          "align": "c",
+          "width": 42.0,
+          "text": "Op=0"
+        }
+      ],
+      "color": "black",
+      "label": "Op=0",
+      "lp": "90.596,148.5",
+      "operand": "0",
+      "pos": "e,81.909,122.47 51.475,174.21 58.712,161.9 68.658,145 76.836,131.09",
+      "style": "bold",
+      "backedge": "0",
+      "type": "0",
+      "iterdist": "1",
+      "Width": "32",
+      "tailport": "out0"
+    },
+    {
+      "_gvid": 1,
+      "tail": 1,
+      "head": 2,
+      "_draw_": [
+        {
+          "op": "S",
+          "style": "setlinewidth(2)"
+        },
+        {
+          "op": "c",
+          "grad": "none",
+          "color": "#000000"
+        },
+        {
+          "op": "b",
+          "points": [
+            [
+              134.03,
+              174.08
+            ],
+            [
+              128.93,
+              164.28
+            ],
+            [
+              122.18,
+              151.78
+            ],
+            [
+              115.6,
+              141.0
+            ],
+            [
+              113.5,
+              137.56
+            ],
+            [
+              111.2,
+              133.99
+            ],
+            [
+              108.88,
+              130.51
+            ]
+          ]
+        }
+      ],
+      "_hdraw_": [
+        {
+          "op": "S",
+          "style": "setlinewidth(2)"
+        },
+        {
+          "op": "S",
+          "style": "solid"
+        },
+        {
+          "op": "c",
+          "grad": "none",
+          "color": "#000000"
+        },
+        {
+          "op": "C",
+          "grad": "none",
+          "color": "#000000"
+        },
+        {
+          "op": "P",
+          "points": [
+            [
+              111.71,
+              128.45
+            ],
+            [
+              103.19,
+              122.15
+            ],
+            [
+              105.92,
+              132.38
+            ]
+          ]
+        }
+      ],
+      "_ldraw_": [
+        {
+          "op": "F",
+          "size": 14.0,
+          "face": "Times-Roman"
+        },
+        {
+          "op": "c",
+          "grad": "none",
+          "color": "#000000"
+        },
+        {
+          "op": "T",
+          "pt": [
+            144.6,
+            144.8
+          ],
+          "align": "c",
+          "width": 42.0,
+          "text": "Op=1"
+        }
+      ],
+      "color": "black",
+      "label": "Op=1",
+      "lp": "144.6,148.5",
+      "operand": "1",
+      "pos": "e,103.19,122.15 134.03,174.08 128.93,164.28 122.18,151.78 115.6,141 113.5,137.56 111.2,133.99 108.88,130.51",
+      "style": "bold",
+      "backedge": "0",
+      "type": "0",
+      "iterdist": "1",
+      "Width": "32",
+      "tailport": "out0"
+    },
+    {
+      "_gvid": 2,
+      "tail": 2,
+      "head": 3,
+      "_draw_": [
+        {
+          "op": "S",
+          "style": "setlinewidth(2)"
+        },
+        {
+          "op": "c",
+          "grad": "none",
+          "color": "#000000"
+        },
+        {
+          "op": "b",
+          "points": [
+            [
+              91.6,
+              86.8
+            ],
+            [
+              91.6,
+              75.16
+            ],
+            [
+              91.6,
+              59.55
+            ],
+            [
+              91.6,
+              46.24
+            ]
+          ]
+        }
+      ],
+      "_hdraw_": [
+        {
+          "op": "S",
+          "style": "setlinewidth(2)"
+        },
+        {
+          "op": "S",
+          "style": "solid"
+        },
+        {
+          "op": "c",
+          "grad": "none",
+          "color": "#000000"
+        },
+        {
+          "op": "C",
+          "grad": "none",
+          "color": "#000000"
+        },
+        {
+          "op": "P",
+          "points": [
+            [
+              95.1,
+              46.18
+            ],
+            [
+              91.6,
+              36.18
+            ],
+            [
+              88.1,
+              46.18
+            ]
+          ]
+        }
+      ],
+      "_ldraw_": [
+        {
+          "op": "F",
+          "size": 14.0,
+          "face": "Times-Roman"
+        },
+        {
+          "op": "c",
+          "grad": "none",
+          "color": "#000000"
+        },
+        {
+          "op": "T",
+          "pt": [
+            112.6,
+            57.8
+          ],
+          "align": "c",
+          "width": 42.0,
+          "text": "Op=0"
+        }
+      ],
+      "color": "black",
+      "label": "Op=0",
+      "lp": "112.6,61.5",
+      "operand": "0",
+      "pos": "e,91.596,36.175 91.596,86.799 91.596,75.163 91.596,59.548 91.596,46.237",
+      "style": "bold",
+      "backedge": "0",
+      "type": "0",
+      "iterdist": "1",
+      "Width": "32",
+      "tailport": "out0"
+    }
+  ]
+}

@@ -64,6 +64,46 @@ make -j8
 export PATH=xxx/verilator/bin:$PATH
 ```
 
+5. [Optional] MLIR Compiler support: Polygeist and LLVM18
+
+```
+git clone https://github.com/llvm/Polygeist.git
+cd Polygeist
+git submodule update --init --recursive --progress
+cd llvm-project
+cmake -G Ninja \
+    -S llvm \
+    -B build \
+    -DCMAKE_BUILD_TYPE=Release \
+    -DLLVM_ENABLE_DUMP=ON \
+    -DLLVM_ENABLE_ASSERTIONS=ON \
+    -DLLVM_ENABLE_RTTI=ON \
+    -DLLVM_ENABLE_LIBEDIT=OFF \
+    -DLLVM_TARGETS_TO_BUILD=X86 \
+    -DLLVM_ENABLE_PROJECTS="clang;mlir" \
+    -DCMAKE_INSTALL_PREFIX="$(pwd)/install"
+
+ninja -C build -j 16
+ninja -C build install
+
+cd ..
+mkdir build
+cd build
+
+make -G Ninja .. \
+    -DMLIR_DIR=$PWD/../llvm-project/build/lib/cmake/mlir \
+    -DCLANG_DIR=$PWD/../llvm-project/build/lib/cmake/clang \
+    -DLLVM_TARGETS_TO_BUILD="host" \
+    -DLLVM_ENABLE_ASSERTIONS=ON \
+    -DCMAKE_BUILD_TYPE=DEBUG
+
+ninja -j 16
+
+```
+
+
+
+
 ## Build 
 
 1. Build compiler
@@ -78,6 +118,20 @@ bash build.sh
 ```
 cd ./mapper
 bash build.sh
+```
+
+3. [Optional] Build MLIR compiler ADORA
+
+```
+cd LinGo
+export ADORA_LLVM_ROOT="$(pwd)/Polygeist/llvm-project/install"
+cd adora
+cmake -S . -B build -G Ninja \
+  -DCMAKE_BUILD_TYPE=Release \
+  -DMLIR_DIR="$ADORA_LLVM_ROOT/lib/cmake/mlir" \
+  -DLLVM_DIR="$ADORA_LLVM_ROOT/lib/cmake/llvm"
+
+cmake --build adora/build --target cgra-opt cgrv-opt adora-cdfg -j8
 ```
 
 ## Run

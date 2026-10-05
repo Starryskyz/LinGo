@@ -147,7 +147,7 @@ module LNS_Top #(parameter WIDTH = 32,
             logc_stage_qi <= 1'b1;
             logc_stage_Div <= 1'b0;
             logc_stage_logc_custom_reg <= 160'b0;
-            logc_stage_K_custom_reg <= 31'b0;
+            logc_stage_K_custom_reg <= 31'b0; // more bit warning
             // bias_one_reg <= 32'b0;
             // bias_sel_reg <= 12'b0;
             logc_stage_bias <= 32'b0;
@@ -579,7 +579,7 @@ module FLOAT_TRAN_TO_Q822(
 );
 
     wire [7:0] exponent;
-    assign exponent = {1'b0, float_y[30:23]} + 8'b10000001;
+    assign exponent = {1'b0, float_y[30:23]} + 8'b10000001; //one more bit warning
     wire [24:0] Q2_23;
     assign Q2_23 = (float_y[31] == 1'b0) ? {1'b0, 1'b1, float_y[22:0]} : {1'b1, 1'b0, ~float_y[22:0]} + 1'b1;
     reg incase;
