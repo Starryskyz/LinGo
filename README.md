@@ -171,3 +171,11 @@ export PYTHONPATH=$(pwd)/server:$PYTHONPATH
 export PYTHONPATH=$(pwd)/workspace:$PYTHONPATH
 make [-j8]
 ```
+
+## [Experimental] GUI flow
+
+```
+python3 LinGo/gui/server.py --port 8080
+```
+
+then visit localhost:8080

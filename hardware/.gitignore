@@ -4,3 +4,4 @@ project/project/
 .bsp/
 .metals/
 verilog/
+__pycache__/
