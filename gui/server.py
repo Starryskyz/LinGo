@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Local LinGo workbench. Python standard library only."""
 import argparse
+import ast
 import copy
 import hashlib
 import importlib.util
@@ -15,6 +16,7 @@ import subprocess
 import threading
 import time
 import uuid
+import xml.etree.ElementTree as ET
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from urllib.parse import urlparse, parse_qs
 
@@ -34,6 +36,116 @@ PROC = None
 STATE_FILE = TMP / 'state.json'
 SOURCE_SPEC = ROOT / 'hardware/src/main/resources/fgra_spec.json'
 SPEC_TEMPLATES = ROOT / 'hardware/spectemplate'
+MODEL_FILES = ['Makefile', 'circuits/test_cgra.v', 'circuits/LinGoWithAXI.v',
+               'circuits/axilite_spec.json', 'circuits/lingo_cgra_adg.json',
+               'sim_build/Vtop.mk', 'sim_build/Vtop_classes.mk']
+
+def spec_path():
+    path = TMP / 'hardware/fgra_spec.json'
+    path.parent.mkdir(parents=True, exist_ok=True)
+    return path
+
+def file_hash(path):
+    path = Path(path)
+    return hashlib.sha256(path.read_bytes()).hexdigest() if path.is_file() else None
+
+def files_hash(paths):
+    return digest({str(p): file_hash(p) for p in sorted(map(Path, paths))})
+
+def tool_stamp(name, search_path=None):
+    path = name if Path(name).is_file() else shutil.which(name, path=search_path or env_tools()['PATH'])
+    if not path:
+        conda = shutil.which('conda')
+        candidate = Path(conda).parent.parent / 'envs/lingo/bin' / name if conda else None
+        path = str(candidate) if candidate and candidate.is_file() else None
+    if not path:
+        return None
+    stat = Path(path).stat()
+    return [path, stat.st_size, stat.st_mtime_ns]
+
+def rtl_inputs():
+    return digest({'spec': STATE['spec'], 'sources': files_hash(
+        list((ROOT / 'hardware/src/main/scala').rglob('*.scala')) +
+        [ROOT / 'hardware/build.sbt'] + list((ROOT / 'hardware/project').glob('*.sbt')))})
+
+def rtl_outputs(directory):
+    directory = Path(directory)
+    return [directory / 'clean.v', directory / 'LinGoWithAXI.v'] + [directory / 'lingo-spec' / name
+        for name in ('lingo_adg.json', 'operations.json', 'axilite_spec.json', 'lingo_spec.json')]
+
+def compile_inputs(name, payload):
+    paths = [p for p in bench(name).rglob('*') if p.is_file() and p.suffix in ('.c', '.h', '.hpp')]
+    compiler = payload.get('compiler', 'llvm')
+    return digest({'sources': files_hash(paths), 'compiler': compiler, 'kernel': payload.get('kernel', 'kernel'),
+        'adapter': file_hash(ROOT / 'benchmarks' / ('compile.sh' if compiler == 'llvm' else 'mlirCompile.sh')),
+        'tools': [tool_stamp(name) for name in (['clang-15', 'opt', str(ROOT / 'compiler/build/llvm-pass/libCDFGPass.so')]
+                  if compiler == 'llvm' else ['cgeist', str(ROOT / 'adora/build/bin/cgra-opt')])],
+        'scripts': files_hash([ROOT / 'adora/tools/adoracc/adoracc.py', ROOT / 'adora/scripts/cdfg_to_lingo.py']) if compiler == 'mlir' else None,
+        'rtl': files_hash(rtl_outputs(STATE['rtl']['dir'])) if compiler == 'mlir' else None})
+
+def mapping_inputs(name, payload):
+    return digest({'dfg': file_hash(STATE['compile'][name]['dfg']),
+        'rtl': files_hash(rtl_outputs(STATE['rtl']['dir'])), 'backend': payload.get('backend', 'all'),
+        'mapper': tool_stamp(str(ROOT / 'mapper/build/mapperPro'))})
+
+def build_inputs():
+    rtl = STATE.get('rtl')
+    if not rtl:
+        return None
+    sim_path = simulation_env()['PATH']
+    return digest({'rtl': files_hash(rtl_outputs(rtl['dir'])),
+        'build_options': {'optimization': 'O0', 'jobs': 4, 'standard': 'c++17'},
+        'makefile': file_hash(ROOT / 'simulation/Makefile'),
+        'testbench': file_hash(ROOT / 'simulation/circuits/test_cgra.v'),
+        'verilator': tool_stamp('verilator', sim_path), 'cocotb': tool_stamp('cocotb-config', sim_path),
+        'cxx': tool_stamp(simulation_cxx())})
+
+def verification_state():
+    return STATE.setdefault('verification', {'build': None, 'runs': {}})
+
+def test_path(name):
+    bench(name)
+    return TMP / 'verification/tests' / name / 'test_cgra.py'
+
+def verification_source(name):
+    path = test_path(name)
+    return path.read_text() if path.is_file() else (ROOT / 'simulation/workspace/test_cgra_template.py').read_text().replace('example', name)
+
+def save_verification_source(name, source):
+    if not re.fullmatch(r'[A-Za-z][A-Za-z0-9_]{0,63}', name or ''):
+        raise ValueError('Python simulation benchmark names cannot contain hyphens')
+    if not isinstance(source, str):
+        raise ValueError('Test source must be text')
+    ast.parse(source)
+    path = test_path(name)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(source)
+
+def save_spec_template(name, spec, overwrite=False):
+    if not isinstance(name, str):
+        raise ValueError('Use letters, digits, _, - or . for the spec name')
+    if not name.endswith('.json'):
+        name += '.json'
+    if not re.fullmatch(r'\w[\w.-]{0,127}', name):
+        raise ValueError('Use letters, digits, _, - or .; the filename must be at most 128 characters')
+    SPEC_TEMPLATES.mkdir(parents=True, exist_ok=True)
+    path = SPEC_TEMPLATES / name
+    if path.is_symlink() or path.resolve().parent != SPEC_TEMPLATES.resolve():
+        raise ValueError('Invalid spec path')
+    spec = checked_spec(copy.deepcopy(spec))
+    if path.exists() and not overwrite:
+        return {'exists': True, 'name': name}
+    if overwrite:
+        pending = path.with_suffix('.pending')
+        pending.write_bytes(builder.render_spec(spec))
+        pending.replace(path)
+    else:
+        try:
+            with path.open('xb') as out:
+                out.write(builder.render_spec(spec))
+        except FileExistsError:
+            return {'exists': True, 'name': name}
+    return {'saved': True, 'name': name}
 
 def spec_templates():
     return sorted(p.name for p in SPEC_TEMPLATES.glob('*.json')
@@ -46,7 +158,7 @@ def load_spec_template(name):
 
 def apply_spec(spec):
     spec = checked_spec(copy.deepcopy(spec))
-    (TMP / 'fgra_spec.json').write_bytes(builder.render_spec(spec))
+    spec_path().write_bytes(builder.render_spec(spec))
     STATE['draft'] = copy.deepcopy(spec)
     STATE['spec'] = spec
     if not STATE['rtl'] or digest(spec) != STATE['rtl']['hash']:
@@ -121,7 +233,10 @@ def compile_current(name, result):
     return bool(result and path.exists() and Path(result['dfg']).is_file()
                 and (not latest or latest['id'] == result['job'] and latest['status'] == 'succeeded')
                 and result['source_hash'] == digest(path.read_text())
-                and (result['compiler'] != 'mlir' or result.get('rtl_hash') == (STATE['rtl'] or {}).get('hash')))
+                and (result['compiler'] != 'mlir' or result.get('rtl_hash') == (STATE['rtl'] or {}).get('hash'))
+                and (not result.get('input_hash') or result['input_hash'] == compile_inputs(name, result))
+                and (not result.get('input_hash') or (Path(result['dfg']).parent.parent / 'dfg.svg').is_file())
+                and (not result.get('dfg_hash') or result['dfg_hash'] == file_hash(result['dfg'])))
 
 def latest_job(kind, name=None):
     return next((j for j in reversed(list(JOBS.values())) if j['kind'] == kind and
@@ -130,7 +245,7 @@ def latest_job(kind, name=None):
 def snapshot():
     with LOCK:
         # Detect external edits to the GUI's generated specification as well.
-        cached_spec = TMP / 'fgra_spec.json'
+        cached_spec = spec_path()
         if not ACTIVE and cached_spec.is_file():
             try:
                 external = checked_spec(json.loads(cached_spec.read_text()))
@@ -153,7 +268,9 @@ def snapshot():
         data['dirty'] = digest(data['draft']) != digest(data['spec'])
         latest = latest_job('rtl')
         data['rtl_current'] = bool(data['rtl'] and data['rtl']['hash'] == digest(data['spec'])
-                                   and Path(data['rtl']['dir']).is_dir()
+                                   and all(p.is_file() for p in rtl_outputs(data['rtl']['dir']))
+                                   and (not data['rtl'].get('input_hash') or data['rtl']['input_hash'] == rtl_inputs())
+                                   and (not data['rtl'].get('output_hash') or data['rtl']['output_hash'] == files_hash(rtl_outputs(data['rtl']['dir'])))
                                    and (not latest or latest['id'] == data['rtl']['job'] and latest['status'] == 'succeeded'))
         for name, result in data['compile'].items():
             result['current'] = compile_current(name, result)
@@ -162,16 +279,53 @@ def snapshot():
             latest = latest_job('mapping', name)
             result['current'] = bool(data['rtl_current'] and compiled and compiled['current']
                                      and (not latest or latest['id'] == result['job'] and latest['status'] == 'succeeded')
-                                     and result['compile_id'] == compiled['job'] and result['rtl_hash'] == data['rtl']['hash'])
-            directory = TMP / 'runs' / result['job']
+                                     and result['compile_id'] == compiled['job'] and result['rtl_hash'] == data['rtl']['hash']
+                                     and (not result.get('input_hash') or result['input_hash'] == mapping_inputs(name, result)))
+            directory = Path(result.get('dir', str(TMP / 'runs' / result['job'])))
+            result['current'] = result['current'] and all((directory / p).is_file() for p in ('mapped_adg.json', 'mapped_adg.dot', 'config.bit'))
+            if result.get('output_hash'):
+                result['current'] = result['current'] and result['output_hash'] == files_hash([directory / p for p in result['output_files']])
             result['files'] = sorted(p.name for p in directory.iterdir()
                                      if p.is_file() and p.suffix in ('.bit', '.py', '.c', '.dot')
                                      and p.name != 'mapped_adg_view.dot') if directory.is_dir() else []
+        verification = copy.deepcopy(verification_state())
+        model = verification.get('build')
+        latest = latest_job('verilator')
+        verification['built'] = bool(data['rtl_current'] and not data['dirty'] and model
+            and model.get('input_hash') == build_inputs() and Path(model['executable']).is_file()
+            and model.get('executable_hash') == file_hash(model['executable'])
+            and (not model.get('files') or (all((Path(model['executable']).parent.parent / p).is_file() for p in model['files'])
+                and model['output_hash'] == files_hash([Path(model['executable']).parent.parent / p for p in model['files']])))
+            and (not latest or latest['id'] == model['job'] and latest['status'] == 'succeeded'))
+        verification['benchmarks'] = [name for name, result in data['mapping'].items() if result['current']
+            and re.fullmatch(r'[A-Za-z][A-Za-z0-9_]{0,63}', name)
+            and (Path(result.get('dir', str(TMP / 'runs' / result['job']))) / (name + '_cocotb.py')).is_file()]
+        for name, result in verification.get('runs', {}).items():
+            mapped = data['mapping'].get(name)
+            latest_run = latest_job('verification', name)
+            result['current'] = bool(verification['built'] and mapped and mapped['current']
+                and (not latest_run or latest_run['id'] == result['job'] and latest_run['status'] == 'succeeded')
+                and result.get('map_job') == mapped['job'] and result.get('build_hash') == model['input_hash']
+                and result.get('test_hash') == file_hash(test_path(name))
+                and result.get('runtime_hash') == files_hash((ROOT / 'simulation/server').glob('*.py')))
+            result['current'] = result['current'] and (TMP / 'verification/results' / name / 'results.xml').is_file()
+        data['verification'] = verification
+        # Progress follows valid artifacts, including reused compiler output
+        # after an architecture change, rather than the last action taken.
+        data['step'] = 0
+        if data['rtl_current'] and not data['dirty']:
+            data['step'] = 1
+            if any(result['current'] for result in data['compile'].values()):
+                data['step'] = 2
+            if any(result['current'] for result in data['mapping'].values()):
+                data['step'] = 3
         return data
 
 def run(job, args, cwd, env=None):
     global PROC
     job['log'] += '$ ' + ' '.join(map(str, args)) + '\n'
+    with (Path(job['dir']) / 'run.log').open('a') as log:
+        log.write('$ ' + ' '.join(map(str, args)) + '\n')
     with LOCK:
         if job.get('cancelled'):
             raise RuntimeError('Cancelled')
@@ -203,6 +357,22 @@ def env_tools():
     env['PATH'] = os.pathsep.join(map(str, dirs)) + os.pathsep + env.get('PATH', '')
     return env
 
+def simulation_env():
+    env = env_tools()
+    conda = shutil.which('conda')
+    if conda:
+        bindir = Path(conda).resolve().parent
+        lingo = bindir.parent / 'envs/lingo/bin'
+        # Keep the template's Cocotb 1.9 runtime ahead of oss-cad-suite's bundled runtime.
+        env['PATH'] = os.pathsep.join([str(lingo), env['PATH']])
+    env['PYTHONDONTWRITEBYTECODE'] = '1'
+    env['CXXFLAGS'] = env.get('CXXFLAGS', '') + ' -std=c++17'
+    return env
+
+def simulation_cxx():
+    path = env_tools()['PATH']
+    return shutil.which('clang++', path=path) or shutil.which('g++', path=path) or 'g++'
+
 def graph_json(dot, out, job, env):
     run(job, ['dot', '-Tdot_json', dot, '-o', out], out.parent, env)
     value = json.loads(out.read_text())
@@ -217,17 +387,20 @@ def worker(job, payload):
         kind = job['kind']
         if kind == 'rtl':
             spec = copy.deepcopy(STATE['spec'])
-            specfile = directory / 'fgra_spec.json'
+            specfile = spec_path()
             specfile.write_bytes(builder.render_spec(spec))
-            env.update(LINGO_SPEC=str(specfile), LINGO_OUTPUT_DIR=str(directory / 'hardware'))
+            env.update(LINGO_SPEC=str(specfile), LINGO_OUTPUT_DIR=str(directory))
             run(job, ['conda', 'run', '--no-capture-output', '-n', 'lingo', 'sbt', 'runMain fgramemfp.VerilogGen'], ROOT / 'hardware', env)
-            output = directory / 'hardware'
+            output = directory
             verilog = output / 'LinGoWithAXI.v'
             for path in (verilog, output / 'lingo-spec/lingo_adg.json', output / 'lingo-spec/operations.json'):
                 if not path.is_file():
                     raise RuntimeError('Missing generated artifact: ' + path.name)
             (output / 'clean.v').write_text(re.sub(r'//\s*@[^\n]*', '', verilog.read_text()))
-            result = {'hash': digest(spec), 'dir': str(output), 'job': job['id']}
+            if not all(p.is_file() for p in rtl_outputs(output)):
+                raise RuntimeError('RTL generation is missing hardware description files')
+            result = {'hash': digest(spec), 'dir': str(output), 'job': job['id'],
+                      'input_hash': job.get('input_hash', rtl_inputs()), 'output_hash': files_hash(rtl_outputs(output))}
             with LOCK:
                 STATE['rtl'] = result
                 STATE['step'] = 1
@@ -266,7 +439,9 @@ def worker(job, payload):
             # Publish the selected program's compiler output only; keep intermediates isolated.
             shutil.copy2(dfg, source.parent / (name + '.json'))
             result = dict(metrics, job=job['id'], dfg=str(dfg), source_hash=digest(original), compiler=compiler,
-                          rtl_hash=STATE['rtl']['hash'], svg='/api/artifact?job=' + job['id'] + '&file=dfg.svg')
+                          kernel=kernel, input_hash=job.get('input_hash', compile_inputs(name, payload)),
+                          dfg_hash=file_hash(dfg), rtl_hash=STATE['rtl']['hash'],
+                          svg='/api/artifact?job=' + job['id'] + '&file=dfg.svg')
             with LOCK:
                 STATE['compile'][name] = result
                 STATE['mapping'].pop(name, None)
@@ -300,12 +475,72 @@ def worker(job, payload):
                                        (directory / 'mapped_adg.dot').read_text()))
             run(job, ['dot', '-Kdot', '-Tdot_json', view_dot, '-o', directory / 'mapped_adg.json'], directory, env)
             run(job, ['dot', '-Kdot', '-Tsvg', directory / 'mapped_dfg.dot', '-o', directory / 'dfg.svg'], directory, env)
-            result = {'job': job['id'], 'ii': ii, 'latency': latency, 'backend': output_type,
+            required = ['mapped_adg.json', 'config.bit']
+            if output_type in ('all', 'cocotb'):
+                required.append(name + '_cocotb.py')
+            if not all((directory / filename).is_file() for filename in required):
+                raise RuntimeError('Mapping is missing required output files')
+            output_files = sorted(p.name for p in directory.iterdir() if p.is_file() and
+                                  (p.suffix in ('.bit', '.py') or p.name == 'mapped_adg.json'))
+            result = {'job': job['id'], 'dir': str(directory), 'ii': ii, 'latency': latency, 'backend': output_type,
+                      'input_hash': job.get('input_hash') or mapping_inputs(name, payload),
+                      'output_files': output_files, 'output_hash': files_hash([directory / p for p in output_files]),
                       'compile_id': compiled['job'], 'rtl_hash': rtl['hash'],
                       'svg': '/api/artifact?job=' + job['id'] + '&file=dfg.svg'}
             with LOCK:
                 STATE['mapping'][name] = result
                 STATE['step'] = 3
+        elif kind == 'verilator':
+            env = simulation_env()
+            circuits = directory / 'circuits'
+            circuits.mkdir()
+            (directory / 'workspace').mkdir()
+            shutil.copy2(ROOT / 'simulation/Makefile', directory / 'Makefile')
+            shutil.copy2(ROOT / 'simulation/circuits/test_cgra.v', circuits / 'test_cgra.v')
+            rtl = Path(STATE['rtl']['dir'])
+            shutil.copy2(rtl / 'clean.v', circuits / 'LinGoWithAXI.v')
+            for original, target in [('axilite_spec.json', 'axilite_spec.json'), ('lingo_adg.json', 'lingo_cgra_adg.json')]:
+                shutil.copy2(rtl / 'lingo-spec' / original, circuits / target)
+            env.update(PWD=str(directory), PYTHONDONTWRITEBYTECODE='1')
+            run(job, ['conda', 'run', '--no-capture-output', '-n', 'lingo', 'make', '-j16', 'SIM=verilator',
+                'CXX=' + simulation_cxx(), 'BUILD_ARGS=OPT_FAST=-O0 OPT_SLOW=-O0', 'sim_build/Vtop'], directory, env)
+            executable = directory / 'sim_build/Vtop'
+            if not executable.is_file():
+                raise RuntimeError('Verilator did not produce sim_build/Vtop')
+            model_files = MODEL_FILES
+            with LOCK:
+                verification_state()['build'] = {'job': job['id'], 'input_hash': job['input_hash'],
+                    'executable': str(executable), 'executable_hash': file_hash(executable),
+                    'files': model_files, 'output_hash': files_hash([directory / p for p in model_files])}
+        elif kind == 'verification':
+            env = simulation_env()
+            name = payload['name']
+            build = TMP / 'verification/build'
+            workspace = build / 'workspace'
+            shutil.copy2(test_path(name), directory / 'test_cgra.py')
+            shutil.copy2(directory / 'test_cgra.py', workspace / 'test_cgra.py')
+            mapped = STATE['mapping'][name]
+            mapdir = Path(mapped['dir'])
+            shutil.copy2(mapdir / (name + '_cocotb.py'), directory / (name + '_cocotb.py'))
+            shutil.copy2(directory / (name + '_cocotb.py'), workspace / (name + '.py'))
+            runtime_hash = files_hash((ROOT / 'simulation/server').glob('*.py'))
+            env.update(PWD=str(build), PYTHONDONTWRITEBYTECODE='1',
+                PYTHONPATH=os.pathsep.join([str(workspace), str(ROOT / 'simulation/server'), env.get('PYTHONPATH', '')]))
+            # Only execute the already built model; no implicit rebuild during Run.
+            results = directory / 'results.xml'
+            run(job, ['conda', 'run', '--no-capture-output', '-n', 'lingo', 'make', 'SIM=verilator',
+                'MODULE=test_cgra', 'COCOTB_RESULTS_FILE=' + str(results), str(results)], build, env)
+            if not results.is_file():
+                raise RuntimeError('Simulation did not produce results.xml')
+            report = ET.parse(results).getroot()
+            tests = list(report.iter('testcase'))
+            failures = list(report.iter('failure')) + list(report.iter('error'))
+            if not tests or failures:
+                raise RuntimeError('Simulation failed: ' + str(len(failures)) + ' failure(s), ' + str(len(tests)) + ' test(s)')
+            with LOCK:
+                verification_state()['runs'][name] = {'job': job['id'], 'map_job': mapped['job'],
+                    'build_hash': verification_state()['build']['input_hash'], 'test_hash': file_hash(directory / 'test_cgra.py'),
+                    'runtime_hash': runtime_hash, 'tests': len(tests)}
         else:
             raise ValueError('Unknown job type')
         with LOCK:
@@ -316,6 +551,8 @@ def worker(job, payload):
             job['status'] = 'cancelled' if job.get('cancelled') else 'failed'
             job['error'] = str(error)
             job['log'] += '\n' + str(error) + '\n'
+            with (directory / 'run.log').open('a') as log:
+                log.write('\n' + str(error) + '\n')
     finally:
         with LOCK:
             job['elapsed'] = round(time.monotonic() - job.pop('_started'), 2)
@@ -323,7 +560,7 @@ def worker(job, payload):
             ACTIVE = None
 
 # Restore job summaries after a restart; interrupted jobs cannot be considered successful.
-for p in sorted((TMP / 'runs').glob('*/job.json'), key=lambda p: p.stat().st_mtime) if (TMP / 'runs').exists() else []:
+for p in sorted(TMP.rglob('job.json'), key=lambda p: p.stat().st_mtime):
     try:
         job = json.loads(p.read_text())
         if job['status'] == 'running':
@@ -334,28 +571,154 @@ for p in sorted((TMP / 'runs').glob('*/job.json'), key=lambda p: p.stat().st_mti
     except (ValueError, KeyError):
         pass
 
+def migrate_outputs():
+    """Move existing successful outputs without discarding previous user results."""
+    old = TMP / 'runs'
+    if not old.exists() and not any((TMP / name).exists() for name in ('fgra_spec.json', 'previews')):
+        return
+    hardware = TMP / 'hardware'
+    hardware.mkdir(exist_ok=True)
+    rtl = STATE.get('rtl')
+    moves = []
+    if rtl and Path(rtl['dir']).is_dir() and old in Path(rtl['dir']).parents:
+        moves.append((Path(rtl['dir']), hardware / 'rtl', rtl['job']))
+    for name, result in STATE['compile'].items():
+        source = old / result['job']
+        if source.is_dir():
+            moves.append((source, TMP / 'benchmarks' / name / 'compile', result['job']))
+    for name, result in STATE['mapping'].items():
+        source = old / result['job']
+        if source.is_dir():
+            moves.append((source, TMP / 'benchmarks' / name / 'map', result['job']))
+    for source, target, ident in moves:
+        if target.exists():
+            continue
+        target.parent.mkdir(parents=True, exist_ok=True)
+        shutil.move(str(source), str(target))
+        if ident in JOBS:
+            job = JOBS[ident]
+            if job['kind'] == 'rtl':
+                for filename in ('run.log', 'job.json'):
+                    previous = Path(job['dir']) / filename
+                    if previous.is_file():
+                        shutil.move(str(previous), str(target / filename))
+            job['dir'] = str(target)
+            atomic_json(target / 'job.json', job)
+        if rtl and ident == rtl['job']:
+            rtl['dir'] = str(target)
+        for result in STATE['compile'].values():
+            if result['job'] == ident:
+                result['dfg'] = str(target / Path(result['dfg']).relative_to(source))
+        for result in STATE['mapping'].values():
+            if result['job'] == ident:
+                result['dir'] = str(target)
+    for filename in ('fgra_spec.json', 'previews'):
+        source = TMP / filename
+        if source.exists() and not (hardware / filename).exists():
+            shutil.move(str(source), str(hardware / filename))
+    archive = hardware / 'legacy-runs'
+    if archive.exists():
+        archive = hardware / ('legacy-runs-' + uuid.uuid4().hex[:6])
+    if old.exists() and any(old.iterdir()):
+        shutil.move(str(old), str(archive))
+        for job in JOBS.values():
+            directory = Path(job['dir'])
+            if old in directory.parents:
+                job['dir'] = str(archive / directory.relative_to(old))
+                if Path(job['dir']).is_dir():
+                    atomic_json(Path(job['dir']) / 'job.json', job)
+    elif old.exists():
+        old.rmdir()
+    verification_state()
+    save()
+
+migrate_outputs()
+JOBS = dict(sorted(JOBS.items(), key=lambda item: item[1].get('created', 0)))
+
+def initialize_output_hashes():
+    changed = False
+    rtl = STATE.get('rtl')
+    if rtl and not rtl.get('output_hash') and all(p.is_file() for p in rtl_outputs(rtl['dir'])):
+        rtl['output_hash'] = files_hash(rtl_outputs(rtl['dir']))
+        changed = True
+    for result in STATE['compile'].values():
+        if not result.get('dfg_hash') and Path(result['dfg']).is_file():
+            result['dfg_hash'] = file_hash(result['dfg'])
+            changed = True
+    for result in STATE['mapping'].values():
+        directory = Path(result.get('dir', str(TMP / 'runs' / result['job'])))
+        if directory.is_dir() and not result.get('output_hash'):
+            result['output_files'] = sorted(p.name for p in directory.iterdir() if p.is_file()
+                and (p.suffix in ('.bit', '.py') or p.name == 'mapped_adg.json'))
+            result['output_hash'] = files_hash([directory / p for p in result['output_files']])
+            changed = True
+    model = verification_state().get('build')
+    if model and not model.get('files'):
+        directory = Path(model['executable']).parent.parent
+        if all((directory / p).is_file() for p in MODEL_FILES):
+            model['files'] = MODEL_FILES
+            model['output_hash'] = files_hash([directory / p for p in MODEL_FILES])
+            changed = True
+    if changed:
+        save()
+
+initialize_output_hashes()
+
 def start(kind, payload):
     global ACTIVE
     with LOCK:
-        if kind not in ('rtl', 'compile', 'mapping'):
+        if kind not in ('rtl', 'compile', 'mapping', 'verilator', 'verification'):
             raise ValueError('Unknown job type')
         if ACTIVE:
             raise ValueError('Another task is running')
         state = snapshot()
-        if kind in ('compile', 'mapping') and (not state['rtl_current'] or state['dirty']):
+        if kind in ('compile', 'mapping', 'verilator', 'verification') and (not state['rtl_current'] or state['dirty']):
             raise ValueError('Generate RTL for the current architecture first')
         if kind == 'mapping' and not state['compile'].get(payload.get('name'), {}).get('current'):
             raise ValueError('Compile the current source first')
         if kind == 'rtl' and state['dirty']:
             raise ValueError('Generate spec before generating RTL')
+        name = payload.get('name')
+        if kind in ('compile', 'mapping', 'verification'):
+            bench(name)
+        if kind == 'compile' and (payload.get('compiler', 'llvm') not in ('llvm', 'mlir')
+                or not re.fullmatch(r'[A-Za-z_][A-Za-z0-9_]*', payload.get('kernel', 'kernel'))):
+            raise ValueError('Invalid compiler or kernel function')
+        if kind == 'mapping' and payload.get('backend', 'all') not in ('all', 'cocotb', 'sdk'):
+            raise ValueError('Unknown output backend')
+        if kind == 'verification':
+            if not state['verification']['built']:
+                raise ValueError('Build Verilator for the current RTL first')
+            if name not in state['verification']['benchmarks']:
+                raise ValueError('Select a current mapping with a generated Cocotb Python file')
+            if not test_path(name).is_file():
+                raise ValueError('Save the test script before running')
+            if 'test_source' in payload and payload['test_source'] != test_path(name).read_text():
+                raise ValueError('The saved test script changed; reload it before running')
+            ast.parse(test_path(name).read_text())
+        inputs = {'rtl': rtl_inputs, 'compile': lambda: compile_inputs(name, payload),
+                  'mapping': lambda: mapping_inputs(name, payload), 'verilator': build_inputs}
+        input_hash = inputs[kind]() if kind in inputs else None
+        cached = state['rtl'] if kind == 'rtl' else state['compile'].get(name) if kind == 'compile' else state['mapping'].get(name) if kind == 'mapping' else state['verification']['build'] if kind == 'verilator' else None
+        current = state['rtl_current'] if kind == 'rtl' else state['verification']['built'] if kind == 'verilator' else cached and cached.get('current')
+        if current and cached.get('input_hash') == input_hash:
+            return {'id': cached['job'], 'cached': True, 'message': 'Already built' if kind == 'verilator' else 'Inputs unchanged; existing output reused'}
         ident = uuid.uuid4().hex[:12]
-        directory = TMP / 'runs' / ident
+        directory = (TMP / 'hardware/rtl' if kind == 'rtl' else TMP / 'verification/build' if kind == 'verilator'
+            else TMP / 'verification/results' / name if kind == 'verification'
+            else TMP / 'benchmarks' / name / ('compile' if kind == 'compile' else 'map'))
+        if directory.exists():
+            shutil.rmtree(directory)
+        for key, old_job in list(JOBS.items()):
+            if Path(old_job['dir']) == directory:
+                del JOBS[key]
         directory.mkdir(parents=True)
         job = {'id': ident, 'kind': kind, 'name': payload.get('name'), 'status': 'running', 'dir': str(directory),
-               'log': '', '_started': time.monotonic(), 'created': time.time(), 'elapsed': 0}
+               'log': '', 'input_hash': input_hash, '_started': time.monotonic(), 'created': time.time(), 'elapsed': 0}
         JOBS[ident] = job
         ACTIVE = ident
-        STATE['step'] = {'rtl': 0, 'compile': 1, 'mapping': 2}[kind]
+        if kind in ('rtl', 'compile', 'mapping'):
+            STATE['step'] = {'rtl': 0, 'compile': 1, 'mapping': 2}[kind]
         save()
         atomic_json(directory / 'job.json', job)
         threading.Thread(target=worker, args=(job, copy.deepcopy(payload)), daemon=True).start()
@@ -384,6 +747,10 @@ class Handler(BaseHTTPRequestHandler):
             if parsed.path == '/api/source':
                 name = query['name'][0]
                 return self.respond({'source': (bench(name) / (name + '.c')).read_text()})
+            if parsed.path == '/api/verification-source':
+                name = query['name'][0]
+                path = test_path(name)
+                return self.respond({'source': verification_source(name), 'saved': path.is_file(), 'path': str(path)})
             if parsed.path == '/api/mapping':
                 job = JOBS[query['job'][0]]
                 return self.respond(json.loads((Path(job['dir']) / 'mapped_adg.json').read_text()))
@@ -426,7 +793,7 @@ class Handler(BaseHTTPRequestHandler):
                             os.killpg(PROC.pid, signal.SIGTERM)
                     return self.respond({'ok': True})
                 if route == '/api/ui':
-                    allowed = {'program', 'mapping_program', 'compiler', 'kernel', 'backend'}
+                    allowed = {'program', 'mapping_program', 'compiler', 'kernel', 'backend', 'verification_program'}
                     STATE['ui'] = {key: value for key, value in payload.items()
                                    if key in allowed and isinstance(value, str) and len(value) <= 128}
                     save()
@@ -440,6 +807,10 @@ class Handler(BaseHTTPRequestHandler):
                 elif route == '/api/load-spec':
                     apply_spec(load_spec_template(payload.get('name')))
                     STATE['loaded_template'] = payload['name']
+                elif route == '/api/save-spec':
+                    return self.respond(save_spec_template(payload.get('name'), payload['spec'], payload.get('overwrite') is True))
+                elif route == '/api/verification-source':
+                    save_verification_source(payload['name'], payload['source'])
                 elif route == '/api/source':
                     name = payload['name']
                     (bench(name) / (name + '.c')).write_text(payload['source'])

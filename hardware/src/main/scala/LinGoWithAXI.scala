@@ -8,6 +8,7 @@ import fgramemfp.spec.FusionSpec
 
 import java.io.File
 import java.nio.file.{Files, Paths, StandardOpenOption}
+import scala.jdk.CollectionConverters._
 
 object LinGoParam {
   val outputDir: String = sys.env.getOrElse("LINGO_OUTPUT_DIR", "verilog")
@@ -93,14 +94,17 @@ object VerilogGen extends App {
   (new ChiselStage).emitVerilog(
     new LinGoWithAXI, Array("-td", outputDir))
   val top = Paths.get(outputDir, "LinGoWithAXI.v")
-  val resources = Seq("CPA_tree_with_MAD.v", "CSA_tree.v", "LNS_Top.v",
-    "anticonverter.v", "converter.v", "segSel.v")
-  resources.foreach { name =>
+  // Chisel emits this manifest only for black boxes used by the design.
+  // A design without XCore has no LNS resources to merge.
+  val resourceList = Paths.get(outputDir, "firrtl_black_box_resource_files.f")
+  val resources = if (Files.exists(resourceList)) {
+    Files.readAllLines(resourceList).asScala.toSeq
+      .map(_.trim).filter(_.nonEmpty).map(name => Paths.get(name))
+  } else Seq.empty[java.nio.file.Path]
+  resources.foreach { resource =>
     Files.write(top, "\n".getBytes("UTF-8"), StandardOpenOption.APPEND)
-    Files.write(top, Files.readAllBytes(Paths.get(outputDir, name)),
-      StandardOpenOption.APPEND)
+    Files.write(top, Files.readAllBytes(resource), StandardOpenOption.APPEND)
   }
-  (resources :+ "firrtl_black_box_resource_files.f").foreach { name =>
-    Files.deleteIfExists(Paths.get(outputDir, name))
-  }
+  resources.foreach(resource => Files.deleteIfExists(resource))
+  Files.deleteIfExists(resourceList)
 }

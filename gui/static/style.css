@@ -238,11 +238,40 @@ main.log-collapsed {
   min-width:0;
   min-height:0;
 }
-#verification > .card, #physical > .card {
+#physical > .card {
   flex:1;
   min-height:0;
   overflow:auto;
 }
+main.verification-view {
+  grid-template-rows:var(--header-height) minmax(0,1fr) var(--footer-height);
+}
+#verification {
+  display:grid;
+  grid-template-rows:var(--controls-height) minmax(0,1fr);
+  gap:var(--shell-gap);
+}
+.verification-controls > label { margin-left:0; }
+.controls.verification-controls { align-items:center; }
+.controls.verification-controls .status { margin:0; }
+.verification-controls .button span { margin:0 7px 0 0; }
+.verification-output {
+  flex:1;
+  min-height:0;
+  min-width:0;
+  margin:0;
+  padding:18px;
+  overflow:auto;
+  overscroll-behavior:contain;
+  background:#fafbfd;
+  color:#40516a;
+  font:11px/1.75 Consolas,monospace;
+  white-space:pre-wrap;
+  overflow-wrap:anywhere;
+}
+.verification-editors .card-heading > div { min-width:0; }
+#verification-source-status { overflow-wrap:anywhere; }
+#verification-log-label { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 header {
   display:flex;
   align-items:center;
@@ -545,7 +574,7 @@ input:disabled {
   align-items:center;
   padding:17px 18px;
 }
-.generation-row+.generation-row {
+.generate-card > * + * {
   border-top:1px solid var(--line);
 }
 .generation-row strong {
