@@ -179,3 +179,11 @@ python3 LinGo/gui/server.py --port 8080
 ```
 
 then visit localhost:8080
+
+![gui_hw](docs/pics/gui_hw.png)
+
+![gui_compile](docs/pics/gui_compile.png)
+
+![gui_map](docs/pics/gui_map.png)
+
+![gui_verify](docs/pics/gui_verify.png)
