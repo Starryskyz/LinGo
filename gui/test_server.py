@@ -20,6 +20,10 @@ class WorkbenchTests(unittest.TestCase):
         self.old = (server.STATE, server.JOBS, server.ACTIVE)
         self.tmp_patch = patch.object(server, 'TMP', self.directory)
         self.tmp_patch.start()
+        self.templates = self.directory / 'spectemplate'
+        self.templates.mkdir()
+        self.template_patch = patch.object(server, 'SPEC_TEMPLATES', self.templates)
+        self.template_patch.start()
         server.STATE = server.initial()
         server.JOBS = {}
         server.ACTIVE = None
@@ -29,6 +33,7 @@ class WorkbenchTests(unittest.TestCase):
     def tearDown(self):
         self.save_patch.stop()
         self.tmp_patch.stop()
+        self.template_patch.stop()
         server.STATE, server.JOBS, server.ACTIVE = self.old
         self.temp.cleanup()
 
@@ -69,6 +74,38 @@ class WorkbenchTests(unittest.TestCase):
         (self.directory / 'fgra_spec.json').write_text(json.dumps(spec))
         self.assertEqual(server.snapshot()['spec']['fgra_gib_num_track_cg'], spec['fgra_gib_num_track_cg'])
         self.assertEqual(server.STATE['step'], 0)
+
+    def test_load_spec_preserves_instances_and_invalidates_old_rtl(self):
+        original = copy.deepcopy(server.STATE['spec'])
+        server.STATE['rtl'] = {'hash': server.digest(original), 'dir': str(self.directory), 'job': 'rtl1'}
+        spec = copy.deepcopy(original)
+        spec['fgra_iobs'][0][0]['max_delay_cg'] = 9
+        spec['fgra_cg_gibs'][0][0]['fclist'] = [4, 4, 2]
+        path = self.templates / 'custom.json'
+        path.write_text(json.dumps(spec))
+        before = path.read_bytes()
+        self.assertEqual(server.spec_templates(), ['custom.json'])
+        server.apply_spec(server.load_spec_template('custom.json'))
+        self.assertEqual(server.STATE['draft'], spec)
+        self.assertEqual(server.STATE['spec']['fgra_cg_gibs'][0][0]['fclist'], [4, 4, 2])
+        self.assertFalse(server.snapshot()['rtl_current'])
+        self.assertEqual(path.read_bytes(), before)
+
+    def test_invalid_template_does_not_replace_current_state(self):
+        original = copy.deepcopy(server.STATE)
+        (self.templates / 'broken.json').write_text('{invalid json')
+        with self.assertRaises(ValueError):
+            server.apply_spec(server.load_spec_template('broken.json'))
+        self.assertEqual(server.STATE, original)
+
+    def test_template_paths_and_external_symlinks_are_rejected(self):
+        outside = self.directory / 'outside.json'
+        outside.write_text(json.dumps(server.STATE['spec']))
+        (self.templates / 'linked.json').symlink_to(outside)
+        self.assertEqual(server.spec_templates(), [])
+        for name in ('../outside.json', 'linked.json', '/etc/passwd', None):
+            with self.assertRaises(ValueError):
+                server.load_spec_template(name)
 
     def test_rtl_and_dfg_version_invalidation(self):
         source = self.directory / 'demo.c'

@@ -782,3 +782,16 @@ svg .edge.highlight polygon {
   color:#5f79a0;
   font-size:10px;
 }
+
+.spec-loader-body {
+  padding: 18px 20px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: end;
+}
+.spec-loader-body p {
+  grid-column: 1 / -1;
+  margin: 0;
+  line-height: 1.7;
+}

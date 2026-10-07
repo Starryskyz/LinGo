@@ -33,6 +33,24 @@ ACTIVE = None
 PROC = None
 STATE_FILE = TMP / 'state.json'
 SOURCE_SPEC = ROOT / 'hardware/src/main/resources/fgra_spec.json'
+SPEC_TEMPLATES = ROOT / 'hardware/spectemplate'
+
+def spec_templates():
+    return sorted(p.name for p in SPEC_TEMPLATES.glob('*.json')
+                  if p.is_file() and p.resolve().parent == SPEC_TEMPLATES.resolve())
+
+def load_spec_template(name):
+    if not isinstance(name, str) or name not in spec_templates():
+        raise ValueError('Select a JSON spec from hardware/spectemplate')
+    return checked_spec(json.loads((SPEC_TEMPLATES / name).read_text()))
+
+def apply_spec(spec):
+    spec = checked_spec(copy.deepcopy(spec))
+    (TMP / 'fgra_spec.json').write_bytes(builder.render_spec(spec))
+    STATE['draft'] = copy.deepcopy(spec)
+    STATE['spec'] = spec
+    if not STATE['rtl'] or digest(spec) != STATE['rtl']['hash']:
+        STATE['step'] = 0
 
 def digest(value):
     return hashlib.sha256(json.dumps(value, sort_keys=True).encode()).hexdigest()
@@ -126,6 +144,7 @@ def snapshot():
                 pass
         data = copy.deepcopy(STATE)
         data['ui'] = copy.deepcopy(STATE.get('ui', {}))
+        data['spec_templates'] = spec_templates()
         data['benchmarks'] = benchmarks()
         data['operations'] = operations()
         data['profiles'] = builder.PE_PROFILES
@@ -417,12 +436,10 @@ class Handler(BaseHTTPRequestHandler):
                 if route == '/api/draft':
                     STATE['draft'] = payload['spec']
                 elif route == '/api/spec':
-                    spec = checked_spec(payload['spec'])
-                    STATE['draft'] = copy.deepcopy(spec)
-                    STATE['spec'] = spec
-                    (TMP / 'fgra_spec.json').write_bytes(builder.render_spec(spec))
-                    if not STATE['rtl'] or digest(spec) != STATE['rtl']['hash']:
-                        STATE['step'] = 0
+                    apply_spec(payload['spec'])
+                elif route == '/api/load-spec':
+                    apply_spec(load_spec_template(payload.get('name')))
+                    STATE['loaded_template'] = payload['name']
                 elif route == '/api/source':
                     name = payload['name']
                     (bench(name) / (name + '.c')).write_text(payload['source'])

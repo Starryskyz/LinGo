@@ -8,7 +8,7 @@ python3 /data/jrzhang/LinGo/gui/server.py --port 8080
 
 Open **http://127.0.0.1:8080**. The application uses Python's standard library and a local HTML/CSS/JavaScript frontend; no npm install or CDN access is required. For a remote machine, forward port 8080 through SSH.
 
-The workflow is **CGRA HW → Compile → Mapping**. Verification and Physical Design are reserved for later implementation. Generate spec, then RTL, before compiling. Select individual PEs, GIBs and IOBs to configure them. The format brush copies a PE configuration; press Escape to stop painting. Scroll to zoom and drag to pan each graph.
+The workflow is **CGRA HW → Compile → Mapping**. Verification and Physical Design are reserved for later implementation. Generate spec, then RTL, before compiling. Select individual PEs, GIBs and IOBs to configure them. Use **Load spec** to select a JSON architecture from `hardware/spectemplate`; loading replaces the current draft and cached spec, while the template remains unchanged. Changed architecture inputs make RTL and mapping results outdated. The format brush copies a PE, IOB or GIB configuration to the same kind of resource; press Escape to stop painting. **Apply to all** copies to every resource of that kind. GIB copies CG settings and any source FG settings to existing FG GIBs, without creating new FG connections. Scroll to zoom and drag to pan each graph.
 
 Architecture drafts, generated specifications, RTL/ADG, intermediate compilation files, mapping outputs and task logs are stored in `gui/tmp`. The repository hardware spec is imported on first launch and is not overwritten. Successful compilation publishes only the selected program's `<name>.json` into its benchmark directory. Creating and saving a program writes its C file there. RTL generation uses `LINGO_SPEC` / `LINGO_OUTPUT_DIR` and performs the same clean-Verilog operation as `hardware/genRTL.sh`, with isolated output paths.
 
@@ -20,4 +20,5 @@ Run the focused backend checks with:
 
 ```bash
 python3 -m unittest discover -s gui -p 'test_*.py'
+node gui/test_instance_copy.js
 ```
