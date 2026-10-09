@@ -47,14 +47,14 @@ ifeq ($(SIM),icarus)
 
 
 else ifeq ($(SIM),verilator)
-    ifneq ($(filter default undefined,$(origin CXX)),)
-        CXX := $(or $(wildcard $(abspath ../llvm-project/install/bin/clang++)),clang++)
-    endif
-    BUILD_ARGS ?= CXX=$(CXX) OPT_FAST=-O2 OPT_SLOW=-O2
+#     ifneq ($(filter default undefined,$(origin CXX)),)
+#         CXX := $(or $(wildcard $(abspath ../llvm-project/install/bin/clang++)),clang++)
+#     endif
+#     BUILD_ARGS ?= CXX=$(CXX) OPT_FAST=-O2 OPT_SLOW=-O2
 
     EXTRA_ARGS += -Wno-SELRANGE
     EXTRA_ARGS += -Wno-WIDTH
-#     EXTRA_ARGS += -Wno-CASEINCOMPLETE
+    EXTRA_ARGS += -Wno-CASEINCOMPLETE
 #     EXTRA_ARGS += -Wno-fatal ###
 
     EXTRA_ARGS += $(foreach v,$(filter PARAM_%,$(.VARIABLES)), \
