@@ -285,21 +285,14 @@ class IOController(dataWidth: Int, addrWidth: Int, hasMask: Boolean, mode: Int, 
       wDataReg := wdata
     }
     when(isLoad){//@yuan: for load operation, the latency is 2
-      // io.sram.en := wen | ren
-      // io.sram.we := Mux(wen, wmask.U, 0.U)
-      io.sram.en := (wen | ren) && !reset.asBool
-      io.sram.we := Mux(reset.asBool, 0.U, Mux(wen, wmask.U, 0.U))
+      io.sram.en := wen | ren
+      io.sram.we := Mux(wen, wmask.U, 0.U)
       io.sram.addr := addr
       io.sram.din := wdata
       io.out_cg(0) := RegNext(io.sram.dout)
     }.otherwise{//@yuan: otherwise, for the store operation, the latency is 1
-      // io.sram.en := RegNext(wen | ren)
-      // io.sram.we := RegNext(Mux(wen, wmask.U, 0.U))
-      val sramEnReg = RegNext(wen | ren, false.B)
-      val sramWeReg = RegNext(Mux(wen, wmask.U, 0.U), 0.U)
-
-      io.sram.en := sramEnReg && !reset.asBool
-      io.sram.we := Mux(reset.asBool, 0.U, sramWeReg)
+      io.sram.en := RegNext(wen | ren)
+      io.sram.we := RegNext(Mux(wen, wmask.U, 0.U))
       io.sram.addr := addrReg
       io.sram.din := wDataReg
       io.out_cg(0) := DontCare
@@ -310,10 +303,8 @@ class IOController(dataWidth: Int, addrWidth: Int, hasMask: Boolean, mode: Int, 
     // io.sram.din := wDataReg
     // io.out_cg(0) := RegNext(io.sram.dout)
   }else{ // not add reg, write/read latency is 0/2
-    // io.sram.en := wen | ren
-    // io.sram.we := Mux(wen, wmask.U, 0.U)
-    io.sram.en := (wen | ren) && !reset.asBool
-    io.sram.we := Mux(reset.asBool, 0.U, Mux(wen, wmask.U, 0.U))
+    io.sram.en := wen | ren
+    io.sram.we := Mux(wen, wmask.U, 0.U)
     io.sram.addr := addr
     io.sram.din := wdata
     io.out_cg(0) := RegNext(io.sram.dout)

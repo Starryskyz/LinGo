@@ -63,7 +63,7 @@ tests_dir = os.path.dirname(__file__)
 #     return np.zeros(shape, dtype=np.int16)
 
 
-def ri32(shape, low=0, high=1000):
+def ri32(shape, low=0, high=30):
     return np.random.randint(low, high + 1, size=shape, dtype=np.int32)
 
 

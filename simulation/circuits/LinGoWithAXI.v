@@ -3208,18 +3208,21 @@ module IOController(
   wire  _T_43 = wen | ren; // @[src/main/scala/dsa/io/IOController.scala 280:14]
   wire [12:0] addr = _GEN_34[12:0]; // @[src/main/scala/dsa/io/IOController.scala 208:18]
   reg [31:0] wDataReg; // @[src/main/scala/dsa/io/IOController.scala 283:27]
-  wire [3:0] _io_sram_we_T = wen ? 4'hf : 4'h0; // @[src/main/scala/dsa/io/IOController.scala 289:24]
-  reg [31:0] io_out_cg_0_REG; // @[src/main/scala/dsa/io/IOController.scala 292:30]
-  reg  io_sram_en_REG; // @[src/main/scala/dsa/io/IOController.scala 294:28]
-  reg [3:0] io_sram_we_REG; // @[src/main/scala/dsa/io/IOController.scala 295:28]
-  reg  io_out_fg_0_REG; // @[src/main/scala/dsa/io/IOController.scala 316:28]
-  assign io_sram_en = isLoad ? _T_43 : io_sram_en_REG; // @[src/main/scala/dsa/io/IOController.scala 287:17 288:18 294:18]
-  assign io_sram_we = isLoad ? _io_sram_we_T : io_sram_we_REG; // @[src/main/scala/dsa/io/IOController.scala 287:17 289:18 295:18]
-  assign io_sram_addr = isLoad ? addr : addrReg; // @[src/main/scala/dsa/io/IOController.scala 287:17 290:20 296:20]
-  assign io_sram_din = isLoad ? io_in_cg_0 : wDataReg; // @[src/main/scala/dsa/io/IOController.scala 287:17 291:19 297:19]
+  wire  _io_sram_en_T_2 = ~reset; // @[src/main/scala/dsa/io/IOController.scala 290:36]
+  wire [3:0] _io_sram_we_T_1 = wen ? 4'hf : 4'h0; // @[src/main/scala/dsa/io/IOController.scala 291:47]
+  wire [3:0] _io_sram_we_T_2 = reset ? 4'h0 : _io_sram_we_T_1; // @[src/main/scala/dsa/io/IOController.scala 291:24]
+  reg [31:0] io_out_cg_0_REG; // @[src/main/scala/dsa/io/IOController.scala 294:30]
+  reg  sramEnReg; // @[src/main/scala/dsa/io/IOController.scala 298:30]
+  reg [3:0] sramWeReg; // @[src/main/scala/dsa/io/IOController.scala 299:30]
+  wire [3:0] _io_sram_we_T_4 = reset ? 4'h0 : sramWeReg; // @[src/main/scala/dsa/io/IOController.scala 302:24]
+  reg  io_out_fg_0_REG; // @[src/main/scala/dsa/io/IOController.scala 325:28]
+  assign io_sram_en = isLoad ? _T_43 & ~reset : sramEnReg & _io_sram_en_T_2; // @[src/main/scala/dsa/io/IOController.scala 287:17 290:18 301:18]
+  assign io_sram_we = isLoad ? _io_sram_we_T_2 : _io_sram_we_T_4; // @[src/main/scala/dsa/io/IOController.scala 287:17 291:18 302:18]
+  assign io_sram_addr = isLoad ? addr : addrReg; // @[src/main/scala/dsa/io/IOController.scala 287:17 292:20 303:20]
+  assign io_sram_din = isLoad ? io_in_cg_0 : wDataReg; // @[src/main/scala/dsa/io/IOController.scala 287:17 293:19 304:19]
   assign io_done = done; // @[src/main/scala/dsa/io/IOController.scala 131:11]
-  assign io_out_cg_0 = io_out_cg_0_REG; // @[src/main/scala/dsa/io/IOController.scala 287:17 292:20]
-  assign io_out_fg_0 = io_out_fg_0_REG; // @[src/main/scala/dsa/io/IOController.scala 316:18]
+  assign io_out_cg_0 = io_out_cg_0_REG; // @[src/main/scala/dsa/io/IOController.scala 287:17 294:20]
+  assign io_out_fg_0 = io_out_fg_0_REG; // @[src/main/scala/dsa/io/IOController.scala 325:18]
   always @(posedge clock) begin
     if (reset) begin // @[src/main/scala/dsa/io/IOController.scala 112:22]
       state <= 2'h0; // @[src/main/scala/dsa/io/IOController.scala 112:22]
@@ -3322,14 +3325,20 @@ module IOController(
     end else if (wen) begin // @[src/main/scala/dsa/io/IOController.scala 284:14]
       wDataReg <= io_in_cg_0; // @[src/main/scala/dsa/io/IOController.scala 285:16]
     end
-    io_out_cg_0_REG <= io_sram_dout; // @[src/main/scala/dsa/io/IOController.scala 292:30]
-    io_sram_en_REG <= wen | ren; // @[src/main/scala/dsa/io/IOController.scala 294:33]
-    if (wen) begin // @[src/main/scala/dsa/io/IOController.scala 295:32]
-      io_sram_we_REG <= 4'hf;
+    io_out_cg_0_REG <= io_sram_dout; // @[src/main/scala/dsa/io/IOController.scala 294:30]
+    if (reset) begin // @[src/main/scala/dsa/io/IOController.scala 298:30]
+      sramEnReg <= 1'h0; // @[src/main/scala/dsa/io/IOController.scala 298:30]
     end else begin
-      io_sram_we_REG <= 4'h0;
+      sramEnReg <= _T_43; // @[src/main/scala/dsa/io/IOController.scala 298:30]
     end
-    io_out_fg_0_REG <= ~io_sram_en & io_sram_we == 4'h0 & useFGOut; // @[src/main/scala/dsa/io/IOController.scala 316:71]
+    if (reset) begin // @[src/main/scala/dsa/io/IOController.scala 299:30]
+      sramWeReg <= 4'h0; // @[src/main/scala/dsa/io/IOController.scala 299:30]
+    end else if (wen) begin // @[src/main/scala/dsa/io/IOController.scala 291:47]
+      sramWeReg <= 4'hf;
+    end else begin
+      sramWeReg <= 4'h0;
+    end
+    io_out_fg_0_REG <= ~io_sram_en & io_sram_we == 4'h0 & useFGOut; // @[src/main/scala/dsa/io/IOController.scala 325:71]
   end
 // Register and memory initialization
 `ifdef RANDOMIZE_GARBAGE_ASSIGN
@@ -3392,9 +3401,9 @@ initial begin
   _RAND_11 = {1{`RANDOM}};
   io_out_cg_0_REG = _RAND_11[31:0];
   _RAND_12 = {1{`RANDOM}};
-  io_sram_en_REG = _RAND_12[0:0];
+  sramEnReg = _RAND_12[0:0];
   _RAND_13 = {1{`RANDOM}};
-  io_sram_we_REG = _RAND_13[3:0];
+  sramWeReg = _RAND_13[3:0];
   _RAND_14 = {1{`RANDOM}};
   io_out_fg_0_REG = _RAND_14[0:0];
 `endif // RANDOMIZE_REG_INIT
@@ -57894,265 +57903,265 @@ endmodule
 module LinGoWithAXI(
   input          clock,
   input          reset,
-  output         io_s_axi_aw_ready, // @[src/main/scala/LinGoWithAXI.scala 64:14]
-  input          io_s_axi_aw_valid, // @[src/main/scala/LinGoWithAXI.scala 64:14]
-  input  [7:0]   io_s_axi_aw_bits_id, // @[src/main/scala/LinGoWithAXI.scala 64:14]
-  input  [15:0]  io_s_axi_aw_bits_addr, // @[src/main/scala/LinGoWithAXI.scala 64:14]
-  input  [7:0]   io_s_axi_aw_bits_len, // @[src/main/scala/LinGoWithAXI.scala 64:14]
-  input  [2:0]   io_s_axi_aw_bits_size, // @[src/main/scala/LinGoWithAXI.scala 64:14]
-  input  [1:0]   io_s_axi_aw_bits_burst, // @[src/main/scala/LinGoWithAXI.scala 64:14]
-  input          io_s_axi_aw_bits_lock, // @[src/main/scala/LinGoWithAXI.scala 64:14]
-  input  [3:0]   io_s_axi_aw_bits_cache, // @[src/main/scala/LinGoWithAXI.scala 64:14]
-  input  [2:0]   io_s_axi_aw_bits_prot, // @[src/main/scala/LinGoWithAXI.scala 64:14]
-  input  [3:0]   io_s_axi_aw_bits_qos, // @[src/main/scala/LinGoWithAXI.scala 64:14]
-  output         io_s_axi_w_ready, // @[src/main/scala/LinGoWithAXI.scala 64:14]
-  input          io_s_axi_w_valid, // @[src/main/scala/LinGoWithAXI.scala 64:14]
-  input  [127:0] io_s_axi_w_bits_data, // @[src/main/scala/LinGoWithAXI.scala 64:14]
-  input  [15:0]  io_s_axi_w_bits_strb, // @[src/main/scala/LinGoWithAXI.scala 64:14]
-  input          io_s_axi_w_bits_last, // @[src/main/scala/LinGoWithAXI.scala 64:14]
-  input          io_s_axi_b_ready, // @[src/main/scala/LinGoWithAXI.scala 64:14]
-  output         io_s_axi_b_valid, // @[src/main/scala/LinGoWithAXI.scala 64:14]
-  output [7:0]   io_s_axi_b_bits_id, // @[src/main/scala/LinGoWithAXI.scala 64:14]
-  output [1:0]   io_s_axi_b_bits_resp, // @[src/main/scala/LinGoWithAXI.scala 64:14]
-  output         io_s_axi_ar_ready, // @[src/main/scala/LinGoWithAXI.scala 64:14]
-  input          io_s_axi_ar_valid, // @[src/main/scala/LinGoWithAXI.scala 64:14]
-  input  [7:0]   io_s_axi_ar_bits_id, // @[src/main/scala/LinGoWithAXI.scala 64:14]
-  input  [15:0]  io_s_axi_ar_bits_addr, // @[src/main/scala/LinGoWithAXI.scala 64:14]
-  input  [7:0]   io_s_axi_ar_bits_len, // @[src/main/scala/LinGoWithAXI.scala 64:14]
-  input  [2:0]   io_s_axi_ar_bits_size, // @[src/main/scala/LinGoWithAXI.scala 64:14]
-  input  [1:0]   io_s_axi_ar_bits_burst, // @[src/main/scala/LinGoWithAXI.scala 64:14]
-  input          io_s_axi_ar_bits_lock, // @[src/main/scala/LinGoWithAXI.scala 64:14]
-  input  [3:0]   io_s_axi_ar_bits_cache, // @[src/main/scala/LinGoWithAXI.scala 64:14]
-  input  [2:0]   io_s_axi_ar_bits_prot, // @[src/main/scala/LinGoWithAXI.scala 64:14]
-  input  [3:0]   io_s_axi_ar_bits_qos, // @[src/main/scala/LinGoWithAXI.scala 64:14]
-  input          io_s_axi_r_ready, // @[src/main/scala/LinGoWithAXI.scala 64:14]
-  output         io_s_axi_r_valid, // @[src/main/scala/LinGoWithAXI.scala 64:14]
-  output [7:0]   io_s_axi_r_bits_id, // @[src/main/scala/LinGoWithAXI.scala 64:14]
-  output [127:0] io_s_axi_r_bits_data, // @[src/main/scala/LinGoWithAXI.scala 64:14]
-  output [1:0]   io_s_axi_r_bits_resp, // @[src/main/scala/LinGoWithAXI.scala 64:14]
-  output         io_s_axi_r_bits_last, // @[src/main/scala/LinGoWithAXI.scala 64:14]
-  output         io_s_axilite_aw_ready, // @[src/main/scala/LinGoWithAXI.scala 64:14]
-  input          io_s_axilite_aw_valid, // @[src/main/scala/LinGoWithAXI.scala 64:14]
-  input  [6:0]   io_s_axilite_aw_bits_addr, // @[src/main/scala/LinGoWithAXI.scala 64:14]
-  input  [2:0]   io_s_axilite_aw_bits_prot, // @[src/main/scala/LinGoWithAXI.scala 64:14]
-  output         io_s_axilite_w_ready, // @[src/main/scala/LinGoWithAXI.scala 64:14]
-  input          io_s_axilite_w_valid, // @[src/main/scala/LinGoWithAXI.scala 64:14]
-  input  [31:0]  io_s_axilite_w_bits_data, // @[src/main/scala/LinGoWithAXI.scala 64:14]
-  input  [3:0]   io_s_axilite_w_bits_strb, // @[src/main/scala/LinGoWithAXI.scala 64:14]
-  input          io_s_axilite_b_ready, // @[src/main/scala/LinGoWithAXI.scala 64:14]
-  output         io_s_axilite_b_valid, // @[src/main/scala/LinGoWithAXI.scala 64:14]
-  output [1:0]   io_s_axilite_b_bits_resp, // @[src/main/scala/LinGoWithAXI.scala 64:14]
-  output         io_s_axilite_ar_ready, // @[src/main/scala/LinGoWithAXI.scala 64:14]
-  input          io_s_axilite_ar_valid, // @[src/main/scala/LinGoWithAXI.scala 64:14]
-  input  [6:0]   io_s_axilite_ar_bits_addr, // @[src/main/scala/LinGoWithAXI.scala 64:14]
-  input  [2:0]   io_s_axilite_ar_bits_prot, // @[src/main/scala/LinGoWithAXI.scala 64:14]
-  input          io_s_axilite_r_ready, // @[src/main/scala/LinGoWithAXI.scala 64:14]
-  output         io_s_axilite_r_valid, // @[src/main/scala/LinGoWithAXI.scala 64:14]
-  output [31:0]  io_s_axilite_r_bits_data, // @[src/main/scala/LinGoWithAXI.scala 64:14]
-  output [1:0]   io_s_axilite_r_bits_resp // @[src/main/scala/LinGoWithAXI.scala 64:14]
+  output         io_s_axi_aw_ready, // @[src/main/scala/LinGoWithAXI.scala 65:14]
+  input          io_s_axi_aw_valid, // @[src/main/scala/LinGoWithAXI.scala 65:14]
+  input  [7:0]   io_s_axi_aw_bits_id, // @[src/main/scala/LinGoWithAXI.scala 65:14]
+  input  [15:0]  io_s_axi_aw_bits_addr, // @[src/main/scala/LinGoWithAXI.scala 65:14]
+  input  [7:0]   io_s_axi_aw_bits_len, // @[src/main/scala/LinGoWithAXI.scala 65:14]
+  input  [2:0]   io_s_axi_aw_bits_size, // @[src/main/scala/LinGoWithAXI.scala 65:14]
+  input  [1:0]   io_s_axi_aw_bits_burst, // @[src/main/scala/LinGoWithAXI.scala 65:14]
+  input          io_s_axi_aw_bits_lock, // @[src/main/scala/LinGoWithAXI.scala 65:14]
+  input  [3:0]   io_s_axi_aw_bits_cache, // @[src/main/scala/LinGoWithAXI.scala 65:14]
+  input  [2:0]   io_s_axi_aw_bits_prot, // @[src/main/scala/LinGoWithAXI.scala 65:14]
+  input  [3:0]   io_s_axi_aw_bits_qos, // @[src/main/scala/LinGoWithAXI.scala 65:14]
+  output         io_s_axi_w_ready, // @[src/main/scala/LinGoWithAXI.scala 65:14]
+  input          io_s_axi_w_valid, // @[src/main/scala/LinGoWithAXI.scala 65:14]
+  input  [127:0] io_s_axi_w_bits_data, // @[src/main/scala/LinGoWithAXI.scala 65:14]
+  input  [15:0]  io_s_axi_w_bits_strb, // @[src/main/scala/LinGoWithAXI.scala 65:14]
+  input          io_s_axi_w_bits_last, // @[src/main/scala/LinGoWithAXI.scala 65:14]
+  input          io_s_axi_b_ready, // @[src/main/scala/LinGoWithAXI.scala 65:14]
+  output         io_s_axi_b_valid, // @[src/main/scala/LinGoWithAXI.scala 65:14]
+  output [7:0]   io_s_axi_b_bits_id, // @[src/main/scala/LinGoWithAXI.scala 65:14]
+  output [1:0]   io_s_axi_b_bits_resp, // @[src/main/scala/LinGoWithAXI.scala 65:14]
+  output         io_s_axi_ar_ready, // @[src/main/scala/LinGoWithAXI.scala 65:14]
+  input          io_s_axi_ar_valid, // @[src/main/scala/LinGoWithAXI.scala 65:14]
+  input  [7:0]   io_s_axi_ar_bits_id, // @[src/main/scala/LinGoWithAXI.scala 65:14]
+  input  [15:0]  io_s_axi_ar_bits_addr, // @[src/main/scala/LinGoWithAXI.scala 65:14]
+  input  [7:0]   io_s_axi_ar_bits_len, // @[src/main/scala/LinGoWithAXI.scala 65:14]
+  input  [2:0]   io_s_axi_ar_bits_size, // @[src/main/scala/LinGoWithAXI.scala 65:14]
+  input  [1:0]   io_s_axi_ar_bits_burst, // @[src/main/scala/LinGoWithAXI.scala 65:14]
+  input          io_s_axi_ar_bits_lock, // @[src/main/scala/LinGoWithAXI.scala 65:14]
+  input  [3:0]   io_s_axi_ar_bits_cache, // @[src/main/scala/LinGoWithAXI.scala 65:14]
+  input  [2:0]   io_s_axi_ar_bits_prot, // @[src/main/scala/LinGoWithAXI.scala 65:14]
+  input  [3:0]   io_s_axi_ar_bits_qos, // @[src/main/scala/LinGoWithAXI.scala 65:14]
+  input          io_s_axi_r_ready, // @[src/main/scala/LinGoWithAXI.scala 65:14]
+  output         io_s_axi_r_valid, // @[src/main/scala/LinGoWithAXI.scala 65:14]
+  output [7:0]   io_s_axi_r_bits_id, // @[src/main/scala/LinGoWithAXI.scala 65:14]
+  output [127:0] io_s_axi_r_bits_data, // @[src/main/scala/LinGoWithAXI.scala 65:14]
+  output [1:0]   io_s_axi_r_bits_resp, // @[src/main/scala/LinGoWithAXI.scala 65:14]
+  output         io_s_axi_r_bits_last, // @[src/main/scala/LinGoWithAXI.scala 65:14]
+  output         io_s_axilite_aw_ready, // @[src/main/scala/LinGoWithAXI.scala 65:14]
+  input          io_s_axilite_aw_valid, // @[src/main/scala/LinGoWithAXI.scala 65:14]
+  input  [6:0]   io_s_axilite_aw_bits_addr, // @[src/main/scala/LinGoWithAXI.scala 65:14]
+  input  [2:0]   io_s_axilite_aw_bits_prot, // @[src/main/scala/LinGoWithAXI.scala 65:14]
+  output         io_s_axilite_w_ready, // @[src/main/scala/LinGoWithAXI.scala 65:14]
+  input          io_s_axilite_w_valid, // @[src/main/scala/LinGoWithAXI.scala 65:14]
+  input  [31:0]  io_s_axilite_w_bits_data, // @[src/main/scala/LinGoWithAXI.scala 65:14]
+  input  [3:0]   io_s_axilite_w_bits_strb, // @[src/main/scala/LinGoWithAXI.scala 65:14]
+  input          io_s_axilite_b_ready, // @[src/main/scala/LinGoWithAXI.scala 65:14]
+  output         io_s_axilite_b_valid, // @[src/main/scala/LinGoWithAXI.scala 65:14]
+  output [1:0]   io_s_axilite_b_bits_resp, // @[src/main/scala/LinGoWithAXI.scala 65:14]
+  output         io_s_axilite_ar_ready, // @[src/main/scala/LinGoWithAXI.scala 65:14]
+  input          io_s_axilite_ar_valid, // @[src/main/scala/LinGoWithAXI.scala 65:14]
+  input  [6:0]   io_s_axilite_ar_bits_addr, // @[src/main/scala/LinGoWithAXI.scala 65:14]
+  input  [2:0]   io_s_axilite_ar_bits_prot, // @[src/main/scala/LinGoWithAXI.scala 65:14]
+  input          io_s_axilite_r_ready, // @[src/main/scala/LinGoWithAXI.scala 65:14]
+  output         io_s_axilite_r_valid, // @[src/main/scala/LinGoWithAXI.scala 65:14]
+  output [31:0]  io_s_axilite_r_bits_data, // @[src/main/scala/LinGoWithAXI.scala 65:14]
+  output [1:0]   io_s_axilite_r_bits_resp // @[src/main/scala/LinGoWithAXI.scala 65:14]
 );
-  wire  spad_clock; // @[src/main/scala/LinGoWithAXI.scala 69:20]
-  wire  spad_io_aclk; // @[src/main/scala/LinGoWithAXI.scala 69:20]
-  wire  spad_io_aresetn; // @[src/main/scala/LinGoWithAXI.scala 69:20]
-  wire  spad_io_s_axi_aw_ready; // @[src/main/scala/LinGoWithAXI.scala 69:20]
-  wire  spad_io_s_axi_aw_valid; // @[src/main/scala/LinGoWithAXI.scala 69:20]
-  wire [7:0] spad_io_s_axi_aw_bits_id; // @[src/main/scala/LinGoWithAXI.scala 69:20]
-  wire [15:0] spad_io_s_axi_aw_bits_addr; // @[src/main/scala/LinGoWithAXI.scala 69:20]
-  wire [7:0] spad_io_s_axi_aw_bits_len; // @[src/main/scala/LinGoWithAXI.scala 69:20]
-  wire [2:0] spad_io_s_axi_aw_bits_size; // @[src/main/scala/LinGoWithAXI.scala 69:20]
-  wire [1:0] spad_io_s_axi_aw_bits_burst; // @[src/main/scala/LinGoWithAXI.scala 69:20]
-  wire  spad_io_s_axi_w_ready; // @[src/main/scala/LinGoWithAXI.scala 69:20]
-  wire  spad_io_s_axi_w_valid; // @[src/main/scala/LinGoWithAXI.scala 69:20]
-  wire [127:0] spad_io_s_axi_w_bits_data; // @[src/main/scala/LinGoWithAXI.scala 69:20]
-  wire [15:0] spad_io_s_axi_w_bits_strb; // @[src/main/scala/LinGoWithAXI.scala 69:20]
-  wire  spad_io_s_axi_w_bits_last; // @[src/main/scala/LinGoWithAXI.scala 69:20]
-  wire  spad_io_s_axi_b_ready; // @[src/main/scala/LinGoWithAXI.scala 69:20]
-  wire  spad_io_s_axi_b_valid; // @[src/main/scala/LinGoWithAXI.scala 69:20]
-  wire [7:0] spad_io_s_axi_b_bits_id; // @[src/main/scala/LinGoWithAXI.scala 69:20]
-  wire  spad_io_s_axi_ar_ready; // @[src/main/scala/LinGoWithAXI.scala 69:20]
-  wire  spad_io_s_axi_ar_valid; // @[src/main/scala/LinGoWithAXI.scala 69:20]
-  wire [7:0] spad_io_s_axi_ar_bits_id; // @[src/main/scala/LinGoWithAXI.scala 69:20]
-  wire [15:0] spad_io_s_axi_ar_bits_addr; // @[src/main/scala/LinGoWithAXI.scala 69:20]
-  wire [7:0] spad_io_s_axi_ar_bits_len; // @[src/main/scala/LinGoWithAXI.scala 69:20]
-  wire [2:0] spad_io_s_axi_ar_bits_size; // @[src/main/scala/LinGoWithAXI.scala 69:20]
-  wire [1:0] spad_io_s_axi_ar_bits_burst; // @[src/main/scala/LinGoWithAXI.scala 69:20]
-  wire  spad_io_s_axi_r_ready; // @[src/main/scala/LinGoWithAXI.scala 69:20]
-  wire  spad_io_s_axi_r_valid; // @[src/main/scala/LinGoWithAXI.scala 69:20]
-  wire [7:0] spad_io_s_axi_r_bits_id; // @[src/main/scala/LinGoWithAXI.scala 69:20]
-  wire [127:0] spad_io_s_axi_r_bits_data; // @[src/main/scala/LinGoWithAXI.scala 69:20]
-  wire  spad_io_s_axi_r_bits_last; // @[src/main/scala/LinGoWithAXI.scala 69:20]
-  wire  spad_io_srams_0_en; // @[src/main/scala/LinGoWithAXI.scala 69:20]
-  wire [3:0] spad_io_srams_0_we; // @[src/main/scala/LinGoWithAXI.scala 69:20]
-  wire [9:0] spad_io_srams_0_addr; // @[src/main/scala/LinGoWithAXI.scala 69:20]
-  wire [31:0] spad_io_srams_0_din; // @[src/main/scala/LinGoWithAXI.scala 69:20]
-  wire [31:0] spad_io_srams_0_dout; // @[src/main/scala/LinGoWithAXI.scala 69:20]
-  wire  spad_io_srams_1_en; // @[src/main/scala/LinGoWithAXI.scala 69:20]
-  wire [3:0] spad_io_srams_1_we; // @[src/main/scala/LinGoWithAXI.scala 69:20]
-  wire [9:0] spad_io_srams_1_addr; // @[src/main/scala/LinGoWithAXI.scala 69:20]
-  wire [31:0] spad_io_srams_1_din; // @[src/main/scala/LinGoWithAXI.scala 69:20]
-  wire [31:0] spad_io_srams_1_dout; // @[src/main/scala/LinGoWithAXI.scala 69:20]
-  wire  spad_io_srams_2_en; // @[src/main/scala/LinGoWithAXI.scala 69:20]
-  wire [3:0] spad_io_srams_2_we; // @[src/main/scala/LinGoWithAXI.scala 69:20]
-  wire [9:0] spad_io_srams_2_addr; // @[src/main/scala/LinGoWithAXI.scala 69:20]
-  wire [31:0] spad_io_srams_2_din; // @[src/main/scala/LinGoWithAXI.scala 69:20]
-  wire [31:0] spad_io_srams_2_dout; // @[src/main/scala/LinGoWithAXI.scala 69:20]
-  wire  spad_io_srams_3_en; // @[src/main/scala/LinGoWithAXI.scala 69:20]
-  wire [3:0] spad_io_srams_3_we; // @[src/main/scala/LinGoWithAXI.scala 69:20]
-  wire [9:0] spad_io_srams_3_addr; // @[src/main/scala/LinGoWithAXI.scala 69:20]
-  wire [31:0] spad_io_srams_3_din; // @[src/main/scala/LinGoWithAXI.scala 69:20]
-  wire [31:0] spad_io_srams_3_dout; // @[src/main/scala/LinGoWithAXI.scala 69:20]
-  wire  spad_io_srams_4_en; // @[src/main/scala/LinGoWithAXI.scala 69:20]
-  wire [3:0] spad_io_srams_4_we; // @[src/main/scala/LinGoWithAXI.scala 69:20]
-  wire [9:0] spad_io_srams_4_addr; // @[src/main/scala/LinGoWithAXI.scala 69:20]
-  wire [31:0] spad_io_srams_4_din; // @[src/main/scala/LinGoWithAXI.scala 69:20]
-  wire [31:0] spad_io_srams_4_dout; // @[src/main/scala/LinGoWithAXI.scala 69:20]
-  wire  spad_io_srams_5_en; // @[src/main/scala/LinGoWithAXI.scala 69:20]
-  wire [3:0] spad_io_srams_5_we; // @[src/main/scala/LinGoWithAXI.scala 69:20]
-  wire [9:0] spad_io_srams_5_addr; // @[src/main/scala/LinGoWithAXI.scala 69:20]
-  wire [31:0] spad_io_srams_5_din; // @[src/main/scala/LinGoWithAXI.scala 69:20]
-  wire [31:0] spad_io_srams_5_dout; // @[src/main/scala/LinGoWithAXI.scala 69:20]
-  wire  spad_io_srams_6_en; // @[src/main/scala/LinGoWithAXI.scala 69:20]
-  wire [3:0] spad_io_srams_6_we; // @[src/main/scala/LinGoWithAXI.scala 69:20]
-  wire [9:0] spad_io_srams_6_addr; // @[src/main/scala/LinGoWithAXI.scala 69:20]
-  wire [31:0] spad_io_srams_6_din; // @[src/main/scala/LinGoWithAXI.scala 69:20]
-  wire [31:0] spad_io_srams_6_dout; // @[src/main/scala/LinGoWithAXI.scala 69:20]
-  wire  spad_io_srams_7_en; // @[src/main/scala/LinGoWithAXI.scala 69:20]
-  wire [3:0] spad_io_srams_7_we; // @[src/main/scala/LinGoWithAXI.scala 69:20]
-  wire [9:0] spad_io_srams_7_addr; // @[src/main/scala/LinGoWithAXI.scala 69:20]
-  wire [31:0] spad_io_srams_7_din; // @[src/main/scala/LinGoWithAXI.scala 69:20]
-  wire [31:0] spad_io_srams_7_dout; // @[src/main/scala/LinGoWithAXI.scala 69:20]
-  wire  spad_io_srams_8_en; // @[src/main/scala/LinGoWithAXI.scala 69:20]
-  wire [3:0] spad_io_srams_8_we; // @[src/main/scala/LinGoWithAXI.scala 69:20]
-  wire [9:0] spad_io_srams_8_addr; // @[src/main/scala/LinGoWithAXI.scala 69:20]
-  wire [31:0] spad_io_srams_8_din; // @[src/main/scala/LinGoWithAXI.scala 69:20]
-  wire [31:0] spad_io_srams_8_dout; // @[src/main/scala/LinGoWithAXI.scala 69:20]
-  wire  spad_io_srams_9_en; // @[src/main/scala/LinGoWithAXI.scala 69:20]
-  wire [3:0] spad_io_srams_9_we; // @[src/main/scala/LinGoWithAXI.scala 69:20]
-  wire [9:0] spad_io_srams_9_addr; // @[src/main/scala/LinGoWithAXI.scala 69:20]
-  wire [31:0] spad_io_srams_9_din; // @[src/main/scala/LinGoWithAXI.scala 69:20]
-  wire [31:0] spad_io_srams_9_dout; // @[src/main/scala/LinGoWithAXI.scala 69:20]
-  wire  spad_io_srams_10_en; // @[src/main/scala/LinGoWithAXI.scala 69:20]
-  wire [3:0] spad_io_srams_10_we; // @[src/main/scala/LinGoWithAXI.scala 69:20]
-  wire [9:0] spad_io_srams_10_addr; // @[src/main/scala/LinGoWithAXI.scala 69:20]
-  wire [31:0] spad_io_srams_10_din; // @[src/main/scala/LinGoWithAXI.scala 69:20]
-  wire [31:0] spad_io_srams_10_dout; // @[src/main/scala/LinGoWithAXI.scala 69:20]
-  wire  spad_io_srams_11_en; // @[src/main/scala/LinGoWithAXI.scala 69:20]
-  wire [3:0] spad_io_srams_11_we; // @[src/main/scala/LinGoWithAXI.scala 69:20]
-  wire [9:0] spad_io_srams_11_addr; // @[src/main/scala/LinGoWithAXI.scala 69:20]
-  wire [31:0] spad_io_srams_11_din; // @[src/main/scala/LinGoWithAXI.scala 69:20]
-  wire [31:0] spad_io_srams_11_dout; // @[src/main/scala/LinGoWithAXI.scala 69:20]
-  wire  spad_io_sram_last_en; // @[src/main/scala/LinGoWithAXI.scala 69:20]
-  wire [7:0] spad_io_sram_last_addr; // @[src/main/scala/LinGoWithAXI.scala 69:20]
-  wire [127:0] spad_io_sram_last_dout; // @[src/main/scala/LinGoWithAXI.scala 69:20]
-  wire  spad_io_bcast_en; // @[src/main/scala/LinGoWithAXI.scala 69:20]
-  wire [11:0] spad_io_bcast_bank_mask; // @[src/main/scala/LinGoWithAXI.scala 69:20]
-  wire [7:0] spad_io_bcast_base_addr_0; // @[src/main/scala/LinGoWithAXI.scala 69:20]
-  wire [7:0] spad_io_bcast_base_addr_1; // @[src/main/scala/LinGoWithAXI.scala 69:20]
-  wire [7:0] spad_io_bcast_base_addr_2; // @[src/main/scala/LinGoWithAXI.scala 69:20]
-  wire [7:0] spad_io_bcast_base_addr_3; // @[src/main/scala/LinGoWithAXI.scala 69:20]
-  wire [7:0] spad_io_bcast_base_addr_4; // @[src/main/scala/LinGoWithAXI.scala 69:20]
-  wire [7:0] spad_io_bcast_base_addr_5; // @[src/main/scala/LinGoWithAXI.scala 69:20]
-  wire [7:0] spad_io_bcast_base_addr_6; // @[src/main/scala/LinGoWithAXI.scala 69:20]
-  wire [7:0] spad_io_bcast_base_addr_7; // @[src/main/scala/LinGoWithAXI.scala 69:20]
-  wire [7:0] spad_io_bcast_base_addr_8; // @[src/main/scala/LinGoWithAXI.scala 69:20]
-  wire [7:0] spad_io_bcast_base_addr_9; // @[src/main/scala/LinGoWithAXI.scala 69:20]
-  wire [7:0] spad_io_bcast_base_addr_10; // @[src/main/scala/LinGoWithAXI.scala 69:20]
-  wire [7:0] spad_io_bcast_base_addr_11; // @[src/main/scala/LinGoWithAXI.scala 69:20]
-  wire  controller_clock; // @[src/main/scala/LinGoWithAXI.scala 78:26]
-  wire  controller_reset; // @[src/main/scala/LinGoWithAXI.scala 78:26]
-  wire  controller_io_s_axilite_aw_ready; // @[src/main/scala/LinGoWithAXI.scala 78:26]
-  wire  controller_io_s_axilite_aw_valid; // @[src/main/scala/LinGoWithAXI.scala 78:26]
-  wire [6:0] controller_io_s_axilite_aw_bits_addr; // @[src/main/scala/LinGoWithAXI.scala 78:26]
-  wire  controller_io_s_axilite_w_ready; // @[src/main/scala/LinGoWithAXI.scala 78:26]
-  wire  controller_io_s_axilite_w_valid; // @[src/main/scala/LinGoWithAXI.scala 78:26]
-  wire [31:0] controller_io_s_axilite_w_bits_data; // @[src/main/scala/LinGoWithAXI.scala 78:26]
-  wire [3:0] controller_io_s_axilite_w_bits_strb; // @[src/main/scala/LinGoWithAXI.scala 78:26]
-  wire  controller_io_s_axilite_b_ready; // @[src/main/scala/LinGoWithAXI.scala 78:26]
-  wire  controller_io_s_axilite_b_valid; // @[src/main/scala/LinGoWithAXI.scala 78:26]
-  wire  controller_io_s_axilite_ar_ready; // @[src/main/scala/LinGoWithAXI.scala 78:26]
-  wire  controller_io_s_axilite_ar_valid; // @[src/main/scala/LinGoWithAXI.scala 78:26]
-  wire [6:0] controller_io_s_axilite_ar_bits_addr; // @[src/main/scala/LinGoWithAXI.scala 78:26]
-  wire  controller_io_s_axilite_r_ready; // @[src/main/scala/LinGoWithAXI.scala 78:26]
-  wire  controller_io_s_axilite_r_valid; // @[src/main/scala/LinGoWithAXI.scala 78:26]
-  wire [31:0] controller_io_s_axilite_r_bits_data; // @[src/main/scala/LinGoWithAXI.scala 78:26]
-  wire  controller_io_srams_iob_0_en; // @[src/main/scala/LinGoWithAXI.scala 78:26]
-  wire [3:0] controller_io_srams_iob_0_we; // @[src/main/scala/LinGoWithAXI.scala 78:26]
-  wire [9:0] controller_io_srams_iob_0_addr; // @[src/main/scala/LinGoWithAXI.scala 78:26]
-  wire [31:0] controller_io_srams_iob_0_din; // @[src/main/scala/LinGoWithAXI.scala 78:26]
-  wire [31:0] controller_io_srams_iob_0_dout; // @[src/main/scala/LinGoWithAXI.scala 78:26]
-  wire  controller_io_srams_iob_1_en; // @[src/main/scala/LinGoWithAXI.scala 78:26]
-  wire [3:0] controller_io_srams_iob_1_we; // @[src/main/scala/LinGoWithAXI.scala 78:26]
-  wire [9:0] controller_io_srams_iob_1_addr; // @[src/main/scala/LinGoWithAXI.scala 78:26]
-  wire [31:0] controller_io_srams_iob_1_din; // @[src/main/scala/LinGoWithAXI.scala 78:26]
-  wire [31:0] controller_io_srams_iob_1_dout; // @[src/main/scala/LinGoWithAXI.scala 78:26]
-  wire  controller_io_srams_iob_2_en; // @[src/main/scala/LinGoWithAXI.scala 78:26]
-  wire [3:0] controller_io_srams_iob_2_we; // @[src/main/scala/LinGoWithAXI.scala 78:26]
-  wire [9:0] controller_io_srams_iob_2_addr; // @[src/main/scala/LinGoWithAXI.scala 78:26]
-  wire [31:0] controller_io_srams_iob_2_din; // @[src/main/scala/LinGoWithAXI.scala 78:26]
-  wire [31:0] controller_io_srams_iob_2_dout; // @[src/main/scala/LinGoWithAXI.scala 78:26]
-  wire  controller_io_srams_iob_3_en; // @[src/main/scala/LinGoWithAXI.scala 78:26]
-  wire [3:0] controller_io_srams_iob_3_we; // @[src/main/scala/LinGoWithAXI.scala 78:26]
-  wire [9:0] controller_io_srams_iob_3_addr; // @[src/main/scala/LinGoWithAXI.scala 78:26]
-  wire [31:0] controller_io_srams_iob_3_din; // @[src/main/scala/LinGoWithAXI.scala 78:26]
-  wire [31:0] controller_io_srams_iob_3_dout; // @[src/main/scala/LinGoWithAXI.scala 78:26]
-  wire  controller_io_srams_iob_4_en; // @[src/main/scala/LinGoWithAXI.scala 78:26]
-  wire [3:0] controller_io_srams_iob_4_we; // @[src/main/scala/LinGoWithAXI.scala 78:26]
-  wire [9:0] controller_io_srams_iob_4_addr; // @[src/main/scala/LinGoWithAXI.scala 78:26]
-  wire [31:0] controller_io_srams_iob_4_din; // @[src/main/scala/LinGoWithAXI.scala 78:26]
-  wire [31:0] controller_io_srams_iob_4_dout; // @[src/main/scala/LinGoWithAXI.scala 78:26]
-  wire  controller_io_srams_iob_5_en; // @[src/main/scala/LinGoWithAXI.scala 78:26]
-  wire [3:0] controller_io_srams_iob_5_we; // @[src/main/scala/LinGoWithAXI.scala 78:26]
-  wire [9:0] controller_io_srams_iob_5_addr; // @[src/main/scala/LinGoWithAXI.scala 78:26]
-  wire [31:0] controller_io_srams_iob_5_din; // @[src/main/scala/LinGoWithAXI.scala 78:26]
-  wire [31:0] controller_io_srams_iob_5_dout; // @[src/main/scala/LinGoWithAXI.scala 78:26]
-  wire  controller_io_srams_iob_6_en; // @[src/main/scala/LinGoWithAXI.scala 78:26]
-  wire [3:0] controller_io_srams_iob_6_we; // @[src/main/scala/LinGoWithAXI.scala 78:26]
-  wire [9:0] controller_io_srams_iob_6_addr; // @[src/main/scala/LinGoWithAXI.scala 78:26]
-  wire [31:0] controller_io_srams_iob_6_din; // @[src/main/scala/LinGoWithAXI.scala 78:26]
-  wire [31:0] controller_io_srams_iob_6_dout; // @[src/main/scala/LinGoWithAXI.scala 78:26]
-  wire  controller_io_srams_iob_7_en; // @[src/main/scala/LinGoWithAXI.scala 78:26]
-  wire [3:0] controller_io_srams_iob_7_we; // @[src/main/scala/LinGoWithAXI.scala 78:26]
-  wire [9:0] controller_io_srams_iob_7_addr; // @[src/main/scala/LinGoWithAXI.scala 78:26]
-  wire [31:0] controller_io_srams_iob_7_din; // @[src/main/scala/LinGoWithAXI.scala 78:26]
-  wire [31:0] controller_io_srams_iob_7_dout; // @[src/main/scala/LinGoWithAXI.scala 78:26]
-  wire  controller_io_srams_iob_8_en; // @[src/main/scala/LinGoWithAXI.scala 78:26]
-  wire [3:0] controller_io_srams_iob_8_we; // @[src/main/scala/LinGoWithAXI.scala 78:26]
-  wire [9:0] controller_io_srams_iob_8_addr; // @[src/main/scala/LinGoWithAXI.scala 78:26]
-  wire [31:0] controller_io_srams_iob_8_din; // @[src/main/scala/LinGoWithAXI.scala 78:26]
-  wire [31:0] controller_io_srams_iob_8_dout; // @[src/main/scala/LinGoWithAXI.scala 78:26]
-  wire  controller_io_srams_iob_9_en; // @[src/main/scala/LinGoWithAXI.scala 78:26]
-  wire [3:0] controller_io_srams_iob_9_we; // @[src/main/scala/LinGoWithAXI.scala 78:26]
-  wire [9:0] controller_io_srams_iob_9_addr; // @[src/main/scala/LinGoWithAXI.scala 78:26]
-  wire [31:0] controller_io_srams_iob_9_din; // @[src/main/scala/LinGoWithAXI.scala 78:26]
-  wire [31:0] controller_io_srams_iob_9_dout; // @[src/main/scala/LinGoWithAXI.scala 78:26]
-  wire  controller_io_srams_iob_10_en; // @[src/main/scala/LinGoWithAXI.scala 78:26]
-  wire [3:0] controller_io_srams_iob_10_we; // @[src/main/scala/LinGoWithAXI.scala 78:26]
-  wire [9:0] controller_io_srams_iob_10_addr; // @[src/main/scala/LinGoWithAXI.scala 78:26]
-  wire [31:0] controller_io_srams_iob_10_din; // @[src/main/scala/LinGoWithAXI.scala 78:26]
-  wire [31:0] controller_io_srams_iob_10_dout; // @[src/main/scala/LinGoWithAXI.scala 78:26]
-  wire  controller_io_srams_iob_11_en; // @[src/main/scala/LinGoWithAXI.scala 78:26]
-  wire [3:0] controller_io_srams_iob_11_we; // @[src/main/scala/LinGoWithAXI.scala 78:26]
-  wire [9:0] controller_io_srams_iob_11_addr; // @[src/main/scala/LinGoWithAXI.scala 78:26]
-  wire [31:0] controller_io_srams_iob_11_din; // @[src/main/scala/LinGoWithAXI.scala 78:26]
-  wire [31:0] controller_io_srams_iob_11_dout; // @[src/main/scala/LinGoWithAXI.scala 78:26]
-  wire  controller_io_sram_cfg_en; // @[src/main/scala/LinGoWithAXI.scala 78:26]
-  wire [7:0] controller_io_sram_cfg_addr; // @[src/main/scala/LinGoWithAXI.scala 78:26]
-  wire [127:0] controller_io_sram_cfg_dout; // @[src/main/scala/LinGoWithAXI.scala 78:26]
-  wire  controller_io_bcast_en; // @[src/main/scala/LinGoWithAXI.scala 78:26]
-  wire [11:0] controller_io_bcast_bank_mask; // @[src/main/scala/LinGoWithAXI.scala 78:26]
-  wire [7:0] controller_io_bcast_base_addr_0; // @[src/main/scala/LinGoWithAXI.scala 78:26]
-  wire [7:0] controller_io_bcast_base_addr_1; // @[src/main/scala/LinGoWithAXI.scala 78:26]
-  wire [7:0] controller_io_bcast_base_addr_2; // @[src/main/scala/LinGoWithAXI.scala 78:26]
-  wire [7:0] controller_io_bcast_base_addr_3; // @[src/main/scala/LinGoWithAXI.scala 78:26]
-  wire [7:0] controller_io_bcast_base_addr_4; // @[src/main/scala/LinGoWithAXI.scala 78:26]
-  wire [7:0] controller_io_bcast_base_addr_5; // @[src/main/scala/LinGoWithAXI.scala 78:26]
-  wire [7:0] controller_io_bcast_base_addr_6; // @[src/main/scala/LinGoWithAXI.scala 78:26]
-  wire [7:0] controller_io_bcast_base_addr_7; // @[src/main/scala/LinGoWithAXI.scala 78:26]
-  wire [7:0] controller_io_bcast_base_addr_8; // @[src/main/scala/LinGoWithAXI.scala 78:26]
-  wire [7:0] controller_io_bcast_base_addr_9; // @[src/main/scala/LinGoWithAXI.scala 78:26]
-  wire [7:0] controller_io_bcast_base_addr_10; // @[src/main/scala/LinGoWithAXI.scala 78:26]
-  wire [7:0] controller_io_bcast_base_addr_11; // @[src/main/scala/LinGoWithAXI.scala 78:26]
-  AXI4Scratchpad spad ( // @[src/main/scala/LinGoWithAXI.scala 69:20]
+  wire  spad_clock; // @[src/main/scala/LinGoWithAXI.scala 70:20]
+  wire  spad_io_aclk; // @[src/main/scala/LinGoWithAXI.scala 70:20]
+  wire  spad_io_aresetn; // @[src/main/scala/LinGoWithAXI.scala 70:20]
+  wire  spad_io_s_axi_aw_ready; // @[src/main/scala/LinGoWithAXI.scala 70:20]
+  wire  spad_io_s_axi_aw_valid; // @[src/main/scala/LinGoWithAXI.scala 70:20]
+  wire [7:0] spad_io_s_axi_aw_bits_id; // @[src/main/scala/LinGoWithAXI.scala 70:20]
+  wire [15:0] spad_io_s_axi_aw_bits_addr; // @[src/main/scala/LinGoWithAXI.scala 70:20]
+  wire [7:0] spad_io_s_axi_aw_bits_len; // @[src/main/scala/LinGoWithAXI.scala 70:20]
+  wire [2:0] spad_io_s_axi_aw_bits_size; // @[src/main/scala/LinGoWithAXI.scala 70:20]
+  wire [1:0] spad_io_s_axi_aw_bits_burst; // @[src/main/scala/LinGoWithAXI.scala 70:20]
+  wire  spad_io_s_axi_w_ready; // @[src/main/scala/LinGoWithAXI.scala 70:20]
+  wire  spad_io_s_axi_w_valid; // @[src/main/scala/LinGoWithAXI.scala 70:20]
+  wire [127:0] spad_io_s_axi_w_bits_data; // @[src/main/scala/LinGoWithAXI.scala 70:20]
+  wire [15:0] spad_io_s_axi_w_bits_strb; // @[src/main/scala/LinGoWithAXI.scala 70:20]
+  wire  spad_io_s_axi_w_bits_last; // @[src/main/scala/LinGoWithAXI.scala 70:20]
+  wire  spad_io_s_axi_b_ready; // @[src/main/scala/LinGoWithAXI.scala 70:20]
+  wire  spad_io_s_axi_b_valid; // @[src/main/scala/LinGoWithAXI.scala 70:20]
+  wire [7:0] spad_io_s_axi_b_bits_id; // @[src/main/scala/LinGoWithAXI.scala 70:20]
+  wire  spad_io_s_axi_ar_ready; // @[src/main/scala/LinGoWithAXI.scala 70:20]
+  wire  spad_io_s_axi_ar_valid; // @[src/main/scala/LinGoWithAXI.scala 70:20]
+  wire [7:0] spad_io_s_axi_ar_bits_id; // @[src/main/scala/LinGoWithAXI.scala 70:20]
+  wire [15:0] spad_io_s_axi_ar_bits_addr; // @[src/main/scala/LinGoWithAXI.scala 70:20]
+  wire [7:0] spad_io_s_axi_ar_bits_len; // @[src/main/scala/LinGoWithAXI.scala 70:20]
+  wire [2:0] spad_io_s_axi_ar_bits_size; // @[src/main/scala/LinGoWithAXI.scala 70:20]
+  wire [1:0] spad_io_s_axi_ar_bits_burst; // @[src/main/scala/LinGoWithAXI.scala 70:20]
+  wire  spad_io_s_axi_r_ready; // @[src/main/scala/LinGoWithAXI.scala 70:20]
+  wire  spad_io_s_axi_r_valid; // @[src/main/scala/LinGoWithAXI.scala 70:20]
+  wire [7:0] spad_io_s_axi_r_bits_id; // @[src/main/scala/LinGoWithAXI.scala 70:20]
+  wire [127:0] spad_io_s_axi_r_bits_data; // @[src/main/scala/LinGoWithAXI.scala 70:20]
+  wire  spad_io_s_axi_r_bits_last; // @[src/main/scala/LinGoWithAXI.scala 70:20]
+  wire  spad_io_srams_0_en; // @[src/main/scala/LinGoWithAXI.scala 70:20]
+  wire [3:0] spad_io_srams_0_we; // @[src/main/scala/LinGoWithAXI.scala 70:20]
+  wire [9:0] spad_io_srams_0_addr; // @[src/main/scala/LinGoWithAXI.scala 70:20]
+  wire [31:0] spad_io_srams_0_din; // @[src/main/scala/LinGoWithAXI.scala 70:20]
+  wire [31:0] spad_io_srams_0_dout; // @[src/main/scala/LinGoWithAXI.scala 70:20]
+  wire  spad_io_srams_1_en; // @[src/main/scala/LinGoWithAXI.scala 70:20]
+  wire [3:0] spad_io_srams_1_we; // @[src/main/scala/LinGoWithAXI.scala 70:20]
+  wire [9:0] spad_io_srams_1_addr; // @[src/main/scala/LinGoWithAXI.scala 70:20]
+  wire [31:0] spad_io_srams_1_din; // @[src/main/scala/LinGoWithAXI.scala 70:20]
+  wire [31:0] spad_io_srams_1_dout; // @[src/main/scala/LinGoWithAXI.scala 70:20]
+  wire  spad_io_srams_2_en; // @[src/main/scala/LinGoWithAXI.scala 70:20]
+  wire [3:0] spad_io_srams_2_we; // @[src/main/scala/LinGoWithAXI.scala 70:20]
+  wire [9:0] spad_io_srams_2_addr; // @[src/main/scala/LinGoWithAXI.scala 70:20]
+  wire [31:0] spad_io_srams_2_din; // @[src/main/scala/LinGoWithAXI.scala 70:20]
+  wire [31:0] spad_io_srams_2_dout; // @[src/main/scala/LinGoWithAXI.scala 70:20]
+  wire  spad_io_srams_3_en; // @[src/main/scala/LinGoWithAXI.scala 70:20]
+  wire [3:0] spad_io_srams_3_we; // @[src/main/scala/LinGoWithAXI.scala 70:20]
+  wire [9:0] spad_io_srams_3_addr; // @[src/main/scala/LinGoWithAXI.scala 70:20]
+  wire [31:0] spad_io_srams_3_din; // @[src/main/scala/LinGoWithAXI.scala 70:20]
+  wire [31:0] spad_io_srams_3_dout; // @[src/main/scala/LinGoWithAXI.scala 70:20]
+  wire  spad_io_srams_4_en; // @[src/main/scala/LinGoWithAXI.scala 70:20]
+  wire [3:0] spad_io_srams_4_we; // @[src/main/scala/LinGoWithAXI.scala 70:20]
+  wire [9:0] spad_io_srams_4_addr; // @[src/main/scala/LinGoWithAXI.scala 70:20]
+  wire [31:0] spad_io_srams_4_din; // @[src/main/scala/LinGoWithAXI.scala 70:20]
+  wire [31:0] spad_io_srams_4_dout; // @[src/main/scala/LinGoWithAXI.scala 70:20]
+  wire  spad_io_srams_5_en; // @[src/main/scala/LinGoWithAXI.scala 70:20]
+  wire [3:0] spad_io_srams_5_we; // @[src/main/scala/LinGoWithAXI.scala 70:20]
+  wire [9:0] spad_io_srams_5_addr; // @[src/main/scala/LinGoWithAXI.scala 70:20]
+  wire [31:0] spad_io_srams_5_din; // @[src/main/scala/LinGoWithAXI.scala 70:20]
+  wire [31:0] spad_io_srams_5_dout; // @[src/main/scala/LinGoWithAXI.scala 70:20]
+  wire  spad_io_srams_6_en; // @[src/main/scala/LinGoWithAXI.scala 70:20]
+  wire [3:0] spad_io_srams_6_we; // @[src/main/scala/LinGoWithAXI.scala 70:20]
+  wire [9:0] spad_io_srams_6_addr; // @[src/main/scala/LinGoWithAXI.scala 70:20]
+  wire [31:0] spad_io_srams_6_din; // @[src/main/scala/LinGoWithAXI.scala 70:20]
+  wire [31:0] spad_io_srams_6_dout; // @[src/main/scala/LinGoWithAXI.scala 70:20]
+  wire  spad_io_srams_7_en; // @[src/main/scala/LinGoWithAXI.scala 70:20]
+  wire [3:0] spad_io_srams_7_we; // @[src/main/scala/LinGoWithAXI.scala 70:20]
+  wire [9:0] spad_io_srams_7_addr; // @[src/main/scala/LinGoWithAXI.scala 70:20]
+  wire [31:0] spad_io_srams_7_din; // @[src/main/scala/LinGoWithAXI.scala 70:20]
+  wire [31:0] spad_io_srams_7_dout; // @[src/main/scala/LinGoWithAXI.scala 70:20]
+  wire  spad_io_srams_8_en; // @[src/main/scala/LinGoWithAXI.scala 70:20]
+  wire [3:0] spad_io_srams_8_we; // @[src/main/scala/LinGoWithAXI.scala 70:20]
+  wire [9:0] spad_io_srams_8_addr; // @[src/main/scala/LinGoWithAXI.scala 70:20]
+  wire [31:0] spad_io_srams_8_din; // @[src/main/scala/LinGoWithAXI.scala 70:20]
+  wire [31:0] spad_io_srams_8_dout; // @[src/main/scala/LinGoWithAXI.scala 70:20]
+  wire  spad_io_srams_9_en; // @[src/main/scala/LinGoWithAXI.scala 70:20]
+  wire [3:0] spad_io_srams_9_we; // @[src/main/scala/LinGoWithAXI.scala 70:20]
+  wire [9:0] spad_io_srams_9_addr; // @[src/main/scala/LinGoWithAXI.scala 70:20]
+  wire [31:0] spad_io_srams_9_din; // @[src/main/scala/LinGoWithAXI.scala 70:20]
+  wire [31:0] spad_io_srams_9_dout; // @[src/main/scala/LinGoWithAXI.scala 70:20]
+  wire  spad_io_srams_10_en; // @[src/main/scala/LinGoWithAXI.scala 70:20]
+  wire [3:0] spad_io_srams_10_we; // @[src/main/scala/LinGoWithAXI.scala 70:20]
+  wire [9:0] spad_io_srams_10_addr; // @[src/main/scala/LinGoWithAXI.scala 70:20]
+  wire [31:0] spad_io_srams_10_din; // @[src/main/scala/LinGoWithAXI.scala 70:20]
+  wire [31:0] spad_io_srams_10_dout; // @[src/main/scala/LinGoWithAXI.scala 70:20]
+  wire  spad_io_srams_11_en; // @[src/main/scala/LinGoWithAXI.scala 70:20]
+  wire [3:0] spad_io_srams_11_we; // @[src/main/scala/LinGoWithAXI.scala 70:20]
+  wire [9:0] spad_io_srams_11_addr; // @[src/main/scala/LinGoWithAXI.scala 70:20]
+  wire [31:0] spad_io_srams_11_din; // @[src/main/scala/LinGoWithAXI.scala 70:20]
+  wire [31:0] spad_io_srams_11_dout; // @[src/main/scala/LinGoWithAXI.scala 70:20]
+  wire  spad_io_sram_last_en; // @[src/main/scala/LinGoWithAXI.scala 70:20]
+  wire [7:0] spad_io_sram_last_addr; // @[src/main/scala/LinGoWithAXI.scala 70:20]
+  wire [127:0] spad_io_sram_last_dout; // @[src/main/scala/LinGoWithAXI.scala 70:20]
+  wire  spad_io_bcast_en; // @[src/main/scala/LinGoWithAXI.scala 70:20]
+  wire [11:0] spad_io_bcast_bank_mask; // @[src/main/scala/LinGoWithAXI.scala 70:20]
+  wire [7:0] spad_io_bcast_base_addr_0; // @[src/main/scala/LinGoWithAXI.scala 70:20]
+  wire [7:0] spad_io_bcast_base_addr_1; // @[src/main/scala/LinGoWithAXI.scala 70:20]
+  wire [7:0] spad_io_bcast_base_addr_2; // @[src/main/scala/LinGoWithAXI.scala 70:20]
+  wire [7:0] spad_io_bcast_base_addr_3; // @[src/main/scala/LinGoWithAXI.scala 70:20]
+  wire [7:0] spad_io_bcast_base_addr_4; // @[src/main/scala/LinGoWithAXI.scala 70:20]
+  wire [7:0] spad_io_bcast_base_addr_5; // @[src/main/scala/LinGoWithAXI.scala 70:20]
+  wire [7:0] spad_io_bcast_base_addr_6; // @[src/main/scala/LinGoWithAXI.scala 70:20]
+  wire [7:0] spad_io_bcast_base_addr_7; // @[src/main/scala/LinGoWithAXI.scala 70:20]
+  wire [7:0] spad_io_bcast_base_addr_8; // @[src/main/scala/LinGoWithAXI.scala 70:20]
+  wire [7:0] spad_io_bcast_base_addr_9; // @[src/main/scala/LinGoWithAXI.scala 70:20]
+  wire [7:0] spad_io_bcast_base_addr_10; // @[src/main/scala/LinGoWithAXI.scala 70:20]
+  wire [7:0] spad_io_bcast_base_addr_11; // @[src/main/scala/LinGoWithAXI.scala 70:20]
+  wire  controller_clock; // @[src/main/scala/LinGoWithAXI.scala 79:26]
+  wire  controller_reset; // @[src/main/scala/LinGoWithAXI.scala 79:26]
+  wire  controller_io_s_axilite_aw_ready; // @[src/main/scala/LinGoWithAXI.scala 79:26]
+  wire  controller_io_s_axilite_aw_valid; // @[src/main/scala/LinGoWithAXI.scala 79:26]
+  wire [6:0] controller_io_s_axilite_aw_bits_addr; // @[src/main/scala/LinGoWithAXI.scala 79:26]
+  wire  controller_io_s_axilite_w_ready; // @[src/main/scala/LinGoWithAXI.scala 79:26]
+  wire  controller_io_s_axilite_w_valid; // @[src/main/scala/LinGoWithAXI.scala 79:26]
+  wire [31:0] controller_io_s_axilite_w_bits_data; // @[src/main/scala/LinGoWithAXI.scala 79:26]
+  wire [3:0] controller_io_s_axilite_w_bits_strb; // @[src/main/scala/LinGoWithAXI.scala 79:26]
+  wire  controller_io_s_axilite_b_ready; // @[src/main/scala/LinGoWithAXI.scala 79:26]
+  wire  controller_io_s_axilite_b_valid; // @[src/main/scala/LinGoWithAXI.scala 79:26]
+  wire  controller_io_s_axilite_ar_ready; // @[src/main/scala/LinGoWithAXI.scala 79:26]
+  wire  controller_io_s_axilite_ar_valid; // @[src/main/scala/LinGoWithAXI.scala 79:26]
+  wire [6:0] controller_io_s_axilite_ar_bits_addr; // @[src/main/scala/LinGoWithAXI.scala 79:26]
+  wire  controller_io_s_axilite_r_ready; // @[src/main/scala/LinGoWithAXI.scala 79:26]
+  wire  controller_io_s_axilite_r_valid; // @[src/main/scala/LinGoWithAXI.scala 79:26]
+  wire [31:0] controller_io_s_axilite_r_bits_data; // @[src/main/scala/LinGoWithAXI.scala 79:26]
+  wire  controller_io_srams_iob_0_en; // @[src/main/scala/LinGoWithAXI.scala 79:26]
+  wire [3:0] controller_io_srams_iob_0_we; // @[src/main/scala/LinGoWithAXI.scala 79:26]
+  wire [9:0] controller_io_srams_iob_0_addr; // @[src/main/scala/LinGoWithAXI.scala 79:26]
+  wire [31:0] controller_io_srams_iob_0_din; // @[src/main/scala/LinGoWithAXI.scala 79:26]
+  wire [31:0] controller_io_srams_iob_0_dout; // @[src/main/scala/LinGoWithAXI.scala 79:26]
+  wire  controller_io_srams_iob_1_en; // @[src/main/scala/LinGoWithAXI.scala 79:26]
+  wire [3:0] controller_io_srams_iob_1_we; // @[src/main/scala/LinGoWithAXI.scala 79:26]
+  wire [9:0] controller_io_srams_iob_1_addr; // @[src/main/scala/LinGoWithAXI.scala 79:26]
+  wire [31:0] controller_io_srams_iob_1_din; // @[src/main/scala/LinGoWithAXI.scala 79:26]
+  wire [31:0] controller_io_srams_iob_1_dout; // @[src/main/scala/LinGoWithAXI.scala 79:26]
+  wire  controller_io_srams_iob_2_en; // @[src/main/scala/LinGoWithAXI.scala 79:26]
+  wire [3:0] controller_io_srams_iob_2_we; // @[src/main/scala/LinGoWithAXI.scala 79:26]
+  wire [9:0] controller_io_srams_iob_2_addr; // @[src/main/scala/LinGoWithAXI.scala 79:26]
+  wire [31:0] controller_io_srams_iob_2_din; // @[src/main/scala/LinGoWithAXI.scala 79:26]
+  wire [31:0] controller_io_srams_iob_2_dout; // @[src/main/scala/LinGoWithAXI.scala 79:26]
+  wire  controller_io_srams_iob_3_en; // @[src/main/scala/LinGoWithAXI.scala 79:26]
+  wire [3:0] controller_io_srams_iob_3_we; // @[src/main/scala/LinGoWithAXI.scala 79:26]
+  wire [9:0] controller_io_srams_iob_3_addr; // @[src/main/scala/LinGoWithAXI.scala 79:26]
+  wire [31:0] controller_io_srams_iob_3_din; // @[src/main/scala/LinGoWithAXI.scala 79:26]
+  wire [31:0] controller_io_srams_iob_3_dout; // @[src/main/scala/LinGoWithAXI.scala 79:26]
+  wire  controller_io_srams_iob_4_en; // @[src/main/scala/LinGoWithAXI.scala 79:26]
+  wire [3:0] controller_io_srams_iob_4_we; // @[src/main/scala/LinGoWithAXI.scala 79:26]
+  wire [9:0] controller_io_srams_iob_4_addr; // @[src/main/scala/LinGoWithAXI.scala 79:26]
+  wire [31:0] controller_io_srams_iob_4_din; // @[src/main/scala/LinGoWithAXI.scala 79:26]
+  wire [31:0] controller_io_srams_iob_4_dout; // @[src/main/scala/LinGoWithAXI.scala 79:26]
+  wire  controller_io_srams_iob_5_en; // @[src/main/scala/LinGoWithAXI.scala 79:26]
+  wire [3:0] controller_io_srams_iob_5_we; // @[src/main/scala/LinGoWithAXI.scala 79:26]
+  wire [9:0] controller_io_srams_iob_5_addr; // @[src/main/scala/LinGoWithAXI.scala 79:26]
+  wire [31:0] controller_io_srams_iob_5_din; // @[src/main/scala/LinGoWithAXI.scala 79:26]
+  wire [31:0] controller_io_srams_iob_5_dout; // @[src/main/scala/LinGoWithAXI.scala 79:26]
+  wire  controller_io_srams_iob_6_en; // @[src/main/scala/LinGoWithAXI.scala 79:26]
+  wire [3:0] controller_io_srams_iob_6_we; // @[src/main/scala/LinGoWithAXI.scala 79:26]
+  wire [9:0] controller_io_srams_iob_6_addr; // @[src/main/scala/LinGoWithAXI.scala 79:26]
+  wire [31:0] controller_io_srams_iob_6_din; // @[src/main/scala/LinGoWithAXI.scala 79:26]
+  wire [31:0] controller_io_srams_iob_6_dout; // @[src/main/scala/LinGoWithAXI.scala 79:26]
+  wire  controller_io_srams_iob_7_en; // @[src/main/scala/LinGoWithAXI.scala 79:26]
+  wire [3:0] controller_io_srams_iob_7_we; // @[src/main/scala/LinGoWithAXI.scala 79:26]
+  wire [9:0] controller_io_srams_iob_7_addr; // @[src/main/scala/LinGoWithAXI.scala 79:26]
+  wire [31:0] controller_io_srams_iob_7_din; // @[src/main/scala/LinGoWithAXI.scala 79:26]
+  wire [31:0] controller_io_srams_iob_7_dout; // @[src/main/scala/LinGoWithAXI.scala 79:26]
+  wire  controller_io_srams_iob_8_en; // @[src/main/scala/LinGoWithAXI.scala 79:26]
+  wire [3:0] controller_io_srams_iob_8_we; // @[src/main/scala/LinGoWithAXI.scala 79:26]
+  wire [9:0] controller_io_srams_iob_8_addr; // @[src/main/scala/LinGoWithAXI.scala 79:26]
+  wire [31:0] controller_io_srams_iob_8_din; // @[src/main/scala/LinGoWithAXI.scala 79:26]
+  wire [31:0] controller_io_srams_iob_8_dout; // @[src/main/scala/LinGoWithAXI.scala 79:26]
+  wire  controller_io_srams_iob_9_en; // @[src/main/scala/LinGoWithAXI.scala 79:26]
+  wire [3:0] controller_io_srams_iob_9_we; // @[src/main/scala/LinGoWithAXI.scala 79:26]
+  wire [9:0] controller_io_srams_iob_9_addr; // @[src/main/scala/LinGoWithAXI.scala 79:26]
+  wire [31:0] controller_io_srams_iob_9_din; // @[src/main/scala/LinGoWithAXI.scala 79:26]
+  wire [31:0] controller_io_srams_iob_9_dout; // @[src/main/scala/LinGoWithAXI.scala 79:26]
+  wire  controller_io_srams_iob_10_en; // @[src/main/scala/LinGoWithAXI.scala 79:26]
+  wire [3:0] controller_io_srams_iob_10_we; // @[src/main/scala/LinGoWithAXI.scala 79:26]
+  wire [9:0] controller_io_srams_iob_10_addr; // @[src/main/scala/LinGoWithAXI.scala 79:26]
+  wire [31:0] controller_io_srams_iob_10_din; // @[src/main/scala/LinGoWithAXI.scala 79:26]
+  wire [31:0] controller_io_srams_iob_10_dout; // @[src/main/scala/LinGoWithAXI.scala 79:26]
+  wire  controller_io_srams_iob_11_en; // @[src/main/scala/LinGoWithAXI.scala 79:26]
+  wire [3:0] controller_io_srams_iob_11_we; // @[src/main/scala/LinGoWithAXI.scala 79:26]
+  wire [9:0] controller_io_srams_iob_11_addr; // @[src/main/scala/LinGoWithAXI.scala 79:26]
+  wire [31:0] controller_io_srams_iob_11_din; // @[src/main/scala/LinGoWithAXI.scala 79:26]
+  wire [31:0] controller_io_srams_iob_11_dout; // @[src/main/scala/LinGoWithAXI.scala 79:26]
+  wire  controller_io_sram_cfg_en; // @[src/main/scala/LinGoWithAXI.scala 79:26]
+  wire [7:0] controller_io_sram_cfg_addr; // @[src/main/scala/LinGoWithAXI.scala 79:26]
+  wire [127:0] controller_io_sram_cfg_dout; // @[src/main/scala/LinGoWithAXI.scala 79:26]
+  wire  controller_io_bcast_en; // @[src/main/scala/LinGoWithAXI.scala 79:26]
+  wire [11:0] controller_io_bcast_bank_mask; // @[src/main/scala/LinGoWithAXI.scala 79:26]
+  wire [7:0] controller_io_bcast_base_addr_0; // @[src/main/scala/LinGoWithAXI.scala 79:26]
+  wire [7:0] controller_io_bcast_base_addr_1; // @[src/main/scala/LinGoWithAXI.scala 79:26]
+  wire [7:0] controller_io_bcast_base_addr_2; // @[src/main/scala/LinGoWithAXI.scala 79:26]
+  wire [7:0] controller_io_bcast_base_addr_3; // @[src/main/scala/LinGoWithAXI.scala 79:26]
+  wire [7:0] controller_io_bcast_base_addr_4; // @[src/main/scala/LinGoWithAXI.scala 79:26]
+  wire [7:0] controller_io_bcast_base_addr_5; // @[src/main/scala/LinGoWithAXI.scala 79:26]
+  wire [7:0] controller_io_bcast_base_addr_6; // @[src/main/scala/LinGoWithAXI.scala 79:26]
+  wire [7:0] controller_io_bcast_base_addr_7; // @[src/main/scala/LinGoWithAXI.scala 79:26]
+  wire [7:0] controller_io_bcast_base_addr_8; // @[src/main/scala/LinGoWithAXI.scala 79:26]
+  wire [7:0] controller_io_bcast_base_addr_9; // @[src/main/scala/LinGoWithAXI.scala 79:26]
+  wire [7:0] controller_io_bcast_base_addr_10; // @[src/main/scala/LinGoWithAXI.scala 79:26]
+  wire [7:0] controller_io_bcast_base_addr_11; // @[src/main/scala/LinGoWithAXI.scala 79:26]
+  AXI4Scratchpad spad ( // @[src/main/scala/LinGoWithAXI.scala 70:20]
     .clock(spad_clock),
     .io_aclk(spad_io_aclk),
     .io_aresetn(spad_io_aresetn),
@@ -58261,7 +58270,7 @@ module LinGoWithAXI(
     .io_bcast_base_addr_10(spad_io_bcast_base_addr_10),
     .io_bcast_base_addr_11(spad_io_bcast_base_addr_11)
   );
-  LinGoController controller ( // @[src/main/scala/LinGoWithAXI.scala 78:26]
+  LinGoController controller ( // @[src/main/scala/LinGoWithAXI.scala 79:26]
     .clock(controller_clock),
     .reset(controller_reset),
     .io_s_axilite_aw_ready(controller_io_s_axilite_aw_ready),
@@ -58357,985 +58366,195 @@ module LinGoWithAXI(
     .io_bcast_base_addr_10(controller_io_bcast_base_addr_10),
     .io_bcast_base_addr_11(controller_io_bcast_base_addr_11)
   );
-  assign io_s_axi_aw_ready = spad_io_s_axi_aw_ready; // @[src/main/scala/LinGoWithAXI.scala 80:12]
-  assign io_s_axi_w_ready = spad_io_s_axi_w_ready; // @[src/main/scala/LinGoWithAXI.scala 80:12]
-  assign io_s_axi_b_valid = spad_io_s_axi_b_valid; // @[src/main/scala/LinGoWithAXI.scala 80:12]
-  assign io_s_axi_b_bits_id = spad_io_s_axi_b_bits_id; // @[src/main/scala/LinGoWithAXI.scala 80:12]
-  assign io_s_axi_b_bits_resp = 2'h0; // @[src/main/scala/LinGoWithAXI.scala 80:12]
-  assign io_s_axi_ar_ready = spad_io_s_axi_ar_ready; // @[src/main/scala/LinGoWithAXI.scala 80:12]
-  assign io_s_axi_r_valid = spad_io_s_axi_r_valid; // @[src/main/scala/LinGoWithAXI.scala 80:12]
-  assign io_s_axi_r_bits_id = spad_io_s_axi_r_bits_id; // @[src/main/scala/LinGoWithAXI.scala 80:12]
-  assign io_s_axi_r_bits_data = spad_io_s_axi_r_bits_data; // @[src/main/scala/LinGoWithAXI.scala 80:12]
-  assign io_s_axi_r_bits_resp = 2'h0; // @[src/main/scala/LinGoWithAXI.scala 80:12]
-  assign io_s_axi_r_bits_last = spad_io_s_axi_r_bits_last; // @[src/main/scala/LinGoWithAXI.scala 80:12]
-  assign io_s_axilite_aw_ready = controller_io_s_axilite_aw_ready; // @[src/main/scala/LinGoWithAXI.scala 81:16]
-  assign io_s_axilite_w_ready = controller_io_s_axilite_w_ready; // @[src/main/scala/LinGoWithAXI.scala 81:16]
-  assign io_s_axilite_b_valid = controller_io_s_axilite_b_valid; // @[src/main/scala/LinGoWithAXI.scala 81:16]
-  assign io_s_axilite_b_bits_resp = 2'h0; // @[src/main/scala/LinGoWithAXI.scala 81:16]
-  assign io_s_axilite_ar_ready = controller_io_s_axilite_ar_ready; // @[src/main/scala/LinGoWithAXI.scala 81:16]
-  assign io_s_axilite_r_valid = controller_io_s_axilite_r_valid; // @[src/main/scala/LinGoWithAXI.scala 81:16]
-  assign io_s_axilite_r_bits_data = controller_io_s_axilite_r_bits_data; // @[src/main/scala/LinGoWithAXI.scala 81:16]
-  assign io_s_axilite_r_bits_resp = 2'h0; // @[src/main/scala/LinGoWithAXI.scala 81:16]
+  assign io_s_axi_aw_ready = spad_io_s_axi_aw_ready; // @[src/main/scala/LinGoWithAXI.scala 81:12]
+  assign io_s_axi_w_ready = spad_io_s_axi_w_ready; // @[src/main/scala/LinGoWithAXI.scala 81:12]
+  assign io_s_axi_b_valid = spad_io_s_axi_b_valid; // @[src/main/scala/LinGoWithAXI.scala 81:12]
+  assign io_s_axi_b_bits_id = spad_io_s_axi_b_bits_id; // @[src/main/scala/LinGoWithAXI.scala 81:12]
+  assign io_s_axi_b_bits_resp = 2'h0; // @[src/main/scala/LinGoWithAXI.scala 81:12]
+  assign io_s_axi_ar_ready = spad_io_s_axi_ar_ready; // @[src/main/scala/LinGoWithAXI.scala 81:12]
+  assign io_s_axi_r_valid = spad_io_s_axi_r_valid; // @[src/main/scala/LinGoWithAXI.scala 81:12]
+  assign io_s_axi_r_bits_id = spad_io_s_axi_r_bits_id; // @[src/main/scala/LinGoWithAXI.scala 81:12]
+  assign io_s_axi_r_bits_data = spad_io_s_axi_r_bits_data; // @[src/main/scala/LinGoWithAXI.scala 81:12]
+  assign io_s_axi_r_bits_resp = 2'h0; // @[src/main/scala/LinGoWithAXI.scala 81:12]
+  assign io_s_axi_r_bits_last = spad_io_s_axi_r_bits_last; // @[src/main/scala/LinGoWithAXI.scala 81:12]
+  assign io_s_axilite_aw_ready = controller_io_s_axilite_aw_ready; // @[src/main/scala/LinGoWithAXI.scala 82:16]
+  assign io_s_axilite_w_ready = controller_io_s_axilite_w_ready; // @[src/main/scala/LinGoWithAXI.scala 82:16]
+  assign io_s_axilite_b_valid = controller_io_s_axilite_b_valid; // @[src/main/scala/LinGoWithAXI.scala 82:16]
+  assign io_s_axilite_b_bits_resp = 2'h0; // @[src/main/scala/LinGoWithAXI.scala 82:16]
+  assign io_s_axilite_ar_ready = controller_io_s_axilite_ar_ready; // @[src/main/scala/LinGoWithAXI.scala 82:16]
+  assign io_s_axilite_r_valid = controller_io_s_axilite_r_valid; // @[src/main/scala/LinGoWithAXI.scala 82:16]
+  assign io_s_axilite_r_bits_data = controller_io_s_axilite_r_bits_data; // @[src/main/scala/LinGoWithAXI.scala 82:16]
+  assign io_s_axilite_r_bits_resp = 2'h0; // @[src/main/scala/LinGoWithAXI.scala 82:16]
   assign spad_clock = clock;
-  assign spad_io_aclk = clock; // @[src/main/scala/LinGoWithAXI.scala 82:16]
-  assign spad_io_aresetn = ~reset; // @[src/main/scala/LinGoWithAXI.scala 83:22]
-  assign spad_io_s_axi_aw_valid = io_s_axi_aw_valid; // @[src/main/scala/LinGoWithAXI.scala 80:12]
-  assign spad_io_s_axi_aw_bits_id = io_s_axi_aw_bits_id; // @[src/main/scala/LinGoWithAXI.scala 80:12]
-  assign spad_io_s_axi_aw_bits_addr = io_s_axi_aw_bits_addr; // @[src/main/scala/LinGoWithAXI.scala 80:12]
-  assign spad_io_s_axi_aw_bits_len = io_s_axi_aw_bits_len; // @[src/main/scala/LinGoWithAXI.scala 80:12]
-  assign spad_io_s_axi_aw_bits_size = io_s_axi_aw_bits_size; // @[src/main/scala/LinGoWithAXI.scala 80:12]
-  assign spad_io_s_axi_aw_bits_burst = io_s_axi_aw_bits_burst; // @[src/main/scala/LinGoWithAXI.scala 80:12]
-  assign spad_io_s_axi_w_valid = io_s_axi_w_valid; // @[src/main/scala/LinGoWithAXI.scala 80:12]
-  assign spad_io_s_axi_w_bits_data = io_s_axi_w_bits_data; // @[src/main/scala/LinGoWithAXI.scala 80:12]
-  assign spad_io_s_axi_w_bits_strb = io_s_axi_w_bits_strb; // @[src/main/scala/LinGoWithAXI.scala 80:12]
-  assign spad_io_s_axi_w_bits_last = io_s_axi_w_bits_last; // @[src/main/scala/LinGoWithAXI.scala 80:12]
-  assign spad_io_s_axi_b_ready = io_s_axi_b_ready; // @[src/main/scala/LinGoWithAXI.scala 80:12]
-  assign spad_io_s_axi_ar_valid = io_s_axi_ar_valid; // @[src/main/scala/LinGoWithAXI.scala 80:12]
-  assign spad_io_s_axi_ar_bits_id = io_s_axi_ar_bits_id; // @[src/main/scala/LinGoWithAXI.scala 80:12]
-  assign spad_io_s_axi_ar_bits_addr = io_s_axi_ar_bits_addr; // @[src/main/scala/LinGoWithAXI.scala 80:12]
-  assign spad_io_s_axi_ar_bits_len = io_s_axi_ar_bits_len; // @[src/main/scala/LinGoWithAXI.scala 80:12]
-  assign spad_io_s_axi_ar_bits_size = io_s_axi_ar_bits_size; // @[src/main/scala/LinGoWithAXI.scala 80:12]
-  assign spad_io_s_axi_ar_bits_burst = io_s_axi_ar_bits_burst; // @[src/main/scala/LinGoWithAXI.scala 80:12]
-  assign spad_io_s_axi_r_ready = io_s_axi_r_ready; // @[src/main/scala/LinGoWithAXI.scala 80:12]
-  assign spad_io_srams_0_en = controller_io_srams_iob_0_en; // @[src/main/scala/LinGoWithAXI.scala 84:17]
-  assign spad_io_srams_0_we = controller_io_srams_iob_0_we; // @[src/main/scala/LinGoWithAXI.scala 84:17]
-  assign spad_io_srams_0_addr = controller_io_srams_iob_0_addr; // @[src/main/scala/LinGoWithAXI.scala 84:17]
-  assign spad_io_srams_0_din = controller_io_srams_iob_0_din; // @[src/main/scala/LinGoWithAXI.scala 84:17]
-  assign spad_io_srams_1_en = controller_io_srams_iob_1_en; // @[src/main/scala/LinGoWithAXI.scala 84:17]
-  assign spad_io_srams_1_we = controller_io_srams_iob_1_we; // @[src/main/scala/LinGoWithAXI.scala 84:17]
-  assign spad_io_srams_1_addr = controller_io_srams_iob_1_addr; // @[src/main/scala/LinGoWithAXI.scala 84:17]
-  assign spad_io_srams_1_din = controller_io_srams_iob_1_din; // @[src/main/scala/LinGoWithAXI.scala 84:17]
-  assign spad_io_srams_2_en = controller_io_srams_iob_2_en; // @[src/main/scala/LinGoWithAXI.scala 84:17]
-  assign spad_io_srams_2_we = controller_io_srams_iob_2_we; // @[src/main/scala/LinGoWithAXI.scala 84:17]
-  assign spad_io_srams_2_addr = controller_io_srams_iob_2_addr; // @[src/main/scala/LinGoWithAXI.scala 84:17]
-  assign spad_io_srams_2_din = controller_io_srams_iob_2_din; // @[src/main/scala/LinGoWithAXI.scala 84:17]
-  assign spad_io_srams_3_en = controller_io_srams_iob_3_en; // @[src/main/scala/LinGoWithAXI.scala 84:17]
-  assign spad_io_srams_3_we = controller_io_srams_iob_3_we; // @[src/main/scala/LinGoWithAXI.scala 84:17]
-  assign spad_io_srams_3_addr = controller_io_srams_iob_3_addr; // @[src/main/scala/LinGoWithAXI.scala 84:17]
-  assign spad_io_srams_3_din = controller_io_srams_iob_3_din; // @[src/main/scala/LinGoWithAXI.scala 84:17]
-  assign spad_io_srams_4_en = controller_io_srams_iob_4_en; // @[src/main/scala/LinGoWithAXI.scala 84:17]
-  assign spad_io_srams_4_we = controller_io_srams_iob_4_we; // @[src/main/scala/LinGoWithAXI.scala 84:17]
-  assign spad_io_srams_4_addr = controller_io_srams_iob_4_addr; // @[src/main/scala/LinGoWithAXI.scala 84:17]
-  assign spad_io_srams_4_din = controller_io_srams_iob_4_din; // @[src/main/scala/LinGoWithAXI.scala 84:17]
-  assign spad_io_srams_5_en = controller_io_srams_iob_5_en; // @[src/main/scala/LinGoWithAXI.scala 84:17]
-  assign spad_io_srams_5_we = controller_io_srams_iob_5_we; // @[src/main/scala/LinGoWithAXI.scala 84:17]
-  assign spad_io_srams_5_addr = controller_io_srams_iob_5_addr; // @[src/main/scala/LinGoWithAXI.scala 84:17]
-  assign spad_io_srams_5_din = controller_io_srams_iob_5_din; // @[src/main/scala/LinGoWithAXI.scala 84:17]
-  assign spad_io_srams_6_en = controller_io_srams_iob_6_en; // @[src/main/scala/LinGoWithAXI.scala 84:17]
-  assign spad_io_srams_6_we = controller_io_srams_iob_6_we; // @[src/main/scala/LinGoWithAXI.scala 84:17]
-  assign spad_io_srams_6_addr = controller_io_srams_iob_6_addr; // @[src/main/scala/LinGoWithAXI.scala 84:17]
-  assign spad_io_srams_6_din = controller_io_srams_iob_6_din; // @[src/main/scala/LinGoWithAXI.scala 84:17]
-  assign spad_io_srams_7_en = controller_io_srams_iob_7_en; // @[src/main/scala/LinGoWithAXI.scala 84:17]
-  assign spad_io_srams_7_we = controller_io_srams_iob_7_we; // @[src/main/scala/LinGoWithAXI.scala 84:17]
-  assign spad_io_srams_7_addr = controller_io_srams_iob_7_addr; // @[src/main/scala/LinGoWithAXI.scala 84:17]
-  assign spad_io_srams_7_din = controller_io_srams_iob_7_din; // @[src/main/scala/LinGoWithAXI.scala 84:17]
-  assign spad_io_srams_8_en = controller_io_srams_iob_8_en; // @[src/main/scala/LinGoWithAXI.scala 84:17]
-  assign spad_io_srams_8_we = controller_io_srams_iob_8_we; // @[src/main/scala/LinGoWithAXI.scala 84:17]
-  assign spad_io_srams_8_addr = controller_io_srams_iob_8_addr; // @[src/main/scala/LinGoWithAXI.scala 84:17]
-  assign spad_io_srams_8_din = controller_io_srams_iob_8_din; // @[src/main/scala/LinGoWithAXI.scala 84:17]
-  assign spad_io_srams_9_en = controller_io_srams_iob_9_en; // @[src/main/scala/LinGoWithAXI.scala 84:17]
-  assign spad_io_srams_9_we = controller_io_srams_iob_9_we; // @[src/main/scala/LinGoWithAXI.scala 84:17]
-  assign spad_io_srams_9_addr = controller_io_srams_iob_9_addr; // @[src/main/scala/LinGoWithAXI.scala 84:17]
-  assign spad_io_srams_9_din = controller_io_srams_iob_9_din; // @[src/main/scala/LinGoWithAXI.scala 84:17]
-  assign spad_io_srams_10_en = controller_io_srams_iob_10_en; // @[src/main/scala/LinGoWithAXI.scala 84:17]
-  assign spad_io_srams_10_we = controller_io_srams_iob_10_we; // @[src/main/scala/LinGoWithAXI.scala 84:17]
-  assign spad_io_srams_10_addr = controller_io_srams_iob_10_addr; // @[src/main/scala/LinGoWithAXI.scala 84:17]
-  assign spad_io_srams_10_din = controller_io_srams_iob_10_din; // @[src/main/scala/LinGoWithAXI.scala 84:17]
-  assign spad_io_srams_11_en = controller_io_srams_iob_11_en; // @[src/main/scala/LinGoWithAXI.scala 84:17]
-  assign spad_io_srams_11_we = controller_io_srams_iob_11_we; // @[src/main/scala/LinGoWithAXI.scala 84:17]
-  assign spad_io_srams_11_addr = controller_io_srams_iob_11_addr; // @[src/main/scala/LinGoWithAXI.scala 84:17]
-  assign spad_io_srams_11_din = controller_io_srams_iob_11_din; // @[src/main/scala/LinGoWithAXI.scala 84:17]
-  assign spad_io_sram_last_en = controller_io_sram_cfg_en; // @[src/main/scala/LinGoWithAXI.scala 85:21]
-  assign spad_io_sram_last_addr = controller_io_sram_cfg_addr; // @[src/main/scala/LinGoWithAXI.scala 85:21]
-  assign spad_io_bcast_en = controller_io_bcast_en; // @[src/main/scala/LinGoWithAXI.scala 86:20]
-  assign spad_io_bcast_bank_mask = controller_io_bcast_bank_mask; // @[src/main/scala/LinGoWithAXI.scala 87:27]
-  assign spad_io_bcast_base_addr_0 = controller_io_bcast_base_addr_0; // @[src/main/scala/LinGoWithAXI.scala 88:27]
-  assign spad_io_bcast_base_addr_1 = controller_io_bcast_base_addr_1; // @[src/main/scala/LinGoWithAXI.scala 88:27]
-  assign spad_io_bcast_base_addr_2 = controller_io_bcast_base_addr_2; // @[src/main/scala/LinGoWithAXI.scala 88:27]
-  assign spad_io_bcast_base_addr_3 = controller_io_bcast_base_addr_3; // @[src/main/scala/LinGoWithAXI.scala 88:27]
-  assign spad_io_bcast_base_addr_4 = controller_io_bcast_base_addr_4; // @[src/main/scala/LinGoWithAXI.scala 88:27]
-  assign spad_io_bcast_base_addr_5 = controller_io_bcast_base_addr_5; // @[src/main/scala/LinGoWithAXI.scala 88:27]
-  assign spad_io_bcast_base_addr_6 = controller_io_bcast_base_addr_6; // @[src/main/scala/LinGoWithAXI.scala 88:27]
-  assign spad_io_bcast_base_addr_7 = controller_io_bcast_base_addr_7; // @[src/main/scala/LinGoWithAXI.scala 88:27]
-  assign spad_io_bcast_base_addr_8 = controller_io_bcast_base_addr_8; // @[src/main/scala/LinGoWithAXI.scala 88:27]
-  assign spad_io_bcast_base_addr_9 = controller_io_bcast_base_addr_9; // @[src/main/scala/LinGoWithAXI.scala 88:27]
-  assign spad_io_bcast_base_addr_10 = controller_io_bcast_base_addr_10; // @[src/main/scala/LinGoWithAXI.scala 88:27]
-  assign spad_io_bcast_base_addr_11 = controller_io_bcast_base_addr_11; // @[src/main/scala/LinGoWithAXI.scala 88:27]
+  assign spad_io_aclk = clock; // @[src/main/scala/LinGoWithAXI.scala 83:16]
+  assign spad_io_aresetn = ~reset; // @[src/main/scala/LinGoWithAXI.scala 84:22]
+  assign spad_io_s_axi_aw_valid = io_s_axi_aw_valid; // @[src/main/scala/LinGoWithAXI.scala 81:12]
+  assign spad_io_s_axi_aw_bits_id = io_s_axi_aw_bits_id; // @[src/main/scala/LinGoWithAXI.scala 81:12]
+  assign spad_io_s_axi_aw_bits_addr = io_s_axi_aw_bits_addr; // @[src/main/scala/LinGoWithAXI.scala 81:12]
+  assign spad_io_s_axi_aw_bits_len = io_s_axi_aw_bits_len; // @[src/main/scala/LinGoWithAXI.scala 81:12]
+  assign spad_io_s_axi_aw_bits_size = io_s_axi_aw_bits_size; // @[src/main/scala/LinGoWithAXI.scala 81:12]
+  assign spad_io_s_axi_aw_bits_burst = io_s_axi_aw_bits_burst; // @[src/main/scala/LinGoWithAXI.scala 81:12]
+  assign spad_io_s_axi_w_valid = io_s_axi_w_valid; // @[src/main/scala/LinGoWithAXI.scala 81:12]
+  assign spad_io_s_axi_w_bits_data = io_s_axi_w_bits_data; // @[src/main/scala/LinGoWithAXI.scala 81:12]
+  assign spad_io_s_axi_w_bits_strb = io_s_axi_w_bits_strb; // @[src/main/scala/LinGoWithAXI.scala 81:12]
+  assign spad_io_s_axi_w_bits_last = io_s_axi_w_bits_last; // @[src/main/scala/LinGoWithAXI.scala 81:12]
+  assign spad_io_s_axi_b_ready = io_s_axi_b_ready; // @[src/main/scala/LinGoWithAXI.scala 81:12]
+  assign spad_io_s_axi_ar_valid = io_s_axi_ar_valid; // @[src/main/scala/LinGoWithAXI.scala 81:12]
+  assign spad_io_s_axi_ar_bits_id = io_s_axi_ar_bits_id; // @[src/main/scala/LinGoWithAXI.scala 81:12]
+  assign spad_io_s_axi_ar_bits_addr = io_s_axi_ar_bits_addr; // @[src/main/scala/LinGoWithAXI.scala 81:12]
+  assign spad_io_s_axi_ar_bits_len = io_s_axi_ar_bits_len; // @[src/main/scala/LinGoWithAXI.scala 81:12]
+  assign spad_io_s_axi_ar_bits_size = io_s_axi_ar_bits_size; // @[src/main/scala/LinGoWithAXI.scala 81:12]
+  assign spad_io_s_axi_ar_bits_burst = io_s_axi_ar_bits_burst; // @[src/main/scala/LinGoWithAXI.scala 81:12]
+  assign spad_io_s_axi_r_ready = io_s_axi_r_ready; // @[src/main/scala/LinGoWithAXI.scala 81:12]
+  assign spad_io_srams_0_en = controller_io_srams_iob_0_en; // @[src/main/scala/LinGoWithAXI.scala 85:17]
+  assign spad_io_srams_0_we = controller_io_srams_iob_0_we; // @[src/main/scala/LinGoWithAXI.scala 85:17]
+  assign spad_io_srams_0_addr = controller_io_srams_iob_0_addr; // @[src/main/scala/LinGoWithAXI.scala 85:17]
+  assign spad_io_srams_0_din = controller_io_srams_iob_0_din; // @[src/main/scala/LinGoWithAXI.scala 85:17]
+  assign spad_io_srams_1_en = controller_io_srams_iob_1_en; // @[src/main/scala/LinGoWithAXI.scala 85:17]
+  assign spad_io_srams_1_we = controller_io_srams_iob_1_we; // @[src/main/scala/LinGoWithAXI.scala 85:17]
+  assign spad_io_srams_1_addr = controller_io_srams_iob_1_addr; // @[src/main/scala/LinGoWithAXI.scala 85:17]
+  assign spad_io_srams_1_din = controller_io_srams_iob_1_din; // @[src/main/scala/LinGoWithAXI.scala 85:17]
+  assign spad_io_srams_2_en = controller_io_srams_iob_2_en; // @[src/main/scala/LinGoWithAXI.scala 85:17]
+  assign spad_io_srams_2_we = controller_io_srams_iob_2_we; // @[src/main/scala/LinGoWithAXI.scala 85:17]
+  assign spad_io_srams_2_addr = controller_io_srams_iob_2_addr; // @[src/main/scala/LinGoWithAXI.scala 85:17]
+  assign spad_io_srams_2_din = controller_io_srams_iob_2_din; // @[src/main/scala/LinGoWithAXI.scala 85:17]
+  assign spad_io_srams_3_en = controller_io_srams_iob_3_en; // @[src/main/scala/LinGoWithAXI.scala 85:17]
+  assign spad_io_srams_3_we = controller_io_srams_iob_3_we; // @[src/main/scala/LinGoWithAXI.scala 85:17]
+  assign spad_io_srams_3_addr = controller_io_srams_iob_3_addr; // @[src/main/scala/LinGoWithAXI.scala 85:17]
+  assign spad_io_srams_3_din = controller_io_srams_iob_3_din; // @[src/main/scala/LinGoWithAXI.scala 85:17]
+  assign spad_io_srams_4_en = controller_io_srams_iob_4_en; // @[src/main/scala/LinGoWithAXI.scala 85:17]
+  assign spad_io_srams_4_we = controller_io_srams_iob_4_we; // @[src/main/scala/LinGoWithAXI.scala 85:17]
+  assign spad_io_srams_4_addr = controller_io_srams_iob_4_addr; // @[src/main/scala/LinGoWithAXI.scala 85:17]
+  assign spad_io_srams_4_din = controller_io_srams_iob_4_din; // @[src/main/scala/LinGoWithAXI.scala 85:17]
+  assign spad_io_srams_5_en = controller_io_srams_iob_5_en; // @[src/main/scala/LinGoWithAXI.scala 85:17]
+  assign spad_io_srams_5_we = controller_io_srams_iob_5_we; // @[src/main/scala/LinGoWithAXI.scala 85:17]
+  assign spad_io_srams_5_addr = controller_io_srams_iob_5_addr; // @[src/main/scala/LinGoWithAXI.scala 85:17]
+  assign spad_io_srams_5_din = controller_io_srams_iob_5_din; // @[src/main/scala/LinGoWithAXI.scala 85:17]
+  assign spad_io_srams_6_en = controller_io_srams_iob_6_en; // @[src/main/scala/LinGoWithAXI.scala 85:17]
+  assign spad_io_srams_6_we = controller_io_srams_iob_6_we; // @[src/main/scala/LinGoWithAXI.scala 85:17]
+  assign spad_io_srams_6_addr = controller_io_srams_iob_6_addr; // @[src/main/scala/LinGoWithAXI.scala 85:17]
+  assign spad_io_srams_6_din = controller_io_srams_iob_6_din; // @[src/main/scala/LinGoWithAXI.scala 85:17]
+  assign spad_io_srams_7_en = controller_io_srams_iob_7_en; // @[src/main/scala/LinGoWithAXI.scala 85:17]
+  assign spad_io_srams_7_we = controller_io_srams_iob_7_we; // @[src/main/scala/LinGoWithAXI.scala 85:17]
+  assign spad_io_srams_7_addr = controller_io_srams_iob_7_addr; // @[src/main/scala/LinGoWithAXI.scala 85:17]
+  assign spad_io_srams_7_din = controller_io_srams_iob_7_din; // @[src/main/scala/LinGoWithAXI.scala 85:17]
+  assign spad_io_srams_8_en = controller_io_srams_iob_8_en; // @[src/main/scala/LinGoWithAXI.scala 85:17]
+  assign spad_io_srams_8_we = controller_io_srams_iob_8_we; // @[src/main/scala/LinGoWithAXI.scala 85:17]
+  assign spad_io_srams_8_addr = controller_io_srams_iob_8_addr; // @[src/main/scala/LinGoWithAXI.scala 85:17]
+  assign spad_io_srams_8_din = controller_io_srams_iob_8_din; // @[src/main/scala/LinGoWithAXI.scala 85:17]
+  assign spad_io_srams_9_en = controller_io_srams_iob_9_en; // @[src/main/scala/LinGoWithAXI.scala 85:17]
+  assign spad_io_srams_9_we = controller_io_srams_iob_9_we; // @[src/main/scala/LinGoWithAXI.scala 85:17]
+  assign spad_io_srams_9_addr = controller_io_srams_iob_9_addr; // @[src/main/scala/LinGoWithAXI.scala 85:17]
+  assign spad_io_srams_9_din = controller_io_srams_iob_9_din; // @[src/main/scala/LinGoWithAXI.scala 85:17]
+  assign spad_io_srams_10_en = controller_io_srams_iob_10_en; // @[src/main/scala/LinGoWithAXI.scala 85:17]
+  assign spad_io_srams_10_we = controller_io_srams_iob_10_we; // @[src/main/scala/LinGoWithAXI.scala 85:17]
+  assign spad_io_srams_10_addr = controller_io_srams_iob_10_addr; // @[src/main/scala/LinGoWithAXI.scala 85:17]
+  assign spad_io_srams_10_din = controller_io_srams_iob_10_din; // @[src/main/scala/LinGoWithAXI.scala 85:17]
+  assign spad_io_srams_11_en = controller_io_srams_iob_11_en; // @[src/main/scala/LinGoWithAXI.scala 85:17]
+  assign spad_io_srams_11_we = controller_io_srams_iob_11_we; // @[src/main/scala/LinGoWithAXI.scala 85:17]
+  assign spad_io_srams_11_addr = controller_io_srams_iob_11_addr; // @[src/main/scala/LinGoWithAXI.scala 85:17]
+  assign spad_io_srams_11_din = controller_io_srams_iob_11_din; // @[src/main/scala/LinGoWithAXI.scala 85:17]
+  assign spad_io_sram_last_en = controller_io_sram_cfg_en; // @[src/main/scala/LinGoWithAXI.scala 86:21]
+  assign spad_io_sram_last_addr = controller_io_sram_cfg_addr; // @[src/main/scala/LinGoWithAXI.scala 86:21]
+  assign spad_io_bcast_en = controller_io_bcast_en; // @[src/main/scala/LinGoWithAXI.scala 87:20]
+  assign spad_io_bcast_bank_mask = controller_io_bcast_bank_mask; // @[src/main/scala/LinGoWithAXI.scala 88:27]
+  assign spad_io_bcast_base_addr_0 = controller_io_bcast_base_addr_0; // @[src/main/scala/LinGoWithAXI.scala 89:27]
+  assign spad_io_bcast_base_addr_1 = controller_io_bcast_base_addr_1; // @[src/main/scala/LinGoWithAXI.scala 89:27]
+  assign spad_io_bcast_base_addr_2 = controller_io_bcast_base_addr_2; // @[src/main/scala/LinGoWithAXI.scala 89:27]
+  assign spad_io_bcast_base_addr_3 = controller_io_bcast_base_addr_3; // @[src/main/scala/LinGoWithAXI.scala 89:27]
+  assign spad_io_bcast_base_addr_4 = controller_io_bcast_base_addr_4; // @[src/main/scala/LinGoWithAXI.scala 89:27]
+  assign spad_io_bcast_base_addr_5 = controller_io_bcast_base_addr_5; // @[src/main/scala/LinGoWithAXI.scala 89:27]
+  assign spad_io_bcast_base_addr_6 = controller_io_bcast_base_addr_6; // @[src/main/scala/LinGoWithAXI.scala 89:27]
+  assign spad_io_bcast_base_addr_7 = controller_io_bcast_base_addr_7; // @[src/main/scala/LinGoWithAXI.scala 89:27]
+  assign spad_io_bcast_base_addr_8 = controller_io_bcast_base_addr_8; // @[src/main/scala/LinGoWithAXI.scala 89:27]
+  assign spad_io_bcast_base_addr_9 = controller_io_bcast_base_addr_9; // @[src/main/scala/LinGoWithAXI.scala 89:27]
+  assign spad_io_bcast_base_addr_10 = controller_io_bcast_base_addr_10; // @[src/main/scala/LinGoWithAXI.scala 89:27]
+  assign spad_io_bcast_base_addr_11 = controller_io_bcast_base_addr_11; // @[src/main/scala/LinGoWithAXI.scala 89:27]
   assign controller_clock = clock;
   assign controller_reset = reset;
-  assign controller_io_s_axilite_aw_valid = io_s_axilite_aw_valid; // @[src/main/scala/LinGoWithAXI.scala 81:16]
-  assign controller_io_s_axilite_aw_bits_addr = io_s_axilite_aw_bits_addr; // @[src/main/scala/LinGoWithAXI.scala 81:16]
-  assign controller_io_s_axilite_w_valid = io_s_axilite_w_valid; // @[src/main/scala/LinGoWithAXI.scala 81:16]
-  assign controller_io_s_axilite_w_bits_data = io_s_axilite_w_bits_data; // @[src/main/scala/LinGoWithAXI.scala 81:16]
-  assign controller_io_s_axilite_w_bits_strb = io_s_axilite_w_bits_strb; // @[src/main/scala/LinGoWithAXI.scala 81:16]
-  assign controller_io_s_axilite_b_ready = io_s_axilite_b_ready; // @[src/main/scala/LinGoWithAXI.scala 81:16]
-  assign controller_io_s_axilite_ar_valid = io_s_axilite_ar_valid; // @[src/main/scala/LinGoWithAXI.scala 81:16]
-  assign controller_io_s_axilite_ar_bits_addr = io_s_axilite_ar_bits_addr; // @[src/main/scala/LinGoWithAXI.scala 81:16]
-  assign controller_io_s_axilite_r_ready = io_s_axilite_r_ready; // @[src/main/scala/LinGoWithAXI.scala 81:16]
-  assign controller_io_srams_iob_0_dout = spad_io_srams_0_dout; // @[src/main/scala/LinGoWithAXI.scala 84:17]
-  assign controller_io_srams_iob_1_dout = spad_io_srams_1_dout; // @[src/main/scala/LinGoWithAXI.scala 84:17]
-  assign controller_io_srams_iob_2_dout = spad_io_srams_2_dout; // @[src/main/scala/LinGoWithAXI.scala 84:17]
-  assign controller_io_srams_iob_3_dout = spad_io_srams_3_dout; // @[src/main/scala/LinGoWithAXI.scala 84:17]
-  assign controller_io_srams_iob_4_dout = spad_io_srams_4_dout; // @[src/main/scala/LinGoWithAXI.scala 84:17]
-  assign controller_io_srams_iob_5_dout = spad_io_srams_5_dout; // @[src/main/scala/LinGoWithAXI.scala 84:17]
-  assign controller_io_srams_iob_6_dout = spad_io_srams_6_dout; // @[src/main/scala/LinGoWithAXI.scala 84:17]
-  assign controller_io_srams_iob_7_dout = spad_io_srams_7_dout; // @[src/main/scala/LinGoWithAXI.scala 84:17]
-  assign controller_io_srams_iob_8_dout = spad_io_srams_8_dout; // @[src/main/scala/LinGoWithAXI.scala 84:17]
-  assign controller_io_srams_iob_9_dout = spad_io_srams_9_dout; // @[src/main/scala/LinGoWithAXI.scala 84:17]
-  assign controller_io_srams_iob_10_dout = spad_io_srams_10_dout; // @[src/main/scala/LinGoWithAXI.scala 84:17]
-  assign controller_io_srams_iob_11_dout = spad_io_srams_11_dout; // @[src/main/scala/LinGoWithAXI.scala 84:17]
-  assign controller_io_sram_cfg_dout = spad_io_sram_last_dout; // @[src/main/scala/LinGoWithAXI.scala 85:21]
+  assign controller_io_s_axilite_aw_valid = io_s_axilite_aw_valid; // @[src/main/scala/LinGoWithAXI.scala 82:16]
+  assign controller_io_s_axilite_aw_bits_addr = io_s_axilite_aw_bits_addr; // @[src/main/scala/LinGoWithAXI.scala 82:16]
+  assign controller_io_s_axilite_w_valid = io_s_axilite_w_valid; // @[src/main/scala/LinGoWithAXI.scala 82:16]
+  assign controller_io_s_axilite_w_bits_data = io_s_axilite_w_bits_data; // @[src/main/scala/LinGoWithAXI.scala 82:16]
+  assign controller_io_s_axilite_w_bits_strb = io_s_axilite_w_bits_strb; // @[src/main/scala/LinGoWithAXI.scala 82:16]
+  assign controller_io_s_axilite_b_ready = io_s_axilite_b_ready; // @[src/main/scala/LinGoWithAXI.scala 82:16]
+  assign controller_io_s_axilite_ar_valid = io_s_axilite_ar_valid; // @[src/main/scala/LinGoWithAXI.scala 82:16]
+  assign controller_io_s_axilite_ar_bits_addr = io_s_axilite_ar_bits_addr; // @[src/main/scala/LinGoWithAXI.scala 82:16]
+  assign controller_io_s_axilite_r_ready = io_s_axilite_r_ready; // @[src/main/scala/LinGoWithAXI.scala 82:16]
+  assign controller_io_srams_iob_0_dout = spad_io_srams_0_dout; // @[src/main/scala/LinGoWithAXI.scala 85:17]
+  assign controller_io_srams_iob_1_dout = spad_io_srams_1_dout; // @[src/main/scala/LinGoWithAXI.scala 85:17]
+  assign controller_io_srams_iob_2_dout = spad_io_srams_2_dout; // @[src/main/scala/LinGoWithAXI.scala 85:17]
+  assign controller_io_srams_iob_3_dout = spad_io_srams_3_dout; // @[src/main/scala/LinGoWithAXI.scala 85:17]
+  assign controller_io_srams_iob_4_dout = spad_io_srams_4_dout; // @[src/main/scala/LinGoWithAXI.scala 85:17]
+  assign controller_io_srams_iob_5_dout = spad_io_srams_5_dout; // @[src/main/scala/LinGoWithAXI.scala 85:17]
+  assign controller_io_srams_iob_6_dout = spad_io_srams_6_dout; // @[src/main/scala/LinGoWithAXI.scala 85:17]
+  assign controller_io_srams_iob_7_dout = spad_io_srams_7_dout; // @[src/main/scala/LinGoWithAXI.scala 85:17]
+  assign controller_io_srams_iob_8_dout = spad_io_srams_8_dout; // @[src/main/scala/LinGoWithAXI.scala 85:17]
+  assign controller_io_srams_iob_9_dout = spad_io_srams_9_dout; // @[src/main/scala/LinGoWithAXI.scala 85:17]
+  assign controller_io_srams_iob_10_dout = spad_io_srams_10_dout; // @[src/main/scala/LinGoWithAXI.scala 85:17]
+  assign controller_io_srams_iob_11_dout = spad_io_srams_11_dout; // @[src/main/scala/LinGoWithAXI.scala 85:17]
+  assign controller_io_sram_cfg_dout = spad_io_sram_last_dout; // @[src/main/scala/LinGoWithAXI.scala 86:21]
 endmodule
 
 // `timescale 1ns / 1ps
-module CPA_tree_with_MAD#(parameter WIDTH32 = 32  
+//@yuan: adding support for float-point number
+//TODO: adding support for NaN, Inf
+module segSel #(parameter WIDTH32 = 32  
 )(
-    input clk,
-    input rstn,
-    input [WIDTH32-1:0] t0,
-    input [WIDTH32-1:0] t1,
-    input [WIDTH32-1:0] t2,
-    input [WIDTH32-1:0] t3,
-    input [WIDTH32-1:0] t4,
-    input float_flag,
-    input [WIDTH32-1:0] bias,
-
-    output float_overflow,
-    output float_underflow,
-    output cpa_overflow,
-    output [WIDTH32-1:0] tri_result
+    input [WIDTH32 - 1:0] x_in,
+    input is_fp,
+    input [5*WIDTH32 - 1:0] break_points_in,
+    output [4:0] log2_out
 );
-    //@zou 默认执行求和方式
-    // wire [WIDTH32-1:0] channel0_CPA;
-    // wire [WIDTH32-1:0] channel1_CPA;
-    // wire [WIDTH32-1:0] channel2_CPA;
-    // wire [WIDTH32-1:0] channel3_CPA;
-
-
-    wire [WIDTH32-1:0] CPA0_a;
-    wire [WIDTH32-1:0] CPA0_b;
-    assign CPA0_a = t0;
-    assign CPA0_b = t1;
-    wire CPA0_overflow;
-    wire CPA0_cpa_overflow;
-    wire CPA0_underflow;
-    wire [WIDTH32-1:0] CPA0_result;
-
-    CPA_float_add cpa_add0(
-        .clk(clk),
-        .rstn(rstn),
-        .float_flag(float_flag),
-        .input_x0(CPA0_a),
-        .input_x1(CPA0_b),
-        .TRi(1'b0),
-        .final_result(CPA0_result),
-        .cpa_overflow(CPA0_cpa_overflow),
-        .overflow(CPA0_overflow),
-        .underflow(CPA0_underflow)
-    );
-
-
-    wire [WIDTH32-1:0] CPA1_a;
-    wire [WIDTH32-1:0] CPA1_b;
-    assign CPA1_a = t2;
-    assign CPA1_b = t3;
-    wire CPA1_overflow;
-    wire CPA1_cpa_overflow;
-    wire CPA1_underflow;
-    wire [WIDTH32-1:0] CPA1_result;
-
-    CPA_float_add cpa_add1(
-        .clk(clk),
-        .rstn(rstn),
-        .float_flag(float_flag),
-        .input_x0(CPA1_a),
-        .input_x1(CPA1_b),
-        .TRi(1'b0),
-        .final_result(CPA1_result),
-        .cpa_overflow(CPA1_cpa_overflow),
-        .overflow(CPA1_overflow),
-        .underflow(CPA1_underflow)
-    );
-
-
-    wire [WIDTH32-1:0] CPA2_a;
-    wire [WIDTH32-1:0] CPA2_b;
-    assign CPA2_a = t4;
-    assign CPA2_b = bias;
-    wire CPA2_overflow;
-    wire CPA2_cpa_overflow;
-    wire CPA2_underflow;
-    wire [WIDTH32-1:0] CPA2_result;
-
-    CPA_float_add cpa_add2(
-        .clk(clk),
-        .rstn(rstn),
-        .float_flag(float_flag),
-        .input_x0(CPA2_a),
-        .input_x1(CPA2_b),
-        .TRi(1'b0),
-        .final_result(CPA2_result),
-        .cpa_overflow(CPA2_cpa_overflow),
-        .overflow(CPA2_overflow),
-        .underflow(CPA2_underflow)
-    );
-
-
-
-
-    wire [WIDTH32-1:0] CPA3_a;
-    wire [WIDTH32-1:0] CPA3_b;
-    assign CPA3_a = CPA0_result;
-    assign CPA3_b = CPA1_result;
-    wire CPA3_overflow;
-    wire CPA3_cpa_overflow;
-    wire CPA3_underflow;
-    wire [WIDTH32-1:0] CPA3_result;
-    CPA_float_add_all_reg cpa_add3(
-        .clk(clk),
-        .rstn(rstn),
-        .float_flag(float_flag),
-        .input_x0(CPA3_a),
-        .input_x1(CPA3_b),
-        .TRi(1'b0),
-        .final_result(CPA3_result),
-        .cpa_overflow(CPA3_cpa_overflow),
-        .overflow(CPA3_overflow),
-        .underflow(CPA3_underflow)
-    );
-
-    wire [WIDTH32-1:0] CPA4_a;
-    wire [WIDTH32-1:0] CPA4_b;
-    //@yuan: we should delay the result of CPA2 to make data being synchronized
-    reg [WIDTH32-1:0] CPA2_result_reg;
-    always@(posedge clk or negedge rstn)begin
-        if(!rstn)begin
-            CPA2_result_reg <= 0;
-        end else begin
-            CPA2_result_reg <= CPA2_result;
-        end
+    reg [WIDTH32 - 1:0] break_point [4:0];
+    reg break_point_sign [4:0];
+    integer i;
+    always@(*)begin
+        for(i = 0; i < 5; i = i + 1)begin
+            if(is_fp)begin
+                break_point[i] = {1'b0, break_points_in[(i+1)*WIDTH32 - 2 -: (WIDTH32 - 1)]} ; //@yuan: for float-point, we only need the significand/fraction field
+            end 
+            else begin
+                break_point[i] = break_points_in[(i+1)*WIDTH32 - 1 -: WIDTH32];
+            end 
+            break_point_sign[i] = break_points_in[(i+1)*WIDTH32 - 1];
+        end //fixed <=
     end
-    assign CPA4_a = CPA3_result;
-    assign CPA4_b = CPA2_result_reg;
-    wire CPA4_overflow;
-    wire CPA4_cpa_overflow;
-    wire CPA4_underflow;
-    wire [WIDTH32-1:0] CPA4_result;
-    CPA_float_add_all_reg cpa_add4(
-        .clk(clk),
-        .rstn(rstn),
-        .float_flag(float_flag),
-        .input_x0(CPA4_a),
-        .input_x1(CPA4_b),
-        .TRi(1'b0),
-        .final_result(CPA4_result),
-        .cpa_overflow(CPA4_cpa_overflow),
-        .overflow(CPA4_overflow),
-        .underflow(CPA4_underflow)
-    );
+
+    wire [WIDTH32 - 1:0] x_op;
+    assign x_op = is_fp ? {1'b0, x_in[WIDTH32 - 2 : 0]} : x_in;
     
-    assign float_overflow = (float_flag==1'b1)&&(CPA0_overflow|CPA1_overflow|CPA2_overflow|CPA3_overflow|CPA4_overflow);
-    assign float_underflow = (float_flag==1'b1)&&(CPA0_underflow|CPA1_underflow|CPA2_underflow|CPA3_underflow|CPA4_underflow);
-    assign cpa_overflow = CPA0_cpa_overflow | CPA1_cpa_overflow | CPA2_cpa_overflow | CPA3_cpa_overflow | CPA4_cpa_overflow;
-    assign tri_result = CPA4_result;
-endmodule
+    genvar j;
+    wire [4:0] is_both_zero;
+    wire [4:0] is_same_sign;
+    generate
+        for(j = 0; j < 5; j = j + 1)begin: break_is_zero
+            assign is_both_zero[j] = (~|break_point[j]) & (~|x_op);
+            assign is_same_sign[j] = break_point_sign[j] == x_in[WIDTH32 - 1];
+        end    
+    endgenerate
 
+    wire [4:0] cmp_result;
+    generate
+        for(j = 0; j < 5; j = j + 1)begin: cmp//@yuan: reusing the comparator
+            assign cmp_result[j] = $signed(x_op) > $signed(break_point[j]) ? 1'b1 : 1'b0 ;
+        end    
+    endgenerate
 
-
-
-
-module CPA_cpatree #(parameter N = 32)(
-    input [N-1:0] a,
-    input [N-1:0] b,
-    input TRi,
-    output [N-1:0] sum,
-    output overflow
-);
-    assign sum = a + b + TRi;  // Simple binary addition
-    assign overflow = (a[N-1] == b[N-1]) && (sum[N-1] != a[N-1]);
-endmodule
-
-module CPA_float_add#(parameter WIDTH32 = 32
-)(
-    input clk,
-    input rstn,
-    input float_flag,
-    input [WIDTH32-1:0] input_x0,
-    input [WIDTH32-1:0] input_x1,
-    input TRi,
-    output [WIDTH32-1:0] final_result,
-    output cpa_overflow,
-    output reg overflow,
-    output reg underflow
-);
     
-    //对阶
-    wire [8:0] subexponet;
-    wire [8:0] exponent0;
-    wire [8:0] exponent1;
-    assign exponent0 = {1'b0, input_x0[30:23]};
-    assign exponent1 = {1'b1, ~input_x1[30:23]};
-    assign subexponet = exponent0 + exponent1 + 1'b1;
+    //if the break point is 0, the segment should be selected the right side
+    generate
+        for(j = 0; j < 5; j = j + 1)begin: result
+            assign log2_out[j] = is_fp ?  is_both_zero[j] ? 1'b1 : is_same_sign[j] ? x_in[WIDTH32 - 1] ^ cmp_result[j] : !x_in[WIDTH32 - 1] : cmp_result[j];
+        end    
+    endgenerate
 
-    wire [7:0] normal_exponent = (subexponet[8]==1'b0) ? input_x0[30:23] : input_x1[30:23];//取较大的指数
-
-    wire [22:0] Mantissa0;
-    wire [22:0] Mantissa1;
-    assign Mantissa0 = input_x0[22:0];
-    assign Mantissa1 = input_x1[22:0];
-    wire [8:0] abs_subexponet;
-    assign abs_subexponet = (subexponet[8]==1'b0)?subexponet:(~subexponet+1'b1);
-
-    wire [22:0] a;
-    wire [23:0] b;
-    assign a = (subexponet[8]==1'b1) ? Mantissa1 : Mantissa0;//不移动的尾数
-    //@yuan: for the Denormalized （specially, the 0）
-    wire [23:0] frac0, frac1;
-    assign frac0 = (input_x0[30:23] == 8'b0) ? {1'b0, Mantissa0} : {1'b1, Mantissa0};
-    assign frac1 = (input_x1[30:23] == 8'b0) ? {1'b0, Mantissa1} : {1'b1, Mantissa1};
-    wire [23:0] input_shift;
-    // assign input_shift = (subexponet[8]==1'b0) ? {1'b1, Mantissa1} : {1'b1, Mantissa0};
-    assign input_shift = (subexponet[8]==1'b0) ? frac1 : frac0;
-
-    wire [4:0] shift_b;
-    assign shift_b = (abs_subexponet[8:5] == 4'b0000) ? abs_subexponet[4:0] : 5'b11111;
-    assign b = input_shift>>shift_b;//对指数较小的尾数进行右移动，由于只有24bit，所以只取后面5bit即可
-    // wire over_subexponent;
-    // assign over_subexponent = ~(abs_subexponet[8:5] == 4'b0);//指数过大的情况，意味着，两个数相差过大
-    //尾数求和
-    // reg [25:0] add_a;
-    reg [31:0] add_b;
-    reg sub;
-    wire [1:0] x_sign;
-    assign x_sign = {input_x0[31],input_x1[31]};
-    always @(*) begin
-        case(x_sign)
-            // 2'b00,2'b11:begin add_a = {3'b001, a}; add_b = {8'b00, b}; sub = 1'b0; end
-            // 2'b01,2'b10:begin add_a = {3'b001, a}; add_b = {8'b11111111, ~b}; sub = 1'b1; end
-            2'b00,2'b11:begin add_b = {8'b0, b}; sub = 1'b0; end
-            2'b01,2'b10:begin add_b = {8'b11111111, ~b}; sub = 1'b1; end
-        endcase
-    end
-    wire [31:0] result;
-    wire [31:0] fixed_point_result;
-    wire [31:0] cpa_a, cpa_b;
-    wire cpa_TRi;
-    wire cpa_overflow_mantissa;
-    wire cpa_overflow_fixed_point;
-    assign cpa_TRi = sub;
-    assign cpa_a = {8'b0, 1'b1, a};
-    assign cpa_b = add_b;
-    //@yuan: for the mantissa addition
-    CPA_cpatree cpa_0(
-        .a(cpa_a),
-        .b(cpa_b),
-        .TRi(cpa_TRi),
-        .sum(result),
-        .overflow(cpa_overflow_mantissa)
-    );
-    //for the fixed point addition
-    CPA_cpatree cpa_fixed_adder(
-        .a(input_x0),
-        .b(input_x1),
-        .TRi(TRi),
-        .sum(fixed_point_result),
-        .overflow(cpa_overflow_fixed_point)
-    );
-    //规范化
-    wire [25:0] abs_result;
-    assign abs_result = (result[25]==1'b0) ? result[25:0] : (~result[25:0] + 1'b1);
-    wire [5:0] k;//高位是符号位
-    wire [22:0] new_result;
-    FLOAT_ADD_LOD1 lod(
-        .x_in(abs_result[24:0]),
-        .k(k),
-        .result(new_result)
-    );
-    wire [7:0] final_result_exponent;
-    wire [22:0] final_result_Mantissa;
-    wire [8:0] final_sub_exponent;
-    wire [8:0] final_sub_k;
-    //@yuan: the underflow and overflow signals should be delayed 1 cycle, as the same as the final result
-    wire underflow_temp, overflow_temp;
-    assign final_sub_k = ~{{3{k[5]}}, k} + 1'b1;
-    assign final_sub_exponent = {1'b0, normal_exponent}+final_sub_k;
-    assign underflow_temp = (input_x0[31] ^ input_x1[31]==1'b1) && (final_sub_exponent[8] ==1'b1 || k==6'b011111);//相减之后为0，或者指数减去k后小于0。
-
-    assign overflow_temp = (normal_exponent[7:0] == 8'b11111111) && (input_x0[31] ^ input_x1[31]==1'b0);
-    assign final_result_exponent = (underflow_temp==1'b1)? 8'b0:((overflow_temp==1'b1)? 8'b11111111: final_sub_exponent[7:0]);//下溢出时取最小的，上溢出取最大的
-    assign final_result_Mantissa = (underflow_temp==1'b1)? 23'b0:((overflow_temp==1'b1)? 23'b11111111111111111111111 : new_result);
-    reg final_sign;
-    always @(*) begin
-        case({input_x0[31], input_x1[31], subexponet[8], result[24]})
-            4'b0000: final_sign=1'b0;
-            4'b0001: final_sign=1'b0;
-            4'b0010: final_sign=1'b0;
-            4'b0011: final_sign=1'b0;
-            4'b1100: final_sign=1'b1;
-            4'b1101: final_sign=1'b1;
-            4'b1110: final_sign=1'b1;
-            4'b1111: final_sign=1'b1;
-            4'b0100: final_sign=1'b0;
-            4'b0101: final_sign=1'b1;
-            4'b0110: final_sign=1'b1;
-            4'b0111: final_sign=1'b0;
-            4'b1000: final_sign=1'b1;
-            4'b1001: final_sign=1'b0;
-            4'b1010: final_sign=1'b0;
-            4'b1011: final_sign=1'b1;
-        endcase
-    end
-    wire [31:0] final_result_float;
-    assign final_result_float = {final_sign, final_result_exponent, final_result_Mantissa};
-    //TODO: Adding a Round module
-    //@yuan: add one register at the ouput of float-addition to improving timing performance
-    reg [WIDTH32 - 1 : 0] final_result_float_reg;
-    reg cpa_overflow_mantissa_reg;
-    always@(posedge clk or negedge rstn)begin
-        if(!rstn)begin
-            final_result_float_reg <= 0;
-            overflow <= 1'b0;
-            underflow <= 1'b0;
-            cpa_overflow_mantissa_reg <= 1'b0;
-        end else begin
-            final_result_float_reg <= final_result_float;
-            overflow <= overflow_temp;
-            underflow <= underflow_temp;
-            cpa_overflow_mantissa_reg <= cpa_overflow_mantissa;
-        end
-    end
-    assign cpa_overflow = (float_flag==1'b1) ? cpa_overflow_mantissa_reg : cpa_overflow_fixed_point;
-    assign final_result = (float_flag==1'b1) ? final_result_float_reg : fixed_point_result;
-endmodule
-
-module CPA_float_add_all_reg#(parameter WIDTH32 = 32
-)(
-    input clk,
-    input rstn,
-    input float_flag,
-    input [WIDTH32-1:0] input_x0,
-    input [WIDTH32-1:0] input_x1,
-    input TRi,
-    output [WIDTH32-1:0] final_result,
-    output reg cpa_overflow,
-    output reg overflow,
-    output reg underflow
-);
-    
-    //对阶
-    wire [8:0] subexponet;
-    wire [8:0] exponent0;
-    wire [8:0] exponent1;
-    assign exponent0 = {1'b0, input_x0[30:23]};
-    assign exponent1 = {1'b1, ~input_x1[30:23]};
-    assign subexponet = exponent0 + exponent1 + 1'b1;
-
-    wire [7:0] normal_exponent = (subexponet[8]==1'b0) ? input_x0[30:23] : input_x1[30:23];//取较大的指数
-
-    wire [22:0] Mantissa0;
-    wire [22:0] Mantissa1;
-    assign Mantissa0 = input_x0[22:0];
-    assign Mantissa1 = input_x1[22:0];
-    wire [8:0] abs_subexponet;
-    assign abs_subexponet = (subexponet[8]==1'b0)?subexponet:(~subexponet+1'b1);
-
-    wire [22:0] a;
-    wire [23:0] b;
-    assign a = (subexponet[8]==1'b1) ? Mantissa1 : Mantissa0;//不移动的尾数
-    //@yuan: for the Denormalized （specially, the 0）
-    wire [23:0] frac0, frac1;
-    assign frac0 = (input_x0[30:23] == 8'b0) ? {1'b0, Mantissa0} : {1'b1, Mantissa0};
-    assign frac1 = (input_x1[30:23] == 8'b0) ? {1'b0, Mantissa1} : {1'b1, Mantissa1};
-    wire [23:0] input_shift;
-    // assign input_shift = (subexponet[8]==1'b0) ? {1'b1, Mantissa1} : {1'b1, Mantissa0};
-    assign input_shift = (subexponet[8]==1'b0) ? frac1 : frac0;
-
-    wire [4:0] shift_b;
-    assign shift_b = (abs_subexponet[8:5] == 4'b0000) ? abs_subexponet[4:0] : 5'b11111;
-    assign b = input_shift>>shift_b;//对指数较小的尾数进行右移动，由于只有24bit，所以只取后面5bit即可
-    // assign b = input_shift>>abs_subexponet;//对指数较小的尾数进行右移动，由于只有24为，所以只取后面5bit尽可
-    // wire over_subexponent;
-    // assign over_subexponent = ~(abs_subexponet[8:5] == 4'b0);//指数过大的情况，意味着，两个数相差过大
-    //尾数求和
-    // reg [25:0] add_a;
-    reg [31:0] add_b;
-    reg sub;
-    wire [1:0] x_sign;
-    assign x_sign = {input_x0[31],input_x1[31]};
-    always @(*) begin
-        case(x_sign)
-            // 2'b00,2'b11:begin add_a = {3'b001, a}; add_b = {8'b00, b}; sub = 1'b0; end
-            // 2'b01,2'b10:begin add_a = {3'b001, a}; add_b = {8'b11111111, ~b}; sub = 1'b1; end
-            2'b00,2'b11:begin add_b = {8'b0, b}; sub = 1'b0; end
-            2'b01,2'b10:begin add_b = {8'b11111111, ~b}; sub = 1'b1; end
-        endcase
-    end
-    wire [31:0] result;
-    wire [31:0] cpa_a, cpa_b;
-    wire cpa_TRi;
-    wire cpa_overflow_temp;
-    assign cpa_TRi = (float_flag==1'b1) ? sub : TRi;
-    assign cpa_a = (float_flag==1'b1) ? {8'b0, 1'b1, a} : input_x0;
-    assign cpa_b = (float_flag==1'b1) ? add_b : input_x1;
-
-    CPA_cpatree cpa_0(
-        .a(cpa_a),
-        .b(cpa_b),
-        .TRi(cpa_TRi),
-        .sum(result),
-        .overflow(cpa_overflow_temp)
-    );
-
-    //规范化
-    wire [25:0] abs_result;
-    assign abs_result = (result[25]==1'b0) ? result[25:0] : (~result[25:0] + 1'b1);
-    wire [5:0] k;//高位是符号位
-    wire [22:0] new_result;
-    FLOAT_ADD_LOD1 lod(
-        .x_in(abs_result[24:0]),
-        .k(k),
-        .result(new_result)
-    );
-    wire [7:0] final_result_exponent;
-    wire [22:0] final_result_Mantissa;
-    wire [8:0] final_sub_exponent;
-    wire [8:0] final_sub_k;
-    //@yuan: the underflow and overflow signals should be delayed 1 cycle, as the same as the final result
-    wire underflow_temp, overflow_temp;
-    assign final_sub_k = ~{{3{k[5]}}, k} + 1'b1;
-    assign final_sub_exponent = {1'b0, normal_exponent}+final_sub_k;
-    assign underflow_temp = (input_x0[31] ^ input_x1[31]==1'b1) && (final_sub_exponent[8] ==1'b1 || k==6'b011111);//相减之后为0，或者指数减去k后小于0。
-
-    assign overflow_temp = (normal_exponent[7:0] == 8'b11111111) && (input_x0[31] ^ input_x1[31]==1'b0);
-    assign final_result_exponent = (underflow_temp==1'b1)? 8'b0:((overflow_temp==1'b1)? 8'b11111111: final_sub_exponent[7:0]);//下溢出时取最小的，上溢出取最大的
-    assign final_result_Mantissa = (underflow_temp==1'b1)? 23'b0:((overflow_temp==1'b1)? 23'b11111111111111111111111 : new_result);
-    reg final_sign;
-    always @(*) begin
-        case({input_x0[31], input_x1[31], subexponet[8], result[24]})
-            4'b0000: final_sign=1'b0;
-            4'b0001: final_sign=1'b0;
-            4'b0010: final_sign=1'b0;
-            4'b0011: final_sign=1'b0;
-            4'b1100: final_sign=1'b1;
-            4'b1101: final_sign=1'b1;
-            4'b1110: final_sign=1'b1;
-            4'b1111: final_sign=1'b1;
-            4'b0100: final_sign=1'b0;
-            4'b0101: final_sign=1'b1;
-            4'b0110: final_sign=1'b1;
-            4'b0111: final_sign=1'b0;
-            4'b1000: final_sign=1'b1;
-            4'b1001: final_sign=1'b0;
-            4'b1010: final_sign=1'b0;
-            4'b1011: final_sign=1'b1;
-        endcase
-    end
-    wire [31:0] final_result_float;
-    assign final_result_float = {final_sign, final_result_exponent, final_result_Mantissa};
-    //TODO: Adding a Round module
-    //@yuan: add one register at the ouput of float-addition to improving timing performance
-    reg [WIDTH32 - 1 : 0] final_result_float_reg;
-    reg [WIDTH32 - 1 : 0] fixed_point_result_reg;
-    always@(posedge clk or negedge rstn)begin
-        if(!rstn)begin
-            final_result_float_reg <= 0;
-            fixed_point_result_reg <= 0;
-            overflow <= 1'b0;
-            underflow <= 1'b0;
-            cpa_overflow <= 1'b0;
-        end else begin
-            final_result_float_reg <= final_result_float;
-            fixed_point_result_reg <= result;
-            overflow <= overflow_temp;
-            underflow <= underflow_temp;
-            cpa_overflow <= cpa_overflow_temp;
-        end
-    end
-    // assign cpa_overflow = (float_flag==1'b1) ? cpa_overflow_mantissa_reg : cpa_overflow_fixed_point_reg;
-    assign final_result = (float_flag==1'b1) ? final_result_float_reg : fixed_point_result_reg;
-endmodule
-
-// module CPA_float_add_last#(parameter WIDTH32 = 32
-// )(
-//     input clk,
-//     inout rstn,
-//     input float_flag,
-//     input [WIDTH32-1:0] input_x0,
-//     input [WIDTH32-1:0] input_x1,
-//     input TRi,
-//     output [WIDTH32-1:0] final_result,
-//     output cpa_overflow,
-//     output reg overflow,
-//     output reg underflow
-// );
-    
-//     //对阶
-//     wire [8:0] subexponet;
-//     wire [8:0] exponent0;
-//     wire [8:0] exponent1;
-//     assign exponent0 = {1'b0, input_x0[30:23]};
-//     assign exponent1 = {1'b1, ~input_x1[30:23]};
-//     assign subexponet = exponent0 + exponent1 + 1'b1;
-
-//     wire [7:0] normal_exponent = (subexponet[8]==1'b0) ? input_x0[30:23] : input_x1[30:23];//取较大的指数
-
-//     wire [22:0] Mantissa0;
-//     wire [22:0] Mantissa1;
-//     assign Mantissa0 = input_x0[22:0];
-//     assign Mantissa1 = input_x1[22:0];
-//     wire [8:0] abs_subexponet;
-//     assign abs_subexponet = (subexponet[8]==1'b0)?subexponet:(~subexponet+1'b1);
-
-//     wire [22:0] a;
-//     wire [23:0] b;
-//     assign a = (subexponet[8]==1'b1) ? Mantissa1 : Mantissa0;//不移动的尾数
-//     //@yuan: for the Denormalized （specially, the 0）
-//     wire [23:0] frac0, frac1;
-//     assign frac0 = (input_x0[30:23] == 8'b0) ? {1'b0, Mantissa0} : {1'b1, Mantissa0};
-//     assign frac1 = (input_x1[30:23] == 8'b0) ? {1'b0, Mantissa1} : {1'b1, Mantissa1};
-//     wire [23:0] input_shift;
-//     // assign input_shift = (subexponet[8]==1'b0) ? {1'b1, Mantissa1} : {1'b1, Mantissa0};
-//     assign input_shift = (subexponet[8]==1'b0) ? frac1 : frac0;
-//     assign b = input_shift>>abs_subexponet;//对指数较小的尾数进行右移动，由于只有24为，所以只取后面5bit尽可
-//     wire over_subexponent;
-//     assign over_subexponent = ~(abs_subexponet[8:5] == 4'b0);//指数过大的情况，意味着，两个数相差过大
-//     //尾数求和
-//     reg [25:0] add_a;
-//     reg [31:0] add_b;
-//     reg sub;
-//     wire [1:0] x_sign;
-//     assign x_sign = {input_x0[31],input_x1[31]};
-//     always @(*) begin
-//         case(x_sign)
-//             2'b00,2'b11:begin add_a = {3'b001, a}; add_b = {8'b00, b}; sub = 1'b0; end
-//             2'b01,2'b10:begin add_a = {3'b001, a}; add_b = {8'b11111111, ~b}; sub = 1'b1; end
-//         endcase
-//     end
-//     wire [31:0] result;
-//     wire [31:0] fixed_point_result;
-//     wire [31:0] cpa_a, cpa_b;
-//     wire cpa_TRi;
-//     wire cpa_overflow_mantissa;
-//     wire cpa_overflow_fixed_point;
-//     assign cpa_TRi = sub;
-//     assign cpa_a = {6'b0, add_a};
-//     assign cpa_b = add_b;
-//     //@yuan: for the mantissa addition
-//     CPA_cpatree cpa_0(
-//         .a(cpa_a),
-//         .b(cpa_b),
-//         .TRi(cpa_TRi),
-//         .sum(result),
-//         .overflow(cpa_overflow_mantissa)
-//     );
-//     //for the fixed point addition
-//     CPA_cpatree cpa_fixed_adder(
-//         .a(input_x0),
-//         .b(input_x1),
-//         .TRi(TRi),
-//         .sum(fixed_point_result),
-//         .overflow(cpa_overflow_fixed_point)
-//     );
-//     //规范化
-//     wire [25:0] abs_result;
-//     assign abs_result = (result[25]==1'b0) ? result[25:0] : (~result[25:0] + 1'b1);
-//     wire [5:0] k;//高位是符号位
-//     wire [22:0] new_result;
-//     FLOAT_ADD_LOD1 lod(
-//         .x_in(abs_result[24:0]),
-//         .k(k),
-//         .result(new_result)
-//     );
-//     wire [7:0] final_result_exponent;
-//     wire [22:0] final_result_Mantissa;
-//     wire [8:0] final_sub_exponent;
-//     wire [8:0] final_sub_k;
-//     //@yuan: the underflow and overflow signals should be delayed 1 cycle, as the same as the final result
-//     wire underflow_temp, overflow_temp;
-//     assign final_sub_k = ~{{3{k[5]}}, k} + 1'b1;
-//     assign final_sub_exponent = {1'b0, normal_exponent}+final_sub_k;
-//     assign underflow_temp = (input_x0[31] ^ input_x1[31]==1'b1) && (final_sub_exponent[8] ==1'b1 || k==6'b011111);//相减之后为0，或者指数减去k后小于0。
-
-//     assign overflow_temp = (normal_exponent[7:0] == 8'b11111111) && (input_x0[31] ^ input_x1[31]==1'b0);
-//     assign final_result_exponent = (underflow_temp==1'b1)? 8'b0:((overflow_temp==1'b1)? 8'b11111111: final_sub_exponent[7:0]);//下溢出时取最小的，上溢出取最大的
-//     assign final_result_Mantissa = (underflow_temp==1'b1)? 23'b0:((overflow_temp==1'b1)? 23'b11111111111111111111111 : new_result);
-//     reg final_sign;
-//     always @(*) begin
-//         case({input_x0[31], input_x1[31], subexponet[8], result[24]})
-//             4'b0000: final_sign=1'b0;
-//             4'b0001: final_sign=1'b0;
-//             4'b0010: final_sign=1'b0;
-//             4'b0011: final_sign=1'b0;
-//             4'b1100: final_sign=1'b1;
-//             4'b1101: final_sign=1'b1;
-//             4'b1110: final_sign=1'b1;
-//             4'b1111: final_sign=1'b1;
-//             4'b0100: final_sign=1'b0;
-//             4'b0101: final_sign=1'b1;
-//             4'b0110: final_sign=1'b1;
-//             4'b0111: final_sign=1'b0;
-//             4'b1000: final_sign=1'b1;
-//             4'b1001: final_sign=1'b0;
-//             4'b1010: final_sign=1'b0;
-//             4'b1011: final_sign=1'b1;
-//         endcase
-//     end
-//     wire [31:0] final_result_float;
-//     assign final_result_float = {final_sign, final_result_exponent, final_result_Mantissa};
-//     //TODO: Adding a Round module
-//     //@yuan: add one register at the ouput of float-addition to improving timing performance
-//     reg [WIDTH32 - 1 : 0] final_result_float_reg;
-//     reg [WIDTH32 - 1 : 0] fixed_point_result_reg;
-//     reg cpa_overflow_mantissa_reg;
-//     reg cpa_overflow_fixed_point_reg;
-//     always@(posedge clk or negedge rstn)begin
-//         if(!rstn)begin
-//             final_result_float_reg <= 0;
-//             fixed_point_result_reg <= 0;
-//             overflow <= 1'b0;
-//             underflow <= 1'b0;
-//             cpa_overflow_fixed_point_reg <= 1'b0;
-//             cpa_overflow_mantissa_reg <= 1'b0;
-//         end else begin
-//             final_result_float_reg <= final_result_float;
-//             fixed_point_result_reg <= fixed_point_result;
-//             overflow <= overflow_temp;
-//             underflow <= underflow_temp;
-//             cpa_overflow_fixed_point_reg <= cpa_overflow_fixed_point;
-//             cpa_overflow_mantissa_reg <= cpa_overflow_mantissa;
-//         end
-//     end
-//     assign cpa_overflow = (float_flag==1'b1) ? cpa_overflow_mantissa_reg : cpa_overflow_fixed_point_reg;
-//     assign final_result = (float_flag==1'b1) ? final_result_float_reg : fixed_point_result_reg;
-// endmodule
-
-// module CPA_float_add#(parameter WIDTH32 = 32
-// )(
-//     input clk,
-//     inout rstn,
-//     input float_flag,
-//     input [WIDTH32-1:0] input_x0,
-//     input [WIDTH32-1:0] input_x1,
-//     input TRi,
-//     output [WIDTH32-1:0] final_result,
-//     output cpa_overflow,
-//     output overflow,
-//     output underflow
-// );
-    
-//     //对阶
-//     wire [8:0] subexponet;
-//     wire [8:0] exponent0;
-//     wire [8:0] exponent1;
-//     assign exponent0 = {1'b0, input_x0[30:23]};
-//     assign exponent1 = {1'b1, ~input_x1[30:23]};
-//     assign subexponet = exponent0 + exponent1 + 1'b1;
-
-//     wire [7:0] normal_exponent = (subexponet[8]==1'b0) ? input_x0[30:23] : input_x1[30:23];//取较大的指数
-
-//     wire [22:0] Mantissa0;
-//     wire [22:0] Mantissa1;
-//     assign Mantissa0 = input_x0[22:0];
-//     assign Mantissa1 = input_x1[22:0];
-//     wire [8:0] abs_subexponet;
-//     assign abs_subexponet = (subexponet[8]==1'b0)?subexponet:(~subexponet+1'b1);
-
-//     wire [22:0] a;
-//     wire [23:0] b;
-//     assign a = (subexponet[8]==1'b1) ? Mantissa1 : Mantissa0;//不移动的尾数
-//     //@yuan: for the Denormalized （specially, the 0）
-//     wire [23:0] frac0, frac1;
-//     assign frac0 = (input_x0[30:23] == 8'b0) ? {1'b0, Mantissa0} : {1'b1, Mantissa0};
-//     assign frac1 = (input_x1[30:23] == 8'b0) ? {1'b0, Mantissa1} : {1'b1, Mantissa1};
-//     wire [23:0] input_shift;
-//     // assign input_shift = (subexponet[8]==1'b0) ? {1'b1, Mantissa1} : {1'b1, Mantissa0};
-//     assign input_shift = (subexponet[8]==1'b0) ? frac1 : frac0;
-//     assign b = input_shift>>abs_subexponet;//对指数较小的尾数进行右移动，由于只有24为，所以只取后面5bit尽可
-//     wire over_subexponent;
-//     assign over_subexponent = ~(abs_subexponet[8:5] == 4'b0);//指数过大的情况，意味着，两个数相差过大
-//     //尾数求和
-//     reg [25:0] add_a;
-//     reg [31:0] add_b;
-//     reg sub;
-//     wire [1:0] x_sign;
-//     assign x_sign = {input_x0[31],input_x1[31]};
-//     always @(*) begin
-//         case(x_sign)
-//             2'b00,2'b11:begin add_a = {3'b001, a}; add_b = {8'b00, b}; sub = 1'b0; end
-//             2'b01,2'b10:begin add_a = {3'b001, a}; add_b = {8'b11111111, ~b}; sub = 1'b1; end
-//         endcase
-//     end
-//     wire [31:0] result;
-//     wire [31:0] cpa_a, cpa_b;
-//     wire cpa_TRi;
-//     assign cpa_TRi = (float_flag==1'b1) ? sub : TRi;
-//     assign cpa_a = (float_flag==1'b1) ? {6'b0, add_a} : input_x0;
-//     assign cpa_b = (float_flag==1'b1) ? add_b : input_x1;
-
-//     CPA_cpatree cpa_0(
-//         .a(cpa_a),
-//         .b(cpa_b),
-//         .TRi(cpa_TRi),
-//         .sum(result),
-//         .overflow(cpa_overflow)
-//     );
-
-//     //规范化
-//     wire [25:0] abs_result;
-//     assign abs_result = (result[25]==1'b0) ? result[25:0] : (~result[25:0] + 1'b1);
-//     wire [5:0] k;//高位是符号位
-//     wire [22:0] new_result;
-//     FLOAT_ADD_LOD1 lod(
-//         .x_in(abs_result[24:0]),
-//         .k(k),
-//         .result(new_result)
-//     );
-//     wire [7:0] final_result_exponent;
-//     wire [22:0] final_result_Mantissa;
-//     wire [8:0] final_sub_exponent;
-//     wire [8:0] final_sub_k;
-//     assign final_sub_k = ~{{3{k[5]}}, k} + 1'b1;
-//     assign final_sub_exponent = {1'b0, normal_exponent}+final_sub_k;
-//     assign underflow = (input_x0[31] ^ input_x1[31]==1'b1) && (final_sub_exponent[8] ==1'b1 || k==6'b011111);//相减之后为0，或者指数减去k后小于0。
-
-//     assign overflow = (normal_exponent[7:0] == 8'b11111111) && (input_x0[31] ^ input_x1[31]==1'b0);
-//     assign final_result_exponent = (underflow==1'b1)? 8'b0:((overflow==1'b1)? 8'b11111111: final_sub_exponent[7:0]);//下溢出时取最小的，上溢出取最大的
-//     assign final_result_Mantissa = (underflow==1'b1)? 23'b0:((overflow==1'b1)? 23'b11111111111111111111111 : new_result);
-//     reg final_sign;
-//     always @(*) begin
-//         case({input_x0[31], input_x1[31], subexponet[8], result[24]})
-//             4'b0000: final_sign=1'b0;
-//             4'b0001: final_sign=1'b0;
-//             4'b0010: final_sign=1'b0;
-//             4'b0011: final_sign=1'b0;
-//             4'b1100: final_sign=1'b1;
-//             4'b1101: final_sign=1'b1;
-//             4'b1110: final_sign=1'b1;
-//             4'b1111: final_sign=1'b1;
-//             4'b0100: final_sign=1'b0;
-//             4'b0101: final_sign=1'b1;
-//             4'b0110: final_sign=1'b1;
-//             4'b0111: final_sign=1'b0;
-//             4'b1000: final_sign=1'b1;
-//             4'b1001: final_sign=1'b0;
-//             4'b1010: final_sign=1'b0;
-//             4'b1011: final_sign=1'b1;
-//         endcase
-//     end
-//     wire [31:0] final_result_float;
-//     assign final_result_float = {final_sign, final_result_exponent, final_result_Mantissa};
-//     //TODO: Adding a Round module
-//     //@yuan: add one register at the ouput of float-addition to improving timing performance
-//     // reg [WIDTH32 - 1 : 0] final_result_float_reg;
-//     // always@(posedge clk or negedge rstn)begin
-//     //     if(!rstn)begin
-//     //         final_result_float_reg <= 0;
-//     //     end else begin
-//     //         final_result_float_reg <= final_result_float;
-//     //     end
-//     // end
-//     assign final_result = (float_flag==1'b1) ? final_result_float : result;
-// endmodule
-
-//分组检测
-
-module FLOAT_ADD_LOD1 #(parameter WIDTH = 24
-)(
-    input [WIDTH:0] x_in,
-    output [5:0] k,
-    output [22:0] result
-);
-    wire [4:0] k_;
-    reg [22:0] result_;
-    FLOAT_ADD_leading_one_detector_24 leading_one_detector_1 (.in(x_in[23:0]), .msb_pos(k_));
-    always @(*) begin
-        case (k_)
-            5'd0: result_ = x_in[22:0];
-            5'd1: result_ = {x_in[21:0], 1'b0};
-            5'd2: result_ = {x_in[20:0], 2'b0};
-            5'd3: result_ = {x_in[19:0], 3'b0};
-            5'd4: result_ = {x_in[18:0], 4'b0};
-            5'd5: result_ = {x_in[17:0], 5'b0};
-            5'd6: result_ = {x_in[16:0], 6'b0};
-            5'd7: result_ = {x_in[15:0], 7'b0};
-            5'd8: result_ = {x_in[14:0], 8'b0};
-            5'd9: result_ = {x_in[13:0], 9'b0};
-            5'd10: result_ = {x_in[12:0], 10'b0};
-            5'd11: result_ = {x_in[11:0], 11'b0};
-            5'd12: result_ = {x_in[10:0], 12'b0};
-            5'd13: result_ = {x_in[9:0], 13'b0};
-            5'd14: result_ = {x_in[8:0], 14'b0};
-            5'd15: result_ = {x_in[7:0], 15'b0};
-            5'd16: result_ = {x_in[6:0], 16'b0};
-            5'd17: result_ = {x_in[5:0], 17'b0};
-            5'd18: result_ = {x_in[4:0], 18'b0};
-            5'd19: result_ = {x_in[3:0], 19'b0};
-            5'd20: result_ = {x_in[2:0], 20'b0};
-            5'd21: result_ = {x_in[1:0], 21'b0};
-            5'd22: result_ = {x_in[0], 22'b0};
-            default:  result_ = {23'b0};
-        endcase
-    end
-    assign result = (x_in[24] == 1'b1)?x_in[23:1]:result_;
-    assign k = (x_in[24] == 1'b1) ? 6'b111111 : {1'b0, k_};
-
-endmodule
-
-
-
-module FLOAT_ADD_leading_one_detector_4bit (
-    input [3:0] in,      // 4-bit input
-    output reg [1:0] msb_pos,  // MSB position within the 4 bits, 2-bit output (0-3)
-    output reg signal
-);
-    always @(*) begin
-        if(in == 4'b0000)
-            signal = 1'b0;
-        else
-            signal = 1'b1;
-        // casez (in)
-        //     4'b1???: msb_pos = 2'd0;
-        //     4'b01??: msb_pos = 2'd1;
-        //     4'b001?: msb_pos = 2'd2;
-        //     4'b0001: msb_pos = 2'd3;
-        //     default: msb_pos = 2'd0;  // Default case (this should never happen)
-        // endcase
-        if(in[3]) msb_pos = 2'd0;
-        else if(in[2]) msb_pos = 2'd1;
-        else if(in[1]) msb_pos = 2'd2;
-        else msb_pos = 2'd3;
-    end
-endmodule
-
-
-module FLOAT_ADD_leading_one_detector_24 (
-    input [23:0] in,     // 32-bit input
-    output reg [4:0] msb_pos  // MSB position, 5-bit output (0-31)
-);
-
-    wire [1:0] msb_group_1, msb_group_2, msb_group_3, msb_group_4;
-    wire [1:0] msb_group_5, msb_group_6;
-    wire signal1, signal2, signal3, signal4;
-    wire  signal5, signal6;
-
-    // Instantiate 8 4-bit Leading-One Detectors for each group
-    FLOAT_ADD_leading_one_detector_4bit group1 (.in(in[23:20]), .msb_pos(msb_group_1), .signal(signal1));
-    FLOAT_ADD_leading_one_detector_4bit group2 (.in(in[19:16]), .msb_pos(msb_group_2), .signal(signal2));
-    FLOAT_ADD_leading_one_detector_4bit group3 (.in(in[15:12]), .msb_pos(msb_group_3), .signal(signal3));
-    FLOAT_ADD_leading_one_detector_4bit group4 (.in(in[11:8]), .msb_pos(msb_group_4), .signal(signal4));
-    FLOAT_ADD_leading_one_detector_4bit group5 (.in(in[7:4]), .msb_pos(msb_group_5), .signal(signal5));
-    FLOAT_ADD_leading_one_detector_4bit group6 (.in(in[3:0]), .msb_pos(msb_group_6), .signal(signal6));
-    always @(*) begin
-        // Combine results from each group to determine the final MSB position
-        if (signal1) msb_pos = {3'b000, msb_group_1};  // Position in the first group (0-3)
-        else if (signal2) msb_pos = {3'b001, msb_group_2};
-        else if (signal3) msb_pos = {3'b010, msb_group_3};
-        else if (signal4) msb_pos = {3'b011, msb_group_4};
-        else if (signal5) msb_pos = {3'b100, msb_group_5};
-        else if (signal6) msb_pos = {3'b101, msb_group_6};
-        else msb_pos = 5'b11111;  // Default case (this should never happen)
-    end
-endmodule
+    // assign log2_out[0] = is_fp ?  is_both_zero[0] ? 1'b1 : is_same_sign[0] ? x_in[WIDTH32 - 1] ^ cmp_result[0] : !x_in[WIDTH32 - 1] : cmp_result[0];
+    // assign log2_out[1] = is_fp ?  is_both_zero[1] ? 1'b1 : is_same_sign[1] ? x_in[WIDTH32 - 1] ^ cmp_result[1] : !x_in[WIDTH32 - 1] : cmp_result[1];
+    // assign log2_out[2] = is_fp ?  is_both_zero[2] ? 1'b1 : is_same_sign[2] ? x_in[WIDTH32 - 1] ^ cmp_result[2] : !x_in[WIDTH32 - 1] : cmp_result[2];
+    // assign log2_out[3] = is_fp ?  is_both_zero[3] ? 1'b1 : is_same_sign[3] ? x_in[WIDTH32 - 1] ^ cmp_result[3] : !x_in[WIDTH32 - 1] : cmp_result[3];
+    // assign log2_out[4] = is_fp ?  is_both_zero[4] ? 1'b1 : is_same_sign[4] ? x_in[WIDTH32 - 1] ^ cmp_result[4] : !x_in[WIDTH32 - 1] : cmp_result[4];
+endmodule 
 
 // `timescale 1ns / 1ps
 
@@ -61115,826 +60334,802 @@ module Booth_pp(
 
 endmodule
 // `timescale 1ns / 1ps
-//@zou:多项式系数通过配置输入，最大支持段数为6段
-module LNS_Top #(parameter WIDTH = 32,
-             parameter WIDTH32 = 32  
+module CPA_tree_with_MAD#(parameter WIDTH32 = 32  
 )(
     input clk,
     input rstn,
-    input [4:0] n,
+    input [WIDTH32-1:0] t0,
+    input [WIDTH32-1:0] t1,
+    input [WIDTH32-1:0] t2,
+    input [WIDTH32-1:0] t3,
+    input [WIDTH32-1:0] t4,
     input float_flag,
-    input [WIDTH32 - 1:0] x_0,
-    input [WIDTH32 - 1:0] y_0,
-    // input [2:0] TRI_select,//@yuan: 选择具体的函数
-    input VEC,//向量计算，或者乘除法计算
-    input qi,//是否开方
-    input Div,//是否除法
-    //@zou：五个channel
-    input [5*WIDTH-1:0] logc_in_0,//@yuan: 第一段多项式展开的logci输入
-    input [WIDTH-3:0] K_in_0,//@yuan: 第一段多项式展开的ki输入
-    input [5*WIDTH-1:0] logc_in_1,//@yuan: 第二段多项式展开的logci输入
-    input [WIDTH-3:0] K_in_1,//@yuan: 第二段多项式展开的ki输入
-    input [5*WIDTH-1:0] logc_in_2,//@yuan: 第三段多项式展开的logci输入
-    input [WIDTH-3:0] K_in_2,//@yuan: 第三段多项式展开的ki输入
-    input [5*WIDTH-1:0] logc_in_3,//@yuan: 第四段多项式展开的logci输入
-    input [WIDTH-3:0] K_in_3,//@yuan: 第四段多项式展开的ki输入
-    input [5*WIDTH-1:0] logc_in_4,//@yuan: 第五段多项式展开的logci输入
-    input [WIDTH-3:0] K_in_4,//@yuan: 第五段多项式展开的ki输入
-    input [5*WIDTH-1:0] logc_in_5,//@yuan: 第六段多项式展开的logci输入
-    input [WIDTH-3:0] K_in_5,//@yuan: 第六段多项式展开的ki输入
-    input [11:0] bias_sel, //@yuan: 各段的偏移选择信号；每段 2-bit * 5段；每段： 00 无偏移， 01 偏移量为1， 10 偏移量为x
-    input [5*WIDTH32-1 : 0] break_points, //@yuan: 因为最大的分段数是6，所以潜在的断点是5个；对于分段数不足6个的情况，对应的断点设置为当前数据格式下对应的正数的最大值：7FFFFFFF (由编译器决定)
-    input [6*WIDTH32-1 : 0] constant_bias_in, //@yuan: 输入的每一段的bias
+    input [WIDTH32-1:0] bias,
 
-    input TRG,//@zou：booth计算5个6*Q8.22还是一个Q8.22*Q8.22
-    input power,//指数函数
-    input TRi,//三角函数
-    output TRG_overflow,//24*24的溢出
-    output VEC_overflow,
-    output CPA_float_overflow,
-    output CPA_float_underflow,
-    output CPA_cpa_overflow,
-    output [WIDTH32 - 1:0] channel0_log_result,
-    output [WIDTH32 - 1:0] channel2_tri_result,
-    output [WIDTH32 - 1:0] channel0_VEC_Power_result //@zou,每个类型都只有一个输出，且都转化成了Qm.n输出格式
+    output float_overflow,
+    output float_underflow,
+    output cpa_overflow,
+    output [WIDTH32-1:0] tri_result
 );
-    //wire power_sign;
-    //@zou：默认计算指数时不会出现负数为底数且指数为小数的不正确情况
-    //assign power_sign = ((float_flag == 1'b0 )&&(power == 1'b1) && (y_0[n] == 1'b0)) ? 1'b1 : 1'b0;//为1，则指数计算结果为正数，否则为x发符号
-    //@yuan:取消bias_one在内部，这个可以通过常数项的配置烧入
-    // reg [WIDTH32 - 1:0] fix_bias_one;
-    // always @(*) begin
-    //     fix_bias_one = (32'b1 << n);//@yuan: 使用移位即可
-    // end
-    // wire [WIDTH32 - 1:0] bias_one;//$zou, 浮点增加
-    // assign bias_one = (float_flag==1'b1) ? 32'b00111111_10000000_00000000_00000000 : fix_bias_one;
-
-    integer j;
-
-    //@zou: 计算段系数选择
-    //@yuan: 在第一个cycle进行段系数的选择，目的是节约寄存器的数量
-    wire [4:0] segSel_Out;
-    //@yuan: 根据输入选择对应范围段的系数
-    reg [5*WIDTH-1:0] logc_stage_logc_custom;
-    reg [WIDTH-3:0] logc_stage_K_custom;
-    reg [WIDTH - 1:0] segment_bias_constant [5 : 0];
-
-    //@yuan: each segment has its own constant bias
-    always@(*)begin
-        for(j = 0; j < 6; j = j + 1)begin
-            segment_bias_constant[j] = constant_bias_in[(j + 1)*WIDTH32 - 1 -: WIDTH32];//fixed <=
-        end
-    end
-    // reg [WIDTH32-1:0] bias_custom;
-    segSel #(.WIDTH32(WIDTH32)) sel (
-        .x_in(x_0),
-        .is_fp(float_flag),
-        .break_points_in(break_points),
-        .log2_out(segSel_Out)
-    );
-    always @(*) begin
-        casez(segSel_Out)
-            5'b1????: begin logc_stage_logc_custom = logc_in_5; logc_stage_K_custom = K_in_5; end //@yuan: 选择第六段的系数，下面各选择项依次递减
-            5'b01???: begin logc_stage_logc_custom = logc_in_4; logc_stage_K_custom = K_in_4; end
-            5'b001??: begin logc_stage_logc_custom = logc_in_3; logc_stage_K_custom = K_in_3; end
-            5'b0001?: begin logc_stage_logc_custom = logc_in_2; logc_stage_K_custom = K_in_2; end
-            5'b00001: begin logc_stage_logc_custom = logc_in_1; logc_stage_K_custom = K_in_1; end
-            5'b00000: begin logc_stage_logc_custom = logc_in_0; logc_stage_K_custom = K_in_0; end
-            default: begin logc_stage_logc_custom = logc_in_0; logc_stage_K_custom = K_in_0; end
-        endcase
-    end
-    reg [WIDTH32 - 1:0] bias_custom;
-    reg [WIDTH32 - 1:0] bias_seg [5:0];
-    always@(*)begin
-        for(j = 0; j < 6; j = j + 1)begin
-            case(bias_sel[(j+1)*2 - 1 -: 2])
-                2'b00: bias_seg[j] = 32'b0;
-                2'b01: bias_seg[j] = segment_bias_constant[j];
-                2'b10: bias_seg[j] = x_0;
-                2'b11: bias_seg[j] = y_0; //@yuan: used by cascaed LNS
-                default: bias_seg[j] = 32'b0;
-                //fixed <=
-            endcase
-        end
-    end
-    always @(*) begin
-        casez(segSel_Out)
-            5'b1????: begin bias_custom = bias_seg[5]; end //@yuan: 选择第六段的系数，下面各选择项依次递减
-            5'b01???: begin bias_custom = bias_seg[4]; end 
-            5'b001??: begin bias_custom = bias_seg[3]; end
-            5'b0001?: begin bias_custom = bias_seg[2]; end
-            5'b00001: begin bias_custom = bias_seg[1]; end
-            5'b00000: begin bias_custom = bias_seg[0]; end
-            default: begin bias_custom = bias_seg[0]; end
-        endcase
-    end
-
-    //@zou: 流水线寄存器
-    reg [WIDTH32 - 1:0] input_x;
-    reg [WIDTH32 - 1:0] input_y;
-    reg logc_stage_TRG;
-    reg logc_stage_TRi;
-    //reg logc_stage_power_sign;
-    reg logc_stage_power;
-    reg logc_stage_VEC;
-    reg logc_stage_qi;
-    reg logc_stage_Div;
-    //@yuan: 段系数寄存器
-    reg [5*WIDTH-1:0] logc_stage_logc_custom_reg;
-    reg [WIDTH-3:0] logc_stage_K_custom_reg;
-    reg [WIDTH32 - 1:0] logc_stage_bias;
-    // reg [WIDTH32 - 1:0] bias_one_reg;
-    // reg [11:0] bias_sel_reg;
-    reg [4:0] segSel_Out_reg;
-    // reg [2:0] logc_stage_TRI_select;
-    reg [4:0] input_n;
-    reg logc_stage_float_flag;
-
-    always @(posedge clk or negedge rstn) begin
-        if (rstn == 1'b0) begin
-            input_x <= 32'b0;
-            input_y <= 32'b0;
-            input_n <= 5'b0;
-            logc_stage_TRG <= 1'b1;
-            logc_stage_TRi <= 1'b0;
-            //logc_stage_power_sign <= 1'b0;
-            logc_stage_power <= 1'b0;
-            logc_stage_VEC <= 1'b0;
-            logc_stage_qi <= 1'b1;
-            logc_stage_Div <= 1'b0;
-            logc_stage_logc_custom_reg <= 160'b0;
-            logc_stage_K_custom_reg <= 31'b0;
-            // bias_one_reg <= 32'b0;
-            // bias_sel_reg <= 12'b0;
-            logc_stage_bias <= 32'b0;
-            segSel_Out_reg <= 5'b0;
-            logc_stage_float_flag <= 1'b0;
-        end 
-        else begin
-            // 在复位信号为高时，input_x 和 input_y 被赋值为 x_0 和 y_0
-            input_x <= x_0;
-            input_y <= y_0;
-            input_n <= n;
-            logc_stage_TRG <= TRG;
-            logc_stage_TRi <= TRi;
-            //logc_stage_power_sign <= power_sign;
-            logc_stage_power <= power;
-            logc_stage_VEC <= VEC;
-            logc_stage_qi <= qi;
-            logc_stage_Div <= Div;
-            logc_stage_logc_custom_reg <= logc_stage_logc_custom;
-            logc_stage_K_custom_reg <= logc_stage_K_custom;
-            // bias_one_reg <= bias_one;
-            // bias_sel_reg <= bias_sel;
-            logc_stage_bias <= bias_custom;
-            segSel_Out_reg <= segSel_Out;
-            logc_stage_float_flag <= float_flag;
-        end
-    end
-
-    //对数转换
-    wire [WIDTH - 1:0] log_x;
-    wire [WIDTH32-1:0] absx0;
-    genvar i; // 定义生成变量
-    converter logconv_x0 (
-        .x_in(input_x),
-        .n(input_n),
-        .float_flag(logc_stage_float_flag),
-        .abs_x(absx0),
-        .log2_out(log_x)
-    );
-
-    //指数运算会转换成Q8.22*Q8.22的乘法运算，需要对y的数据格式进行转换
-    wire [WIDTH-3:0] fix_new_y0;
-    wire [WIDTH-3:0] float_new_y0;
-    wire float_power_y0_overflow;
-    wire float_power_y0_underflow;
-    Tran_to_822 tran_to_822_0(
-        .B0(input_y),
-        .n(input_n),
-        .new_B0(fix_new_y0)
-    );
-    FLOAT_TRAN_TO_Q822 float_tran_to_q822(
-        .float_y(input_y),
-        .Q822y(float_new_y0),
-        .overflow_y(float_power_y0_overflow),
-        .underflow_y(float_power_y0_underflow)
-    );
-    wire [WIDTH-3:0] new_y0;
-    assign new_y0 = (logc_stage_float_flag==1'b1) ? float_new_y0 : fix_new_y0;
-
-    wire logc_stage_power_sign;
-    assign logc_stage_power_sign = ((logc_stage_power == 1'b1) && (new_y0[22] == 1'b0)) ? 1'b1 : 1'b0;//为1，则指数计算结果为正数，否则为x的符号
-
-    wire [WIDTH-3:0] logc_stage_input_CSA_B;
-    assign logc_stage_input_CSA_B = (logc_stage_TRG == 1'b0) ? new_y0 : logc_stage_K_custom_reg;//TRG为0有效，表示进行指数函数
-
-    reg [WIDTH - 1:0] input_logA;
-    reg [WIDTH32 - 1:0] input_B0;
-    reg [WIDTH32 - 1:0] lns_stage_bias;
-    reg lns_stage_TRG;
-    reg lns_stage_TRi;
-    reg lns_stage_power_sign;
-    reg lns_stage_VEC;
-    reg lns_stage_qi;
-    reg lns_stage_Div;
-    reg [5*WIDTH - 1:0] lns_stage_logc;
-    // reg [WIDTH - 3:0] lns_stage_B;
-    reg [WIDTH - 3:0] lns_stage_input_CSA_B;
-    reg [4:0] lns_stage_n;
-    reg lns_stage_float_flag;  
-
-    //每一项泰勒展开：logci + ki * logx; logc_stage_logc_custom_reg： logci; logc_stage_K_custom_reg: ki
-    always @(posedge clk or negedge rstn) begin
-        if (~rstn) begin
-            input_logA <= 32'b0;
-            input_B0 <= 32'b0;
-            lns_stage_logc <= 159'b0;
-            // lns_stage_B <= 30'b0;
-            lns_stage_input_CSA_B <= 30'b0;
-            lns_stage_bias <= 32'b0;
-
-            lns_stage_TRG <= 1'b1;
-            lns_stage_TRi <= 1'b0;
-            lns_stage_power_sign <= 1'b0;
-            lns_stage_VEC <= 1'b0;
-            lns_stage_qi <= 1'b1;
-            lns_stage_Div <= 1'b0;
-            lns_stage_n <= 5'b0;
-            lns_stage_float_flag <= 1'b0;
-        end else begin
-            input_logA <= log_x;
-            input_B0 <= input_y;//用于指数函数、对数转换
-            lns_stage_logc <= logc_stage_logc_custom_reg;
-            // lns_stage_B <= logc_stage_K_custom_reg;
-            lns_stage_input_CSA_B <= logc_stage_input_CSA_B;
-
-            lns_stage_bias <= logc_stage_bias;
-            lns_stage_TRG <= logc_stage_TRG;
-            lns_stage_TRi <= logc_stage_TRi;
-            lns_stage_power_sign <= logc_stage_power_sign;
-            lns_stage_VEC <= logc_stage_VEC;
-            lns_stage_qi <= logc_stage_qi;
-            lns_stage_Div <= logc_stage_Div;
-            lns_stage_n <= input_n;
-            lns_stage_float_flag <= logc_stage_float_flag;
-        end
-    end
-
-    wire [9:0] y_zero_sign_k0;//@zou, CSA只处理一个y0
-    wire [WIDTH + 5:0] cpa_channel0, cpa_channel1, cpa_channel2, cpa_channel3, cpa_channel4;
-    CSA_tree csa_tree(
-        .A(input_logA),
-        .B(lns_stage_input_CSA_B),
-        .n(lns_stage_n),
-        .float_flag(lns_stage_float_flag),
-        .B0(input_B0),
-        
-        .log_c1(lns_stage_logc[5*WIDTH-3:4*WIDTH]),
-        .log_c2(lns_stage_logc[4*WIDTH-3:3*WIDTH]),
-        .log_c3(lns_stage_logc[3*WIDTH-3:2*WIDTH]),
-        .log_c4(lns_stage_logc[2*WIDTH-3:WIDTH]),
-        .log_c5(lns_stage_logc[WIDTH-3:0]),
-        .TRG(lns_stage_TRG),
-        .VEC(lns_stage_VEC),
-
-        .zero_sign_k0(y_zero_sign_k0),
-        .cpa_channel0(cpa_channel0),
-        .cpa_channel1(cpa_channel1),
-        .cpa_channel2(cpa_channel2),
-        .cpa_channel3(cpa_channel3),
-        .cpa_channel4(cpa_channel4)
-    );
-
-    reg alogc_stage_float_flag; 
-    reg alogc_stage_TRi;
-    reg alogc_stage_TRG;
-    reg alogc_stage_VEC;
-    reg alogc_stage_qi;
-    reg alogc_stage_Div;
-    reg alogc_stage_power_sign;
-    reg alogc_stage_tri_sign [4:0];
-
-    reg alogc_stage_logA_sign;
-    reg alogc_stage_B_sign [4:0];//指数项是否为偶数
-    reg [WIDTH32-1:0] alogc_stage_bias;
-    reg [WIDTH-1:0] alogc_logA;//@yuan: 只有一个输入通道
-    reg [9:0] alogc_y_zero_sign_k0;
-    reg [WIDTH+5:0] alogc_cpa_channel [4:0];
-    reg [1:0] alogc_stage_logc_zero_sign [4:0];
-    reg [4:0] alogc_stage_n;
-    reg alogc_stage_TRG_sign_B;
-
-    always @(posedge clk or negedge rstn) begin
-        if (~rstn) begin
-            // 当复位信号为低时，所有 input_x 和 input_y 都被清零
-            alogc_logA <= 32'b0;//@yuan: 只有一个输入通道
-            for (j = 0; j < 5; j = j + 1) begin
-                alogc_stage_tri_sign[j] <= 1'b0;
-                alogc_stage_B_sign[j] <= 1'b0;
-                alogc_cpa_channel[j] <= 32'b0;
-                alogc_stage_logc_zero_sign[j] <= 2'b00;
-            end
-            alogc_y_zero_sign_k0 <= 10'b0;
-            alogc_stage_qi <= 1'b1;
-            alogc_stage_Div <= 1'b0;
-            alogc_stage_bias <= 32'b0;
-            alogc_stage_TRi <= 1'b0;
-            alogc_stage_TRG <= 1'b1;
-            alogc_stage_VEC <= 1'b0;
-            alogc_stage_power_sign <= 1'b0;
-            alogc_stage_logA_sign <= 1'b0;
-            alogc_stage_n <= 5'b0;  
-            alogc_stage_TRG_sign_B <= 1'b0;
-            alogc_stage_float_flag <= 1'b0;
-
-        end else begin
-            // 在复位信号为高时，input_x 和 input_y 被赋值为 x_0 和 y_0
-            alogc_logA <= input_logA;
-            for (j = 0; j < 5; j = j + 1) begin
-                alogc_stage_tri_sign[j] <= lns_stage_input_CSA_B[6*j];//@zou:分段近似指数项是否为偶数
-                alogc_stage_B_sign[j] <= lns_stage_input_CSA_B[6*j+5];//@zou:分段近似指数项是否为正数
-            end
-            alogc_stage_logc_zero_sign[0] <= lns_stage_logc[5*WIDTH-1:5*WIDTH-2];
-            alogc_stage_logc_zero_sign[1] <= lns_stage_logc[4*WIDTH-1:4*WIDTH-2];
-            alogc_stage_logc_zero_sign[2] <= lns_stage_logc[3*WIDTH-1:3*WIDTH-2];
-            alogc_stage_logc_zero_sign[3] <= lns_stage_logc[2*WIDTH-1:2*WIDTH-2];
-            alogc_stage_logc_zero_sign[4] <= lns_stage_logc[WIDTH-1:WIDTH-2];
-
-            alogc_cpa_channel[0] <= cpa_channel0;
-            alogc_cpa_channel[1] <= cpa_channel1;
-            alogc_cpa_channel[2] <= cpa_channel2;
-            alogc_cpa_channel[3] <= cpa_channel3;
-            alogc_cpa_channel[4] <= cpa_channel4;
-
-            alogc_y_zero_sign_k0 <= y_zero_sign_k0;
-            
-            alogc_stage_qi <= lns_stage_qi;
-            alogc_stage_Div <= lns_stage_Div;
-            alogc_stage_bias <= lns_stage_bias;
-            alogc_stage_TRi <= lns_stage_TRi;
-            alogc_stage_TRG <= lns_stage_TRG;
-            alogc_stage_VEC <= lns_stage_VEC;
-            alogc_stage_power_sign <= lns_stage_power_sign;
-            alogc_stage_logA_sign <= input_logA[WIDTH - 3];
-            alogc_stage_n <= lns_stage_n;
-            alogc_stage_TRG_sign_B <= input_B0[31];
-            alogc_stage_float_flag <= lns_stage_float_flag;
-        end
-    end
-
-    // 补一位的原因在于防止溢出，溢出在sat中判断；但实际可以直接在CPA中判断
-    wire [WIDTH-2: 0] shift_log_y;
-    assign shift_log_y = (alogc_stage_qi == 1'b0) ? {{2{alogc_y_zero_sign_k0[7]}}, alogc_y_zero_sign_k0[7:0], alogc_cpa_channel[0][21:1]}: {alogc_y_zero_sign_k0[7], alogc_y_zero_sign_k0[7:0], alogc_cpa_channel[0][21:0]};
-    wire [WIDTH-2:0] CPA_ALOGC_a;
-    assign CPA_ALOGC_a = {alogc_logA[WIDTH-3], alogc_logA[WIDTH-3 : 0]};
-    wire [WIDTH-2:0] CPA_ALOGC_sum;
-    //@yuan: 指数的加减也只有一个通道
-    CPA_ALOGC CPA_ALOGC_inst0 (
-        .a(CPA_ALOGC_a),
-        .b(shift_log_y),
-        .Div(alogc_stage_Div),
-        .sum(CPA_ALOGC_sum)
-    );
-
-    wire [WIDTH+5:0] input_sat [4:0];
-    assign input_sat[0] = (alogc_stage_VEC == 1'b1) ? ((CPA_ALOGC_sum[WIDTH-2] == 1'b0) ? {7'b0000000, CPA_ALOGC_sum} : {7'b1111111, CPA_ALOGC_sum}) : alogc_cpa_channel[0];
-    assign input_sat[1] = alogc_cpa_channel[1];
-    assign input_sat[2] = alogc_cpa_channel[2];
-    assign input_sat[3] = alogc_cpa_channel[3];
-    assign input_sat[4] = alogc_cpa_channel[4];
-
-    wire [WIDTH-1:0] pre_input_anti [4:0];
-    wire Tri_overflow_one [4:0];
-    wire SAT_VEC_overflow;
-
-    SAT_with_TRG_VEC_overflow sat_inst0(
-        .input_sat(input_sat[0]),
-        .TRi(alogc_stage_TRi),
-        .TRG(alogc_stage_TRG),
-        .VEC(alogc_stage_VEC),
-        .TRG_B_sign(alogc_stage_TRG_sign_B), //计算power时，y的符号
-        .Tri_sign(alogc_stage_tri_sign[0]), //三角函数计算时，判断如果指数是偶数，则结果是正数
-        .alogc_stage_power_sign(alogc_stage_power_sign),//计算power时，判断如果指数是偶数，则结果是正数
-        .input_logA_zero_sign(alogc_logA[WIDTH-1:WIDTH-2]),//logA，A的零标志和负标志
-        .input_logB_zero_sign(alogc_y_zero_sign_k0[9:8]), //VEC计算时，B的零标志和负标志
-        .input_logC_zero_sign(alogc_stage_logc_zero_sign[0]),//三角函数计算式，ci的零标志和负标志
-        .alogc_stage_logA_sign(alogc_stage_logA_sign),//logA的正负标志
-        .alogc_stage_B_sign(alogc_stage_B_sign[0]),//三角函数计算时，指数的正负标志
-
-        .Tri_overflow_one(Tri_overflow_one[0]),
-        .TRG_overflow(TRG_overflow),//TOP输出
-        .VEC_overflow(SAT_VEC_overflow),
-        .input_anti(pre_input_anti[0])
-    );
-
-    generate
-        for (i = 1; i < 5; i = i + 1) begin: sat_gen // 给生成的代码块命名为 sat_gen
-            SAT_with_VEC_overflow sat_inst (
-                .input_sat(input_sat[i]),
-                .TRi(alogc_stage_TRi),
-                .Tri_sign(alogc_stage_tri_sign[i]),
-                .input_logA_zero_sign(alogc_logA[WIDTH-1:WIDTH-2]),
-                .input_logC_zero_sign(alogc_stage_logc_zero_sign[i]), //应该是logc的zero和符号位
-                .alogc_stage_logA_sign(alogc_stage_logA_sign),
-                .alogc_stage_B_sign(alogc_stage_B_sign[i]),
-                .Tri_overflow_one(Tri_overflow_one[i]),
-                .input_anti(pre_input_anti[i])
-            );
-        end
-    endgenerate
+    //@zou 默认执行求和方式
+    // wire [WIDTH32-1:0] channel0_CPA;
+    // wire [WIDTH32-1:0] channel1_CPA;
+    // wire [WIDTH32-1:0] channel2_CPA;
+    // wire [WIDTH32-1:0] channel3_CPA;
 
 
-    wire [WIDTH32-1:0] alogc_stage_log_result0;
-    wire [WIDTH32-1:0] alogc_stage_log_result0_fix;
-    wire [WIDTH32-1:0] alogc_stage_log_result0_float;
-    Tran_log_to_mn tran_log_to_mn_0(
-        .log30(pre_input_anti[0][WIDTH-3:0]),
-        .n(alogc_stage_n),
-        .log32(alogc_stage_log_result0_fix)
-    );
-    Tran_Q822_to_float tran_q822_to_float0(
-        .log30(pre_input_anti[0][WIDTH-3:0]),
-        .log32(alogc_stage_log_result0_float)
-    );
-    assign alogc_stage_log_result0 = (alogc_stage_float_flag==1'b1) ? alogc_stage_log_result0_float : alogc_stage_log_result0_fix;
+    wire [WIDTH32-1:0] CPA0_a;
+    wire [WIDTH32-1:0] CPA0_b;
+    assign CPA0_a = t0;
+    assign CPA0_b = t1;
+    wire CPA0_overflow;
+    wire CPA0_cpa_overflow;
+    wire CPA0_underflow;
+    wire [WIDTH32-1:0] CPA0_result;
 
-    wire [WIDTH32-1:0] output_anti [4:0];
-    generate
-        for (i = 0; i < 5; i = i + 1) begin: anticonv_gen // 给生成的代码块命名为 sat_gen
-            anticonverter anticonv_inst (
-                .x(pre_input_anti[i]),
-                .float_flag(alogc_stage_float_flag),
-                .Tri_overflow_one(Tri_overflow_one[i]),
-                .n(alogc_stage_n),
-                .x_output(output_anti[i])
-            );
-        end
-    endgenerate
-
-    //指数对数在第4周期输出
-    reg [WIDTH32-1:0] channel0_log_result0;
-    reg [WIDTH32-1:0] CPA_tree_input_t [4:0];
-    reg [WIDTH32-1:0] fxp_stage_bias;
-    reg fxp_stage_TRi;
-    reg fxp_stage_VEC;
-    reg fxp_stage_SAT_VEC_overflow;
-    reg fxp_stage_float_flag;
-
-    always @(posedge clk or negedge rstn) begin
-        if (~rstn) begin
-            for (j = 0; j < 5; j = j + 1) begin
-                CPA_tree_input_t[j] <= 32'b0; 
-            end
-            fxp_stage_SAT_VEC_overflow <= 1'b0;
-            fxp_stage_bias <= 32'b0;
-            fxp_stage_TRi <= 1'b0;
-            fxp_stage_VEC <= 1'b0;
-            channel0_log_result0 <= 32'b0;
-            fxp_stage_float_flag <= 1'b0;
-        end
-        else begin
-            for (j = 0; j < 5; j = j + 1) begin
-                CPA_tree_input_t[j] <= output_anti[j];
-            end
-            fxp_stage_SAT_VEC_overflow <= SAT_VEC_overflow;
-            fxp_stage_TRi <= alogc_stage_TRi;
-            fxp_stage_VEC <= alogc_stage_VEC;
-            fxp_stage_float_flag <= alogc_stage_float_flag;
-
-            fxp_stage_bias <= alogc_stage_bias;
-            channel0_log_result0 <= alogc_stage_log_result0;
-            
-        end
-    end
-
-    assign VEC_overflow = fxp_stage_VEC & fxp_stage_SAT_VEC_overflow;
-    wire [WIDTH32-1:0] channel2_tri_result0;
-    CPA_tree_with_MAD cpa_tree(
+    CPA_float_add cpa_add0(
         .clk(clk),
         .rstn(rstn),
-        .t0(CPA_tree_input_t[0]),
-        .t1(CPA_tree_input_t[1]),
-        .t2(CPA_tree_input_t[2]),
-        .t3(CPA_tree_input_t[3]),
-        .t4(CPA_tree_input_t[4]),
-        .float_flag(fxp_stage_float_flag),
-        .bias(fxp_stage_bias),
-
-        .float_overflow(CPA_float_overflow),
-        .float_underflow(CPA_float_underflow),
-        .cpa_overflow(CPA_cpa_overflow),
-        .tri_result(channel2_tri_result0)
+        .float_flag(float_flag),
+        .input_x0(CPA0_a),
+        .input_x1(CPA0_b),
+        .TRi(1'b0),
+        .final_result(CPA0_result),
+        .cpa_overflow(CPA0_cpa_overflow),
+        .overflow(CPA0_overflow),
+        .underflow(CPA0_underflow)
     );
 
-    //VEC、指数、对数在第四个clk后输出
-    assign channel0_VEC_Power_result = CPA_tree_input_t[0]; //@yuan: 指数和VEC结果
 
-    assign channel0_log_result = channel0_log_result0;// 对数结果
+    wire [WIDTH32-1:0] CPA1_a;
+    wire [WIDTH32-1:0] CPA1_b;
+    assign CPA1_a = t2;
+    assign CPA1_b = t3;
+    wire CPA1_overflow;
+    wire CPA1_cpa_overflow;
+    wire CPA1_underflow;
+    wire [WIDTH32-1:0] CPA1_result;
 
-    assign channel2_tri_result = channel2_tri_result0;//三角函数结果
-
-
-
-endmodule
-
-
-module Tran_to_822 #(parameter WIDTH = 32,
-                    parameter WIDTH32 = 32)
-(
-    input [WIDTH32-1:0] B0,
-    input [4:0] n,
-    output reg [WIDTH-3:0] new_B0
-);
-//保留符号位
-    always @(*) begin
-        case(n)
-            5'd0: new_B0 = {B0[WIDTH32-1], B0[6:0], 22'b0};
-            5'd1: new_B0 = {B0[WIDTH32-1], B0[7:0], 21'b0};
-            5'd2: new_B0 = {B0[WIDTH32-1], B0[8:0], 20'b0};
-            5'd3: new_B0 = {B0[WIDTH32-1], B0[9:0], 19'b0};
-            5'd4: new_B0 = {B0[WIDTH32-1], B0[10:0], 18'b0};
-            5'd5: new_B0 = {B0[WIDTH32-1], B0[11:0], 17'b0};
-            5'd6: new_B0 = {B0[WIDTH32-1], B0[12:0], 16'b0};
-            5'd7: new_B0 = {B0[WIDTH32-1], B0[13:0], 15'b0};
-            5'd8: new_B0 = {B0[WIDTH32-1], B0[14:0], 14'b0};
-            5'd9: new_B0 = {B0[WIDTH32-1], B0[15:0], 13'b0};
-            5'd10: new_B0 = {B0[WIDTH32-1], B0[16:0], 12'b0};
-            5'd11: new_B0 = {B0[WIDTH32-1], B0[17:0], 11'b0};
-            5'd12: new_B0 = {B0[WIDTH32-1], B0[18:0], 10'b0};
-            5'd13: new_B0 = {B0[WIDTH32-1], B0[19:0], 9'b0};
-            5'd14: new_B0 = {B0[WIDTH32-1], B0[20:0], 8'b0};
-            5'd15: new_B0 = {B0[WIDTH32-1], B0[21:0], 7'b0};
-            5'd16: new_B0 = {B0[WIDTH32-1], B0[22:0], 6'b0};
-            5'd17: new_B0 = {B0[WIDTH32-1], B0[23:0], 5'b0};
-            5'd18: new_B0 = {B0[WIDTH32-1], B0[24:0], 4'b0};
-            5'd19: new_B0 = {B0[WIDTH32-1], B0[25:0], 3'b0};
-            5'd20: new_B0 = {B0[WIDTH32-1], B0[26:0], 2'b0};
-            5'd21: new_B0 = {B0[WIDTH32-1], B0[27:0], 1'b0};
-            5'd22: new_B0 = {B0[WIDTH32-1], B0[28:0]};
-            5'd23: new_B0 = {B0[WIDTH32-1], B0[29:1]};
-            5'd24: new_B0 = {B0[WIDTH32-1], B0[30:2]};
-            5'd25: new_B0 = {B0[31], B0[31:3]};
-            5'd26: new_B0 = {{2{B0[31]}}, B0[31:4]};
-            5'd27: new_B0 = {{3{B0[31]}}, B0[31:5]};
-            5'd28: new_B0 = {{4{B0[31]}}, B0[31:6]};
-            5'd29: new_B0 = {{5{B0[31]}}, B0[31:7]};
-            5'd30: new_B0 = {{6{B0[31]}}, B0[31:8]};
-            5'd31: new_B0 = {{7{B0[31]}}, B0[31:9]};
-            default: new_B0 = B0[31:2];
-        endcase
-    end
-endmodule
-
-
-module FLOAT_TRAN_TO_Q822(
-    input [31:0] float_y,
-    output reg [29:0] Q822y,
-    output overflow_y,
-    output underflow_y
-);
-
-    wire [7:0] exponent;
-    assign exponent = {1'b0, float_y[30:23]} + 8'b10000001;
-    wire [24:0] Q2_23;
-    assign Q2_23 = (float_y[31] == 1'b0) ? {1'b0, 1'b1, float_y[22:0]} : {1'b1, 1'b0, ~float_y[22:0]} + 1'b1;
-    reg incase;
-    always @(*) begin
-        case(exponent)
-            8'b00000000: begin Q822y = {{6{Q2_23[24]}}, Q2_23[24:1]}; incase = 1'b1; end
-            8'b00000001: begin Q822y = {{5{Q2_23[24]}}, Q2_23[24:0]}; incase = 1'b1; end
-            8'b00000010: begin Q822y = {{4{Q2_23[24]}}, Q2_23[24:0], 1'b0}; incase = 1'b1; end
-            8'b00000011: begin Q822y = {{3{Q2_23[24]}}, Q2_23[24:0], 2'b0}; incase = 1'b1; end
-            8'b00000100: begin Q822y = {{2{Q2_23[24]}}, Q2_23[24:0], 3'b0}; incase = 1'b1; end
-            8'b00000101: begin Q822y = {{1{Q2_23[24]}}, Q2_23[24:0], 4'b0}; incase = 1'b1; end
-            8'b00000110: begin Q822y = {Q2_23[24:0], 4'b0}; incase = 1'b1; end
-            8'b11111111: begin Q822y = {{7{Q2_23[24]}}, Q2_23[24:2]}; incase = 1'b1; end
-            8'b11111110: begin Q822y = {{8{Q2_23[24]}}, Q2_23[24:3]}; incase = 1'b1; end
-            8'b11111101: begin Q822y = {{9{Q2_23[24]}}, Q2_23[24:4]}; incase = 1'b1; end
-            8'b11111100: begin Q822y = {{10{Q2_23[24]}}, Q2_23[24:5]}; incase = 1'b1; end
-            8'b11111011: begin Q822y = {{11{Q2_23[24]}}, Q2_23[24:6]}; incase = 1'b1; end
-            8'b11111010: begin Q822y = {{12{Q2_23[24]}}, Q2_23[24:7]}; incase = 1'b1; end
-            8'b11111001: begin Q822y = {{13{Q2_23[24]}}, Q2_23[24:8]}; incase = 1'b1; end
-            8'b11111000: begin Q822y = {{14{Q2_23[24]}}, Q2_23[24:9]}; incase = 1'b1; end
-            8'b11110111: begin Q822y = {{15{Q2_23[24]}}, Q2_23[24:10]}; incase = 1'b1; end
-            8'b11110110: begin Q822y = {{16{Q2_23[24]}}, Q2_23[24:11]}; incase = 1'b1; end
-            8'b11110101: begin Q822y = {{17{Q2_23[24]}}, Q2_23[24:12]}; incase = 1'b1; end
-            8'b11110100: begin Q822y = {{18{Q2_23[24]}}, Q2_23[24:13]}; incase = 1'b1; end
-            8'b11110011: begin Q822y = {{19{Q2_23[24]}}, Q2_23[24:14]}; incase = 1'b1; end
-            8'b11110010: begin Q822y = {{20{Q2_23[24]}}, Q2_23[24:15]}; incase = 1'b1; end
-            8'b11110001: begin Q822y = {{21{Q2_23[24]}}, Q2_23[24:16]}; incase = 1'b1; end
-            8'b11110000: begin Q822y = {{22{Q2_23[24]}}, Q2_23[24:17]}; incase = 1'b1; end
-            default: begin Q822y = {30'b0}; incase = 1'b0; end
-        endcase
-    end
-    assign overflow_y = (exponent[7] == 1'b0 && incase == 1'b0);
-    assign underflow_y = (exponent[7] == 1'b1 && incase == 1'b0);
-
-endmodule
-
-
-module SAT_with_TRG_VEC_overflow #(parameter WIDTH = 32)(
-    input [WIDTH+5:0] input_sat,
-    input TRi,
-    input TRG,
-    input VEC,
-    input TRG_B_sign,//计算power时，y的符号
-    input Tri_sign, //三角函数计算时，判断如果指数是偶数，则结果是正数
-    input alogc_stage_power_sign,//计算power时，判断如果指数是偶数，则结果是正数
-    input [1:0] input_logA_zero_sign,//logA，A的零标志和负标志
-    input [1:0] input_logB_zero_sign,//VEC计算时，B的零标志和负标志
-    input [1:0] input_logC_zero_sign,//三角函数计算式，ci的零标志和负标志
-    input alogc_stage_logA_sign,//logA的正负标志
-    input alogc_stage_B_sign,//三角函数计算时，指数的正负标志
-    output reg Tri_overflow_one,
-    output reg TRG_overflow,
-    output reg VEC_overflow,
-    output reg [WIDTH-1:0] input_anti
-);
-always @(*) begin
-    if(VEC == 1'b1)
-        input_anti = {input_logA_zero_sign[1]|input_logB_zero_sign[1], input_logA_zero_sign[0]^input_logB_zero_sign[0], input_sat[WIDTH-3:0]};
-        //这里对于开方的情况，没有进行考虑，即如果输入的B是负数也可以进行开方，相当于B的符号在开方符号外，所以要求开方输入的值不能是负数
-    else if(alogc_stage_power_sign == 1'b1)
-        input_anti = {input_logA_zero_sign[1], 1'b0, input_sat[WIDTH-3:0]};
-    else if(TRG==1'b0 && input_logB_zero_sign[1] == 1'b1)
-        input_anti = 32'b0;
-    else if(TRG==1'b0)
-        input_anti = {input_logA_zero_sign[1], input_logA_zero_sign[0], input_sat[WIDTH-3:0]};
-    else if(TRi == 1'b1 && Tri_sign == 1'b0)
-        // input_anti = {input_logC_zero_sign[1] | (input_logA_zero_sign[1] & (~input_logB_zero_sign[1])), 1'b0^input_logC_zero_sign[0], input_sat[WIDTH-3:0]};//@yuan: we treat 0^0 = 1 here
-        input_anti = {input_logA_zero_sign[1]|input_logC_zero_sign[1], 1'b0^input_logC_zero_sign[0], input_sat[WIDTH-3:0]};
-    else
-        input_anti = {input_logA_zero_sign[1]|input_logC_zero_sign[1], input_logA_zero_sign[0]^input_logC_zero_sign[0], input_sat[WIDTH-3:0]};
-    
-    if(TRi == 1'b0 || (TRi==1'b1 && ( (input_sat[WIDTH+5:WIDTH-3] == 9'b111111111) || (input_sat[WIDTH+5:WIDTH-3] == 9'b000000000))))
-        Tri_overflow_one = 1'b0;
-    else
-        Tri_overflow_one = 1'b1;
-    
-    if(TRG == 1'b1 || (TRG==1'b0 && ((alogc_stage_logA_sign^TRG_B_sign == 1'b1 && input_sat[WIDTH+5:WIDTH-3] == 9'b111111111) || (alogc_stage_logA_sign^TRG_B_sign == 1'b0 && input_sat[WIDTH+5:WIDTH-3] == 9'b000000000))))
-        TRG_overflow = 1'b0;
-    else
-        TRG_overflow = 1'b1;
-    
-    if(VEC==1'b0 || (VEC == 1'b1 && (input_sat[WIDTH+5:WIDTH-3] == 9'b111111111 || input_sat[WIDTH+5:WIDTH-3] == 9'b000000000)))
-        VEC_overflow = 1'b0;
-    else
-        VEC_overflow = 1'b1;
-end
-endmodule
-
-
-module SAT_with_VEC_overflow #(parameter WIDTH = 32)(
-    input [WIDTH+5:0] input_sat,
-    input TRi,
-    input [1:0] input_logA_zero_sign,
-    input [1:0] input_logC_zero_sign,
-    input alogc_stage_logA_sign,
-    input alogc_stage_B_sign,
-    input Tri_sign,
-    output reg Tri_overflow_one,
-    output reg [WIDTH-1:0] input_anti
-
-);
-
-always @(*) begin
-    if(TRi == 1'b1 && Tri_sign == 1'b0)
-        input_anti = {input_logA_zero_sign[1]|input_logC_zero_sign[1], 1'b0^input_logC_zero_sign[0], input_sat[WIDTH-3:0]};
-    else
-        input_anti = {input_logA_zero_sign[1]|input_logC_zero_sign[1], input_logA_zero_sign[0]^input_logC_zero_sign[0], input_sat[WIDTH-3:0]};
-    
-    if(TRi == 1'b0 || (TRi==1'b1 && ( (input_sat[WIDTH+5:WIDTH-3] == 9'b111111111) || (input_sat[WIDTH+5:WIDTH-3] == 9'b000000000))))
-        Tri_overflow_one = 1'b0;
-    else
-        Tri_overflow_one = 1'b1;
-end
-endmodule
-
-module Tran_log_to_mn #(parameter WIDTH = 32,
-                    parameter WIDTH32 = 32)
-(
-        input [WIDTH-3:0] log30,
-        input [4:0] n,
-        output reg [WIDTH32-1:0] log32
-);
-always @(*) begin
-    case(n)
-        5'd0: log32 = { {24{log30[WIDTH-3]}}, log30[WIDTH-3:22]};
-        5'd1: log32 = { {23{log30[WIDTH-3]}}, log30[WIDTH-3:21]};
-        5'd2: log32 = { {22{log30[WIDTH-3]}}, log30[WIDTH-3:20]};
-        5'd3: log32 = { {21{log30[WIDTH-3]}}, log30[WIDTH-3:19]};
-        5'd4: log32 = { {20{log30[WIDTH-3]}}, log30[WIDTH-3:18]};
-        5'd5: log32 = { {19{log30[WIDTH-3]}}, log30[WIDTH-3:17]};
-        5'd6: log32 = { {18{log30[WIDTH-3]}}, log30[WIDTH-3:16]};
-        5'd7: log32 = { {17{log30[WIDTH-3]}}, log30[WIDTH-3:15]};
-        5'd8: log32 = { {16{log30[WIDTH-3]}}, log30[WIDTH-3:14]};
-        5'd9: log32 = { {15{log30[WIDTH-3]}}, log30[WIDTH-3:13]};
-        5'd10: log32 = { {14{log30[WIDTH-3]}}, log30[WIDTH-3:12]};
-        5'd11: log32 = { {13{log30[WIDTH-3]}}, log30[WIDTH-3:11]};
-        5'd12: log32 = { {12{log30[WIDTH-3]}}, log30[WIDTH-3:10]};
-        5'd13: log32 = { {11{log30[WIDTH-3]}}, log30[WIDTH-3:9]};
-        5'd14: log32 = { {10{log30[WIDTH-3]}}, log30[WIDTH-3:8]};
-        5'd15: log32 = { {9{log30[WIDTH-3]}}, log30[WIDTH-3:7]};
-        5'd16: log32 = { {8{log30[WIDTH-3]}}, log30[WIDTH-3:6]};
-        5'd17: log32 = { {7{log30[WIDTH-3]}}, log30[WIDTH-3:5]};
-        5'd18: log32 = { {6{log30[WIDTH-3]}}, log30[WIDTH-3:4]};
-        5'd19: log32 = { {5{log30[WIDTH-3]}}, log30[WIDTH-3:3]};
-        5'd20: log32 = { {4{log30[WIDTH-3]}}, log30[WIDTH-3:2]};
-        5'd21: log32 = { {3{log30[WIDTH-3]}}, log30[WIDTH-3:1]};
-        5'd22: log32 = { {2{log30[WIDTH-3]}}, log30[WIDTH-3:0]};
-        5'd23: log32 = { {1{log30[WIDTH-3]}}, log30[WIDTH-3:0], 1'b0};
-        5'd24: log32 = {log30[WIDTH-3:0], 2'b0};
-        5'd25: log32 = {log30[WIDTH-3], log30[WIDTH-5:0], 3'b0};
-        5'd26: log32 = {log30[WIDTH-3], log30[WIDTH-6:0], 4'b0};
-        5'd27: log32 = {log30[WIDTH-3], log30[WIDTH-7:0], 5'b0};
-        5'd28: log32 = {log30[WIDTH-3], log30[WIDTH-8:0], 6'b0};
-        5'd29: log32 = {log30[WIDTH-3], log30[WIDTH-9:0], 7'b0};
-        5'd30: log32 = {log30[WIDTH-3], log30[WIDTH-10:0], 8'b0};
-        5'd31: log32 = {log30[WIDTH-3], log30[WIDTH-11:0], 9'b0};
-        default: log32 = {{2{log30[WIDTH-3]}}, log30[WIDTH-3:0]};
-    endcase
-end
-endmodule
-
-
-module Tran_Q822_to_float(
-    input [29:0] log30,
-    output reg [31:0] log32
-);
-    wire sign;
-    wire [29:0] abs_x30;
-    ABS0_Tran_Q822_to_float abs0_Tran_Q822_to_float0(
-        .x_in(log30),
-        .sign(sign),
-        .abs_x(abs_x30)
-    );
-    wire [4:0] k;
-    LOD1_Tran_Q822_to_float_24 lod1_Tran_Q822_to_float_24_0(
-        .in(abs_x30),
-        .msb_pos(k)  
+    CPA_float_add cpa_add1(
+        .clk(clk),
+        .rstn(rstn),
+        .float_flag(float_flag),
+        .input_x0(CPA1_a),
+        .input_x1(CPA1_b),
+        .TRi(1'b0),
+        .final_result(CPA1_result),
+        .cpa_overflow(CPA1_cpa_overflow),
+        .overflow(CPA1_overflow),
+        .underflow(CPA1_underflow)
     );
 
-    always @(*) begin
-        case(k)
-            5'd2: log32 = {sign, 8'b10000110, 23'b00000000000000000000000};
-            5'd3: log32 = {sign, 8'b10000101, abs_x30[27:5]};
-            5'd4: log32 = {sign, 8'b10000100, abs_x30[26:4]};
-            5'd5: log32 = {sign, 8'b10000011, abs_x30[25:3]};
-            5'd6: log32 = {sign, 8'b10000010, abs_x30[24:2]};
-            5'd7: log32 = {sign, 8'b10000001, abs_x30[23:1]};
-            5'd8: log32 = {sign, 8'b10000000, abs_x30[22:0]};
-            5'd9: log32 = {sign, 8'b01111111, abs_x30[21:0], 1'b0};
-            5'd10: log32 = {sign, 8'b01111110, abs_x30[20:0], 2'b0};
-            5'd11: log32 = {sign, 8'b01111101, abs_x30[19:0], 3'b0};
-            5'd12: log32 = {sign, 8'b01111100, abs_x30[18:0], 4'b0};
-            5'd13: log32 = {sign, 8'b01111011, abs_x30[17:0], 5'b0};
-            5'd14: log32 = {sign, 8'b01111010, abs_x30[16:0], 6'b0};
-            5'd15: log32 = {sign, 8'b01111001, abs_x30[15:0], 7'b0};
-            5'd16: log32 = {sign, 8'b01111000, abs_x30[14:0], 8'b0};
-            5'd17: log32 = {sign, 8'b01110111, abs_x30[13:0], 9'b0};
-            5'd18: log32 = {sign, 8'b01110110, abs_x30[12:0], 10'b0};
-            5'd19: log32 = {sign, 8'b01110101, abs_x30[11:0], 11'b0};
-            5'd20: log32 = {sign, 8'b01110100, abs_x30[10:0], 12'b0};
-            5'd21: log32 = {sign, 8'b01110011, abs_x30[9:0], 13'b0};
-            5'd22: log32 = {sign, 8'b01110010, abs_x30[8:0], 14'b0};
-            5'd23: log32 = {sign, 8'b01110001, abs_x30[7:0], 15'b0};
-            5'd24: log32 = {sign, 8'b01110000, abs_x30[6:0], 16'b0};
-            5'd25: log32 = {sign, 8'b01101111, abs_x30[5:0], 17'b0};
-            5'd26: log32 = {sign, 8'b01101110, abs_x30[4:0], 18'b0};
-            5'd27: log32 = {sign, 8'b01101101, abs_x30[3:0], 19'b0};
-            5'd28: log32 = {sign, 8'b01101100, abs_x30[2:0], 20'b0};
-            5'd29: log32 = {sign, 8'b01101011, abs_x30[1:0], 21'b0};
-            5'd30: log32 = {sign, 8'b01101010, abs_x30[0], 22'b0};
-            5'd31: log32 = {sign, 8'b01101001, 23'b0};
-            default: log32 = {1'b0, 8'b0, 23'b0};
-        endcase
-    end
+
+    wire [WIDTH32-1:0] CPA2_a;
+    wire [WIDTH32-1:0] CPA2_b;
+    assign CPA2_a = t4;
+    assign CPA2_b = bias;
+    wire CPA2_overflow;
+    wire CPA2_cpa_overflow;
+    wire CPA2_underflow;
+    wire [WIDTH32-1:0] CPA2_result;
+
+    CPA_float_add cpa_add2(
+        .clk(clk),
+        .rstn(rstn),
+        .float_flag(float_flag),
+        .input_x0(CPA2_a),
+        .input_x1(CPA2_b),
+        .TRi(1'b0),
+        .final_result(CPA2_result),
+        .cpa_overflow(CPA2_cpa_overflow),
+        .overflow(CPA2_overflow),
+        .underflow(CPA2_underflow)
+    );
 
 
-endmodule
 
 
-module ABS0_Tran_Q822_to_float(
-    input [29:0] x_in,        // 输入 x 为 32 位定点数
-    output reg sign,
-    output reg [29:0] abs_x // 输出 abs_x 为 x 的绝对值
-);
+    wire [WIDTH32-1:0] CPA3_a;
+    wire [WIDTH32-1:0] CPA3_b;
+    assign CPA3_a = CPA0_result;
+    assign CPA3_b = CPA1_result;
+    wire CPA3_overflow;
+    wire CPA3_cpa_overflow;
+    wire CPA3_underflow;
+    wire [WIDTH32-1:0] CPA3_result;
+    CPA_float_add_all_reg cpa_add3(
+        .clk(clk),
+        .rstn(rstn),
+        .float_flag(float_flag),
+        .input_x0(CPA3_a),
+        .input_x1(CPA3_b),
+        .TRi(1'b0),
+        .final_result(CPA3_result),
+        .cpa_overflow(CPA3_cpa_overflow),
+        .overflow(CPA3_overflow),
+        .underflow(CPA3_underflow)
+    );
 
-    always @(*) begin
-        if (x_in[29] == 1'b1) begin      // 如果符号位为1，表示负数
-            abs_x = ~x_in + 1'b1;  // 取反并加1，得到绝对值
-            sign = 1'b1;
-        end
-        else
-        begin
-            abs_x = x_in;       // 如果符号位为0，表示正数，直接输出 x
-            sign = 1'b0;
+    wire [WIDTH32-1:0] CPA4_a;
+    wire [WIDTH32-1:0] CPA4_b;
+    //@yuan: we should delay the result of CPA2 to make data being synchronized
+    reg [WIDTH32-1:0] CPA2_result_reg;
+    always@(posedge clk or negedge rstn)begin
+        if(!rstn)begin
+            CPA2_result_reg <= 0;
+        end else begin
+            CPA2_result_reg <= CPA2_result;
         end
     end
+    assign CPA4_a = CPA3_result;
+    assign CPA4_b = CPA2_result_reg;
+    wire CPA4_overflow;
+    wire CPA4_cpa_overflow;
+    wire CPA4_underflow;
+    wire [WIDTH32-1:0] CPA4_result;
+    CPA_float_add_all_reg cpa_add4(
+        .clk(clk),
+        .rstn(rstn),
+        .float_flag(float_flag),
+        .input_x0(CPA4_a),
+        .input_x1(CPA4_b),
+        .TRi(1'b0),
+        .final_result(CPA4_result),
+        .cpa_overflow(CPA4_cpa_overflow),
+        .overflow(CPA4_overflow),
+        .underflow(CPA4_underflow)
+    );
+    
+    assign float_overflow = (float_flag==1'b1)&&(CPA0_overflow|CPA1_overflow|CPA2_overflow|CPA3_overflow|CPA4_overflow);
+    assign float_underflow = (float_flag==1'b1)&&(CPA0_underflow|CPA1_underflow|CPA2_underflow|CPA3_underflow|CPA4_underflow);
+    assign cpa_overflow = CPA0_cpa_overflow | CPA1_cpa_overflow | CPA2_cpa_overflow | CPA3_cpa_overflow | CPA4_cpa_overflow;
+    assign tri_result = CPA4_result;
 endmodule
 
-module leading_one_detector_4bit_Tran_Q816_to_float (
+
+
+
+
+module CPA_cpatree #(parameter N = 32)(
+    input [N-1:0] a,
+    input [N-1:0] b,
+    input TRi,
+    output [N-1:0] sum,
+    output overflow
+);
+    assign sum = a + b + TRi;  // Simple binary addition
+    assign overflow = (a[N-1] == b[N-1]) && (sum[N-1] != a[N-1]);
+endmodule
+
+module CPA_float_add#(parameter WIDTH32 = 32
+)(
+    input clk,
+    input rstn,
+    input float_flag,
+    input [WIDTH32-1:0] input_x0,
+    input [WIDTH32-1:0] input_x1,
+    input TRi,
+    output [WIDTH32-1:0] final_result,
+    output cpa_overflow,
+    output reg overflow,
+    output reg underflow
+);
+    
+    //对阶
+    wire [8:0] subexponet;
+    wire [8:0] exponent0;
+    wire [8:0] exponent1;
+    assign exponent0 = {1'b0, input_x0[30:23]};
+    assign exponent1 = {1'b1, ~input_x1[30:23]};
+    assign subexponet = exponent0 + exponent1 + 1'b1;
+
+    wire [7:0] normal_exponent = (subexponet[8]==1'b0) ? input_x0[30:23] : input_x1[30:23];//取较大的指数
+
+    wire [22:0] Mantissa0;
+    wire [22:0] Mantissa1;
+    assign Mantissa0 = input_x0[22:0];
+    assign Mantissa1 = input_x1[22:0];
+    wire [8:0] abs_subexponet;
+    assign abs_subexponet = (subexponet[8]==1'b0)?subexponet:(~subexponet+1'b1);
+
+    wire [22:0] a;
+    wire [23:0] b;
+    assign a = (subexponet[8]==1'b1) ? Mantissa1 : Mantissa0;//不移动的尾数
+    //@yuan: for the Denormalized （specially, the 0）
+    wire [23:0] frac0, frac1;
+    assign frac0 = (input_x0[30:23] == 8'b0) ? {1'b0, Mantissa0} : {1'b1, Mantissa0};
+    assign frac1 = (input_x1[30:23] == 8'b0) ? {1'b0, Mantissa1} : {1'b1, Mantissa1};
+    wire [23:0] input_shift;
+    // assign input_shift = (subexponet[8]==1'b0) ? {1'b1, Mantissa1} : {1'b1, Mantissa0};
+    assign input_shift = (subexponet[8]==1'b0) ? frac1 : frac0;
+
+    wire [4:0] shift_b;
+    assign shift_b = (abs_subexponet[8:5] == 4'b0000) ? abs_subexponet[4:0] : 5'b11111;
+    assign b = input_shift>>shift_b;//对指数较小的尾数进行右移动，由于只有24bit，所以只取后面5bit即可
+    // wire over_subexponent;
+    // assign over_subexponent = ~(abs_subexponet[8:5] == 4'b0);//指数过大的情况，意味着，两个数相差过大
+    //尾数求和
+    // reg [25:0] add_a;
+    reg [31:0] add_b;
+    reg sub;
+    wire [1:0] x_sign;
+    assign x_sign = {input_x0[31],input_x1[31]};
+    always @(*) begin
+        case(x_sign)
+            // 2'b00,2'b11:begin add_a = {3'b001, a}; add_b = {8'b00, b}; sub = 1'b0; end
+            // 2'b01,2'b10:begin add_a = {3'b001, a}; add_b = {8'b11111111, ~b}; sub = 1'b1; end
+            2'b00,2'b11:begin add_b = {8'b0, b}; sub = 1'b0; end
+            2'b01,2'b10:begin add_b = {8'b11111111, ~b}; sub = 1'b1; end
+        endcase
+    end
+    wire [31:0] result;
+    wire [31:0] fixed_point_result;
+    wire [31:0] cpa_a, cpa_b;
+    wire cpa_TRi;
+    wire cpa_overflow_mantissa;
+    wire cpa_overflow_fixed_point;
+    assign cpa_TRi = sub;
+    assign cpa_a = {8'b0, 1'b1, a};
+    assign cpa_b = add_b;
+    //@yuan: for the mantissa addition
+    CPA_cpatree cpa_0(
+        .a(cpa_a),
+        .b(cpa_b),
+        .TRi(cpa_TRi),
+        .sum(result),
+        .overflow(cpa_overflow_mantissa)
+    );
+    //for the fixed point addition
+    CPA_cpatree cpa_fixed_adder(
+        .a(input_x0),
+        .b(input_x1),
+        .TRi(TRi),
+        .sum(fixed_point_result),
+        .overflow(cpa_overflow_fixed_point)
+    );
+    //规范化
+    wire [25:0] abs_result;
+    assign abs_result = (result[25]==1'b0) ? result[25:0] : (~result[25:0] + 1'b1);
+    wire [5:0] k;//高位是符号位
+    wire [22:0] new_result;
+    FLOAT_ADD_LOD1 lod(
+        .x_in(abs_result[24:0]),
+        .k(k),
+        .result(new_result)
+    );
+    wire [7:0] final_result_exponent;
+    wire [22:0] final_result_Mantissa;
+    wire [8:0] final_sub_exponent;
+    wire [8:0] final_sub_k;
+    //@yuan: the underflow and overflow signals should be delayed 1 cycle, as the same as the final result
+    wire underflow_temp, overflow_temp;
+    assign final_sub_k = ~{{3{k[5]}}, k} + 1'b1;
+    assign final_sub_exponent = {1'b0, normal_exponent}+final_sub_k;
+    assign underflow_temp = (input_x0[31] ^ input_x1[31]==1'b1) && (final_sub_exponent[8] ==1'b1 || k==6'b011111);//相减之后为0，或者指数减去k后小于0。
+
+    assign overflow_temp = (normal_exponent[7:0] == 8'b11111111) && (input_x0[31] ^ input_x1[31]==1'b0);
+    assign final_result_exponent = (underflow_temp==1'b1)? 8'b0:((overflow_temp==1'b1)? 8'b11111111: final_sub_exponent[7:0]);//下溢出时取最小的，上溢出取最大的
+    assign final_result_Mantissa = (underflow_temp==1'b1)? 23'b0:((overflow_temp==1'b1)? 23'b11111111111111111111111 : new_result);
+    reg final_sign;
+    always @(*) begin
+        case({input_x0[31], input_x1[31], subexponet[8], result[24]})
+            4'b0000: final_sign=1'b0;
+            4'b0001: final_sign=1'b0;
+            4'b0010: final_sign=1'b0;
+            4'b0011: final_sign=1'b0;
+            4'b1100: final_sign=1'b1;
+            4'b1101: final_sign=1'b1;
+            4'b1110: final_sign=1'b1;
+            4'b1111: final_sign=1'b1;
+            4'b0100: final_sign=1'b0;
+            4'b0101: final_sign=1'b1;
+            4'b0110: final_sign=1'b1;
+            4'b0111: final_sign=1'b0;
+            4'b1000: final_sign=1'b1;
+            4'b1001: final_sign=1'b0;
+            4'b1010: final_sign=1'b0;
+            4'b1011: final_sign=1'b1;
+        endcase
+    end
+    wire [31:0] final_result_float;
+    assign final_result_float = {final_sign, final_result_exponent, final_result_Mantissa};
+    //TODO: Adding a Round module
+    //@yuan: add one register at the ouput of float-addition to improving timing performance
+    reg [WIDTH32 - 1 : 0] final_result_float_reg;
+    reg cpa_overflow_mantissa_reg;
+    always@(posedge clk or negedge rstn)begin
+        if(!rstn)begin
+            final_result_float_reg <= 0;
+            overflow <= 1'b0;
+            underflow <= 1'b0;
+            cpa_overflow_mantissa_reg <= 1'b0;
+        end else begin
+            final_result_float_reg <= final_result_float;
+            overflow <= overflow_temp;
+            underflow <= underflow_temp;
+            cpa_overflow_mantissa_reg <= cpa_overflow_mantissa;
+        end
+    end
+    assign cpa_overflow = (float_flag==1'b1) ? cpa_overflow_mantissa_reg : cpa_overflow_fixed_point;
+    assign final_result = (float_flag==1'b1) ? final_result_float_reg : fixed_point_result;
+endmodule
+
+module CPA_float_add_all_reg#(parameter WIDTH32 = 32
+)(
+    input clk,
+    input rstn,
+    input float_flag,
+    input [WIDTH32-1:0] input_x0,
+    input [WIDTH32-1:0] input_x1,
+    input TRi,
+    output [WIDTH32-1:0] final_result,
+    output reg cpa_overflow,
+    output reg overflow,
+    output reg underflow
+);
+    
+    //对阶
+    wire [8:0] subexponet;
+    wire [8:0] exponent0;
+    wire [8:0] exponent1;
+    assign exponent0 = {1'b0, input_x0[30:23]};
+    assign exponent1 = {1'b1, ~input_x1[30:23]};
+    assign subexponet = exponent0 + exponent1 + 1'b1;
+
+    wire [7:0] normal_exponent = (subexponet[8]==1'b0) ? input_x0[30:23] : input_x1[30:23];//取较大的指数
+
+    wire [22:0] Mantissa0;
+    wire [22:0] Mantissa1;
+    assign Mantissa0 = input_x0[22:0];
+    assign Mantissa1 = input_x1[22:0];
+    wire [8:0] abs_subexponet;
+    assign abs_subexponet = (subexponet[8]==1'b0)?subexponet:(~subexponet+1'b1);
+
+    wire [22:0] a;
+    wire [23:0] b;
+    assign a = (subexponet[8]==1'b1) ? Mantissa1 : Mantissa0;//不移动的尾数
+    //@yuan: for the Denormalized （specially, the 0）
+    wire [23:0] frac0, frac1;
+    assign frac0 = (input_x0[30:23] == 8'b0) ? {1'b0, Mantissa0} : {1'b1, Mantissa0};
+    assign frac1 = (input_x1[30:23] == 8'b0) ? {1'b0, Mantissa1} : {1'b1, Mantissa1};
+    wire [23:0] input_shift;
+    // assign input_shift = (subexponet[8]==1'b0) ? {1'b1, Mantissa1} : {1'b1, Mantissa0};
+    assign input_shift = (subexponet[8]==1'b0) ? frac1 : frac0;
+
+    wire [4:0] shift_b;
+    assign shift_b = (abs_subexponet[8:5] == 4'b0000) ? abs_subexponet[4:0] : 5'b11111;
+    assign b = input_shift>>shift_b;//对指数较小的尾数进行右移动，由于只有24bit，所以只取后面5bit即可
+    // assign b = input_shift>>abs_subexponet;//对指数较小的尾数进行右移动，由于只有24为，所以只取后面5bit尽可
+    // wire over_subexponent;
+    // assign over_subexponent = ~(abs_subexponet[8:5] == 4'b0);//指数过大的情况，意味着，两个数相差过大
+    //尾数求和
+    // reg [25:0] add_a;
+    reg [31:0] add_b;
+    reg sub;
+    wire [1:0] x_sign;
+    assign x_sign = {input_x0[31],input_x1[31]};
+    always @(*) begin
+        case(x_sign)
+            // 2'b00,2'b11:begin add_a = {3'b001, a}; add_b = {8'b00, b}; sub = 1'b0; end
+            // 2'b01,2'b10:begin add_a = {3'b001, a}; add_b = {8'b11111111, ~b}; sub = 1'b1; end
+            2'b00,2'b11:begin add_b = {8'b0, b}; sub = 1'b0; end
+            2'b01,2'b10:begin add_b = {8'b11111111, ~b}; sub = 1'b1; end
+        endcase
+    end
+    wire [31:0] result;
+    wire [31:0] cpa_a, cpa_b;
+    wire cpa_TRi;
+    wire cpa_overflow_temp;
+    assign cpa_TRi = (float_flag==1'b1) ? sub : TRi;
+    assign cpa_a = (float_flag==1'b1) ? {8'b0, 1'b1, a} : input_x0;
+    assign cpa_b = (float_flag==1'b1) ? add_b : input_x1;
+
+    CPA_cpatree cpa_0(
+        .a(cpa_a),
+        .b(cpa_b),
+        .TRi(cpa_TRi),
+        .sum(result),
+        .overflow(cpa_overflow_temp)
+    );
+
+    //规范化
+    wire [25:0] abs_result;
+    assign abs_result = (result[25]==1'b0) ? result[25:0] : (~result[25:0] + 1'b1);
+    wire [5:0] k;//高位是符号位
+    wire [22:0] new_result;
+    FLOAT_ADD_LOD1 lod(
+        .x_in(abs_result[24:0]),
+        .k(k),
+        .result(new_result)
+    );
+    wire [7:0] final_result_exponent;
+    wire [22:0] final_result_Mantissa;
+    wire [8:0] final_sub_exponent;
+    wire [8:0] final_sub_k;
+    //@yuan: the underflow and overflow signals should be delayed 1 cycle, as the same as the final result
+    wire underflow_temp, overflow_temp;
+    assign final_sub_k = ~{{3{k[5]}}, k} + 1'b1;
+    assign final_sub_exponent = {1'b0, normal_exponent}+final_sub_k;
+    assign underflow_temp = (input_x0[31] ^ input_x1[31]==1'b1) && (final_sub_exponent[8] ==1'b1 || k==6'b011111);//相减之后为0，或者指数减去k后小于0。
+
+    assign overflow_temp = (normal_exponent[7:0] == 8'b11111111) && (input_x0[31] ^ input_x1[31]==1'b0);
+    assign final_result_exponent = (underflow_temp==1'b1)? 8'b0:((overflow_temp==1'b1)? 8'b11111111: final_sub_exponent[7:0]);//下溢出时取最小的，上溢出取最大的
+    assign final_result_Mantissa = (underflow_temp==1'b1)? 23'b0:((overflow_temp==1'b1)? 23'b11111111111111111111111 : new_result);
+    reg final_sign;
+    always @(*) begin
+        case({input_x0[31], input_x1[31], subexponet[8], result[24]})
+            4'b0000: final_sign=1'b0;
+            4'b0001: final_sign=1'b0;
+            4'b0010: final_sign=1'b0;
+            4'b0011: final_sign=1'b0;
+            4'b1100: final_sign=1'b1;
+            4'b1101: final_sign=1'b1;
+            4'b1110: final_sign=1'b1;
+            4'b1111: final_sign=1'b1;
+            4'b0100: final_sign=1'b0;
+            4'b0101: final_sign=1'b1;
+            4'b0110: final_sign=1'b1;
+            4'b0111: final_sign=1'b0;
+            4'b1000: final_sign=1'b1;
+            4'b1001: final_sign=1'b0;
+            4'b1010: final_sign=1'b0;
+            4'b1011: final_sign=1'b1;
+        endcase
+    end
+    wire [31:0] final_result_float;
+    assign final_result_float = {final_sign, final_result_exponent, final_result_Mantissa};
+    //TODO: Adding a Round module
+    //@yuan: add one register at the ouput of float-addition to improving timing performance
+    reg [WIDTH32 - 1 : 0] final_result_float_reg;
+    reg [WIDTH32 - 1 : 0] fixed_point_result_reg;
+    always@(posedge clk or negedge rstn)begin
+        if(!rstn)begin
+            final_result_float_reg <= 0;
+            fixed_point_result_reg <= 0;
+            overflow <= 1'b0;
+            underflow <= 1'b0;
+            cpa_overflow <= 1'b0;
+        end else begin
+            final_result_float_reg <= final_result_float;
+            fixed_point_result_reg <= result;
+            overflow <= overflow_temp;
+            underflow <= underflow_temp;
+            cpa_overflow <= cpa_overflow_temp;
+        end
+    end
+    // assign cpa_overflow = (float_flag==1'b1) ? cpa_overflow_mantissa_reg : cpa_overflow_fixed_point_reg;
+    assign final_result = (float_flag==1'b1) ? final_result_float_reg : fixed_point_result_reg;
+endmodule
+
+// module CPA_float_add_last#(parameter WIDTH32 = 32
+// )(
+//     input clk,
+//     inout rstn,
+//     input float_flag,
+//     input [WIDTH32-1:0] input_x0,
+//     input [WIDTH32-1:0] input_x1,
+//     input TRi,
+//     output [WIDTH32-1:0] final_result,
+//     output cpa_overflow,
+//     output reg overflow,
+//     output reg underflow
+// );
+    
+//     //对阶
+//     wire [8:0] subexponet;
+//     wire [8:0] exponent0;
+//     wire [8:0] exponent1;
+//     assign exponent0 = {1'b0, input_x0[30:23]};
+//     assign exponent1 = {1'b1, ~input_x1[30:23]};
+//     assign subexponet = exponent0 + exponent1 + 1'b1;
+
+//     wire [7:0] normal_exponent = (subexponet[8]==1'b0) ? input_x0[30:23] : input_x1[30:23];//取较大的指数
+
+//     wire [22:0] Mantissa0;
+//     wire [22:0] Mantissa1;
+//     assign Mantissa0 = input_x0[22:0];
+//     assign Mantissa1 = input_x1[22:0];
+//     wire [8:0] abs_subexponet;
+//     assign abs_subexponet = (subexponet[8]==1'b0)?subexponet:(~subexponet+1'b1);
+
+//     wire [22:0] a;
+//     wire [23:0] b;
+//     assign a = (subexponet[8]==1'b1) ? Mantissa1 : Mantissa0;//不移动的尾数
+//     //@yuan: for the Denormalized （specially, the 0）
+//     wire [23:0] frac0, frac1;
+//     assign frac0 = (input_x0[30:23] == 8'b0) ? {1'b0, Mantissa0} : {1'b1, Mantissa0};
+//     assign frac1 = (input_x1[30:23] == 8'b0) ? {1'b0, Mantissa1} : {1'b1, Mantissa1};
+//     wire [23:0] input_shift;
+//     // assign input_shift = (subexponet[8]==1'b0) ? {1'b1, Mantissa1} : {1'b1, Mantissa0};
+//     assign input_shift = (subexponet[8]==1'b0) ? frac1 : frac0;
+//     assign b = input_shift>>abs_subexponet;//对指数较小的尾数进行右移动，由于只有24为，所以只取后面5bit尽可
+//     wire over_subexponent;
+//     assign over_subexponent = ~(abs_subexponet[8:5] == 4'b0);//指数过大的情况，意味着，两个数相差过大
+//     //尾数求和
+//     reg [25:0] add_a;
+//     reg [31:0] add_b;
+//     reg sub;
+//     wire [1:0] x_sign;
+//     assign x_sign = {input_x0[31],input_x1[31]};
+//     always @(*) begin
+//         case(x_sign)
+//             2'b00,2'b11:begin add_a = {3'b001, a}; add_b = {8'b00, b}; sub = 1'b0; end
+//             2'b01,2'b10:begin add_a = {3'b001, a}; add_b = {8'b11111111, ~b}; sub = 1'b1; end
+//         endcase
+//     end
+//     wire [31:0] result;
+//     wire [31:0] fixed_point_result;
+//     wire [31:0] cpa_a, cpa_b;
+//     wire cpa_TRi;
+//     wire cpa_overflow_mantissa;
+//     wire cpa_overflow_fixed_point;
+//     assign cpa_TRi = sub;
+//     assign cpa_a = {6'b0, add_a};
+//     assign cpa_b = add_b;
+//     //@yuan: for the mantissa addition
+//     CPA_cpatree cpa_0(
+//         .a(cpa_a),
+//         .b(cpa_b),
+//         .TRi(cpa_TRi),
+//         .sum(result),
+//         .overflow(cpa_overflow_mantissa)
+//     );
+//     //for the fixed point addition
+//     CPA_cpatree cpa_fixed_adder(
+//         .a(input_x0),
+//         .b(input_x1),
+//         .TRi(TRi),
+//         .sum(fixed_point_result),
+//         .overflow(cpa_overflow_fixed_point)
+//     );
+//     //规范化
+//     wire [25:0] abs_result;
+//     assign abs_result = (result[25]==1'b0) ? result[25:0] : (~result[25:0] + 1'b1);
+//     wire [5:0] k;//高位是符号位
+//     wire [22:0] new_result;
+//     FLOAT_ADD_LOD1 lod(
+//         .x_in(abs_result[24:0]),
+//         .k(k),
+//         .result(new_result)
+//     );
+//     wire [7:0] final_result_exponent;
+//     wire [22:0] final_result_Mantissa;
+//     wire [8:0] final_sub_exponent;
+//     wire [8:0] final_sub_k;
+//     //@yuan: the underflow and overflow signals should be delayed 1 cycle, as the same as the final result
+//     wire underflow_temp, overflow_temp;
+//     assign final_sub_k = ~{{3{k[5]}}, k} + 1'b1;
+//     assign final_sub_exponent = {1'b0, normal_exponent}+final_sub_k;
+//     assign underflow_temp = (input_x0[31] ^ input_x1[31]==1'b1) && (final_sub_exponent[8] ==1'b1 || k==6'b011111);//相减之后为0，或者指数减去k后小于0。
+
+//     assign overflow_temp = (normal_exponent[7:0] == 8'b11111111) && (input_x0[31] ^ input_x1[31]==1'b0);
+//     assign final_result_exponent = (underflow_temp==1'b1)? 8'b0:((overflow_temp==1'b1)? 8'b11111111: final_sub_exponent[7:0]);//下溢出时取最小的，上溢出取最大的
+//     assign final_result_Mantissa = (underflow_temp==1'b1)? 23'b0:((overflow_temp==1'b1)? 23'b11111111111111111111111 : new_result);
+//     reg final_sign;
+//     always @(*) begin
+//         case({input_x0[31], input_x1[31], subexponet[8], result[24]})
+//             4'b0000: final_sign=1'b0;
+//             4'b0001: final_sign=1'b0;
+//             4'b0010: final_sign=1'b0;
+//             4'b0011: final_sign=1'b0;
+//             4'b1100: final_sign=1'b1;
+//             4'b1101: final_sign=1'b1;
+//             4'b1110: final_sign=1'b1;
+//             4'b1111: final_sign=1'b1;
+//             4'b0100: final_sign=1'b0;
+//             4'b0101: final_sign=1'b1;
+//             4'b0110: final_sign=1'b1;
+//             4'b0111: final_sign=1'b0;
+//             4'b1000: final_sign=1'b1;
+//             4'b1001: final_sign=1'b0;
+//             4'b1010: final_sign=1'b0;
+//             4'b1011: final_sign=1'b1;
+//         endcase
+//     end
+//     wire [31:0] final_result_float;
+//     assign final_result_float = {final_sign, final_result_exponent, final_result_Mantissa};
+//     //TODO: Adding a Round module
+//     //@yuan: add one register at the ouput of float-addition to improving timing performance
+//     reg [WIDTH32 - 1 : 0] final_result_float_reg;
+//     reg [WIDTH32 - 1 : 0] fixed_point_result_reg;
+//     reg cpa_overflow_mantissa_reg;
+//     reg cpa_overflow_fixed_point_reg;
+//     always@(posedge clk or negedge rstn)begin
+//         if(!rstn)begin
+//             final_result_float_reg <= 0;
+//             fixed_point_result_reg <= 0;
+//             overflow <= 1'b0;
+//             underflow <= 1'b0;
+//             cpa_overflow_fixed_point_reg <= 1'b0;
+//             cpa_overflow_mantissa_reg <= 1'b0;
+//         end else begin
+//             final_result_float_reg <= final_result_float;
+//             fixed_point_result_reg <= fixed_point_result;
+//             overflow <= overflow_temp;
+//             underflow <= underflow_temp;
+//             cpa_overflow_fixed_point_reg <= cpa_overflow_fixed_point;
+//             cpa_overflow_mantissa_reg <= cpa_overflow_mantissa;
+//         end
+//     end
+//     assign cpa_overflow = (float_flag==1'b1) ? cpa_overflow_mantissa_reg : cpa_overflow_fixed_point_reg;
+//     assign final_result = (float_flag==1'b1) ? final_result_float_reg : fixed_point_result_reg;
+// endmodule
+
+// module CPA_float_add#(parameter WIDTH32 = 32
+// )(
+//     input clk,
+//     inout rstn,
+//     input float_flag,
+//     input [WIDTH32-1:0] input_x0,
+//     input [WIDTH32-1:0] input_x1,
+//     input TRi,
+//     output [WIDTH32-1:0] final_result,
+//     output cpa_overflow,
+//     output overflow,
+//     output underflow
+// );
+    
+//     //对阶
+//     wire [8:0] subexponet;
+//     wire [8:0] exponent0;
+//     wire [8:0] exponent1;
+//     assign exponent0 = {1'b0, input_x0[30:23]};
+//     assign exponent1 = {1'b1, ~input_x1[30:23]};
+//     assign subexponet = exponent0 + exponent1 + 1'b1;
+
+//     wire [7:0] normal_exponent = (subexponet[8]==1'b0) ? input_x0[30:23] : input_x1[30:23];//取较大的指数
+
+//     wire [22:0] Mantissa0;
+//     wire [22:0] Mantissa1;
+//     assign Mantissa0 = input_x0[22:0];
+//     assign Mantissa1 = input_x1[22:0];
+//     wire [8:0] abs_subexponet;
+//     assign abs_subexponet = (subexponet[8]==1'b0)?subexponet:(~subexponet+1'b1);
+
+//     wire [22:0] a;
+//     wire [23:0] b;
+//     assign a = (subexponet[8]==1'b1) ? Mantissa1 : Mantissa0;//不移动的尾数
+//     //@yuan: for the Denormalized （specially, the 0）
+//     wire [23:0] frac0, frac1;
+//     assign frac0 = (input_x0[30:23] == 8'b0) ? {1'b0, Mantissa0} : {1'b1, Mantissa0};
+//     assign frac1 = (input_x1[30:23] == 8'b0) ? {1'b0, Mantissa1} : {1'b1, Mantissa1};
+//     wire [23:0] input_shift;
+//     // assign input_shift = (subexponet[8]==1'b0) ? {1'b1, Mantissa1} : {1'b1, Mantissa0};
+//     assign input_shift = (subexponet[8]==1'b0) ? frac1 : frac0;
+//     assign b = input_shift>>abs_subexponet;//对指数较小的尾数进行右移动，由于只有24为，所以只取后面5bit尽可
+//     wire over_subexponent;
+//     assign over_subexponent = ~(abs_subexponet[8:5] == 4'b0);//指数过大的情况，意味着，两个数相差过大
+//     //尾数求和
+//     reg [25:0] add_a;
+//     reg [31:0] add_b;
+//     reg sub;
+//     wire [1:0] x_sign;
+//     assign x_sign = {input_x0[31],input_x1[31]};
+//     always @(*) begin
+//         case(x_sign)
+//             2'b00,2'b11:begin add_a = {3'b001, a}; add_b = {8'b00, b}; sub = 1'b0; end
+//             2'b01,2'b10:begin add_a = {3'b001, a}; add_b = {8'b11111111, ~b}; sub = 1'b1; end
+//         endcase
+//     end
+//     wire [31:0] result;
+//     wire [31:0] cpa_a, cpa_b;
+//     wire cpa_TRi;
+//     assign cpa_TRi = (float_flag==1'b1) ? sub : TRi;
+//     assign cpa_a = (float_flag==1'b1) ? {6'b0, add_a} : input_x0;
+//     assign cpa_b = (float_flag==1'b1) ? add_b : input_x1;
+
+//     CPA_cpatree cpa_0(
+//         .a(cpa_a),
+//         .b(cpa_b),
+//         .TRi(cpa_TRi),
+//         .sum(result),
+//         .overflow(cpa_overflow)
+//     );
+
+//     //规范化
+//     wire [25:0] abs_result;
+//     assign abs_result = (result[25]==1'b0) ? result[25:0] : (~result[25:0] + 1'b1);
+//     wire [5:0] k;//高位是符号位
+//     wire [22:0] new_result;
+//     FLOAT_ADD_LOD1 lod(
+//         .x_in(abs_result[24:0]),
+//         .k(k),
+//         .result(new_result)
+//     );
+//     wire [7:0] final_result_exponent;
+//     wire [22:0] final_result_Mantissa;
+//     wire [8:0] final_sub_exponent;
+//     wire [8:0] final_sub_k;
+//     assign final_sub_k = ~{{3{k[5]}}, k} + 1'b1;
+//     assign final_sub_exponent = {1'b0, normal_exponent}+final_sub_k;
+//     assign underflow = (input_x0[31] ^ input_x1[31]==1'b1) && (final_sub_exponent[8] ==1'b1 || k==6'b011111);//相减之后为0，或者指数减去k后小于0。
+
+//     assign overflow = (normal_exponent[7:0] == 8'b11111111) && (input_x0[31] ^ input_x1[31]==1'b0);
+//     assign final_result_exponent = (underflow==1'b1)? 8'b0:((overflow==1'b1)? 8'b11111111: final_sub_exponent[7:0]);//下溢出时取最小的，上溢出取最大的
+//     assign final_result_Mantissa = (underflow==1'b1)? 23'b0:((overflow==1'b1)? 23'b11111111111111111111111 : new_result);
+//     reg final_sign;
+//     always @(*) begin
+//         case({input_x0[31], input_x1[31], subexponet[8], result[24]})
+//             4'b0000: final_sign=1'b0;
+//             4'b0001: final_sign=1'b0;
+//             4'b0010: final_sign=1'b0;
+//             4'b0011: final_sign=1'b0;
+//             4'b1100: final_sign=1'b1;
+//             4'b1101: final_sign=1'b1;
+//             4'b1110: final_sign=1'b1;
+//             4'b1111: final_sign=1'b1;
+//             4'b0100: final_sign=1'b0;
+//             4'b0101: final_sign=1'b1;
+//             4'b0110: final_sign=1'b1;
+//             4'b0111: final_sign=1'b0;
+//             4'b1000: final_sign=1'b1;
+//             4'b1001: final_sign=1'b0;
+//             4'b1010: final_sign=1'b0;
+//             4'b1011: final_sign=1'b1;
+//         endcase
+//     end
+//     wire [31:0] final_result_float;
+//     assign final_result_float = {final_sign, final_result_exponent, final_result_Mantissa};
+//     //TODO: Adding a Round module
+//     //@yuan: add one register at the ouput of float-addition to improving timing performance
+//     // reg [WIDTH32 - 1 : 0] final_result_float_reg;
+//     // always@(posedge clk or negedge rstn)begin
+//     //     if(!rstn)begin
+//     //         final_result_float_reg <= 0;
+//     //     end else begin
+//     //         final_result_float_reg <= final_result_float;
+//     //     end
+//     // end
+//     assign final_result = (float_flag==1'b1) ? final_result_float : result;
+// endmodule
+
+//分组检测
+
+module FLOAT_ADD_LOD1 #(parameter WIDTH = 24
+)(
+    input [WIDTH:0] x_in,
+    output [5:0] k,
+    output [22:0] result
+);
+    wire [4:0] k_;
+    reg [22:0] result_;
+    FLOAT_ADD_leading_one_detector_24 leading_one_detector_1 (.in(x_in[23:0]), .msb_pos(k_));
+    always @(*) begin
+        case (k_)
+            5'd0: result_ = x_in[22:0];
+            5'd1: result_ = {x_in[21:0], 1'b0};
+            5'd2: result_ = {x_in[20:0], 2'b0};
+            5'd3: result_ = {x_in[19:0], 3'b0};
+            5'd4: result_ = {x_in[18:0], 4'b0};
+            5'd5: result_ = {x_in[17:0], 5'b0};
+            5'd6: result_ = {x_in[16:0], 6'b0};
+            5'd7: result_ = {x_in[15:0], 7'b0};
+            5'd8: result_ = {x_in[14:0], 8'b0};
+            5'd9: result_ = {x_in[13:0], 9'b0};
+            5'd10: result_ = {x_in[12:0], 10'b0};
+            5'd11: result_ = {x_in[11:0], 11'b0};
+            5'd12: result_ = {x_in[10:0], 12'b0};
+            5'd13: result_ = {x_in[9:0], 13'b0};
+            5'd14: result_ = {x_in[8:0], 14'b0};
+            5'd15: result_ = {x_in[7:0], 15'b0};
+            5'd16: result_ = {x_in[6:0], 16'b0};
+            5'd17: result_ = {x_in[5:0], 17'b0};
+            5'd18: result_ = {x_in[4:0], 18'b0};
+            5'd19: result_ = {x_in[3:0], 19'b0};
+            5'd20: result_ = {x_in[2:0], 20'b0};
+            5'd21: result_ = {x_in[1:0], 21'b0};
+            5'd22: result_ = {x_in[0], 22'b0};
+            default:  result_ = {23'b0};
+        endcase
+    end
+    assign result = (x_in[24] == 1'b1)?x_in[23:1]:result_;
+    assign k = (x_in[24] == 1'b1) ? 6'b111111 : {1'b0, k_};
+
+endmodule
+
+
+
+module FLOAT_ADD_leading_one_detector_4bit (
     input [3:0] in,      // 4-bit input
     output reg [1:0] msb_pos,  // MSB position within the 4 bits, 2-bit output (0-3)
     output reg signal
@@ -61944,3215 +61139,49 @@ module leading_one_detector_4bit_Tran_Q816_to_float (
             signal = 1'b0;
         else
             signal = 1'b1;
-        casez (in)
-            4'b1???: msb_pos = 2'd0;
-            4'b01??: msb_pos = 2'd1;
-            4'b001?: msb_pos = 2'd2;
-            4'b0001: msb_pos = 2'd3;
-            default: msb_pos = 2'd0;  // Default case (this should never happen)
-        endcase
+        // casez (in)
+        //     4'b1???: msb_pos = 2'd0;
+        //     4'b01??: msb_pos = 2'd1;
+        //     4'b001?: msb_pos = 2'd2;
+        //     4'b0001: msb_pos = 2'd3;
+        //     default: msb_pos = 2'd0;  // Default case (this should never happen)
+        // endcase
+        if(in[3]) msb_pos = 2'd0;
+        else if(in[2]) msb_pos = 2'd1;
+        else if(in[1]) msb_pos = 2'd2;
+        else msb_pos = 2'd3;
     end
 endmodule
 
 
-module LOD1_Tran_Q822_to_float_24 (
-    input [29:0] in,     // 32-bit input
+module FLOAT_ADD_leading_one_detector_24 (
+    input [23:0] in,     // 32-bit input
     output reg [4:0] msb_pos  // MSB position, 5-bit output (0-31)
 );
 
     wire [1:0] msb_group_1, msb_group_2, msb_group_3, msb_group_4;
-    wire [1:0] msb_group_5, msb_group_6, msb_group_7, msb_group_8;
+    wire [1:0] msb_group_5, msb_group_6;
     wire signal1, signal2, signal3, signal4;
-    wire  signal5, signal6, signal7, signal8;
+    wire  signal5, signal6;
 
     // Instantiate 8 4-bit Leading-One Detectors for each group
-    leading_one_detector_4bit_Tran_Q816_to_float group1 (.in({2'b00, in[29:28]}), .msb_pos(msb_group_1), .signal(signal1));
-    leading_one_detector_4bit_Tran_Q816_to_float group2 (.in(in[27:24]), .msb_pos(msb_group_2), .signal(signal2));
-    leading_one_detector_4bit_Tran_Q816_to_float group3 (.in(in[23:20]), .msb_pos(msb_group_3), .signal(signal3));
-    leading_one_detector_4bit_Tran_Q816_to_float group4 (.in(in[19:16]), .msb_pos(msb_group_4), .signal(signal4));
-    leading_one_detector_4bit_Tran_Q816_to_float group5 (.in(in[15:12]), .msb_pos(msb_group_5), .signal(signal5));
-    leading_one_detector_4bit_Tran_Q816_to_float group6 (.in(in[11:8]), .msb_pos(msb_group_6), .signal(signal6));
-    leading_one_detector_4bit_Tran_Q816_to_float group7 (.in(in[7:4]), .msb_pos(msb_group_7), .signal(signal7));
-    leading_one_detector_4bit_Tran_Q816_to_float group8 (.in(in[3:0]), .msb_pos(msb_group_8), .signal(signal8));
+    FLOAT_ADD_leading_one_detector_4bit group1 (.in(in[23:20]), .msb_pos(msb_group_1), .signal(signal1));
+    FLOAT_ADD_leading_one_detector_4bit group2 (.in(in[19:16]), .msb_pos(msb_group_2), .signal(signal2));
+    FLOAT_ADD_leading_one_detector_4bit group3 (.in(in[15:12]), .msb_pos(msb_group_3), .signal(signal3));
+    FLOAT_ADD_leading_one_detector_4bit group4 (.in(in[11:8]), .msb_pos(msb_group_4), .signal(signal4));
+    FLOAT_ADD_leading_one_detector_4bit group5 (.in(in[7:4]), .msb_pos(msb_group_5), .signal(signal5));
+    FLOAT_ADD_leading_one_detector_4bit group6 (.in(in[3:0]), .msb_pos(msb_group_6), .signal(signal6));
     always @(*) begin
         // Combine results from each group to determine the final MSB position
-        //@zou 若in全为0，则会使得ms_pos为0，对于浮点是不正确的，会输出最小的浮点数
         if (signal1) msb_pos = {3'b000, msb_group_1};  // Position in the first group (0-3)
         else if (signal2) msb_pos = {3'b001, msb_group_2};
         else if (signal3) msb_pos = {3'b010, msb_group_3};
         else if (signal4) msb_pos = {3'b011, msb_group_4};
         else if (signal5) msb_pos = {3'b100, msb_group_5};
         else if (signal6) msb_pos = {3'b101, msb_group_6};
-        else if (signal7) msb_pos = {3'b110, msb_group_7};
-        else if (signal8) msb_pos = {3'b111, msb_group_8};
-        else msb_pos = 5'b00000;  // Default case (this should never happen)
+        else msb_pos = 5'b11111;  // Default case (this should never happen)
     end
-
 endmodule
-
-
-module CPA_ALOGC (
-    input [30:0] a,
-    input [30:0] b,
-    input Div,
-    output [30:0] sum
-);
-    wire [30:0] rev_b;
-    assign rev_b = ~b;
-    wire [30:0] operator_b;
-    assign operator_b = (Div == 1'b0) ? b : rev_b;
-    assign sum = a + operator_b + Div;  // Simple binary addition
-endmodule
-
-module anticonverter#(parameter WIDTH = 32,
-                          parameter WIDTH32 = 32  
-)(
-    input [WIDTH-1:0] x,
-    input float_flag,
-    input Tri_overflow_one,
-    input [4:0] n,
-    output [WIDTH32-1:0] x_output
-);
-
-    wire [22:0] f_e2_out;
-    APP_22_20_10_4_32_anticonv4 app_anti(
-        .f(x[21:0]),
-        .f_e2_out(f_e2_out)
-    );
-    wire [7:0] shift;
-    wire [WIDTH32-1:0] result;
-    //相当于f_e2_out还是24位，只是后面位全部为0
-    // assign  shift = {3'b0, n} + 8'b11101001 + x[29:22];
-    assign  shift = {3'b0, n} + x[29:22];
-    // assign  shift = x[21:16] + 1'b1;
-    wire [22:0] app_result;
-    assign app_result = (f_e2_out[22]==1'b1) ? f_e2_out : {1'b1, 22'b0};
-    new_Shift_operation32 shift_op(
-        .shift(shift),
-        .e({app_result, 1'b0}),  // 24-bit signed input signal
-        .result(result)
-    );
-    wire [7:0] float_e_temp;
-    assign float_e_temp = 8'b01111111 + x[29:22];
-    wire [7:0] float_e;
-    assign float_e = (float_e_temp == 8'b11111111) ? 8'b00000000 : float_e_temp;
-    wire [WIDTH32-1:0] final_result_fix;
-    assign  final_result_fix = (x[30]== 1'b1) ? (~result + 1'b1) : result;
-    wire [WIDTH32-1:0] final_result_float;
-    assign final_result_float = {x[30], float_e, app_result[21:0], 1'b0};
-    wire [WIDTH32-1:0] final_result;
-    assign final_result = (float_flag == 1'b1) ? final_result_float: final_result_fix;
-    assign  x_output = (x[31] == 1'b1 || Tri_overflow_one == 1'b1) ? 32'd0 : final_result;
-endmodule
-
-
-module  APP_22_20_10_4_32_anticonv4(
-    input [21:0] f,               // 22-bit input
-    output [22:0] f_e2_out     // 23-bit output 
-);
-    reg [5:0] segment;
-    reg [20:0] b;
-    always @(*) begin
-        case(f[21:12])
-            10'b0000000000: begin segment = 6'd0; b = 21'b011111111111111111100; end
-            10'b0000000001: begin segment = 6'd0; b = 21'b011111111111111110010; end
-            10'b0000000010: begin segment = 6'd0; b = 21'b011111111111111101001; end
-            10'b0000000011: begin segment = 6'd0; b = 21'b011111111111111100000; end
-            10'b0000000100: begin segment = 6'd0; b = 21'b011111111111111011000; end
-            10'b0000000101: begin segment = 6'd0; b = 21'b011111111111111010000; end
-            10'b0000000110: begin segment = 6'd0; b = 21'b011111111111111001001; end
-            10'b0000000111: begin segment = 6'd0; b = 21'b011111111111111000010; end
-            10'b0000001000: begin segment = 6'd0; b = 21'b011111111111110111100; end
-            10'b0000001001: begin segment = 6'd0; b = 21'b011111111111110110110; end
-            10'b0000001010: begin segment = 6'd0; b = 21'b011111111111110110000; end
-            10'b0000001011: begin segment = 6'd0; b = 21'b011111111111110101100; end
-            10'b0000001100: begin segment = 6'd0; b = 21'b011111111111110100111; end
-            10'b0000001101: begin segment = 6'd0; b = 21'b011111111111110100011; end
-            10'b0000001110: begin segment = 6'd0; b = 21'b011111111111110100000; end
-            10'b0000001111: begin segment = 6'd0; b = 21'b011111111111110011101; end
-            10'b0000010000: begin segment = 6'd0; b = 21'b011111111111110011010; end
-            10'b0000010001: begin segment = 6'd0; b = 21'b011111111111110011000; end
-            10'b0000010010: begin segment = 6'd0; b = 21'b011111111111110010111; end
-            10'b0000010011: begin segment = 6'd0; b = 21'b011111111111110010110; end
-            10'b0000010100: begin segment = 6'd0; b = 21'b011111111111110010101; end
-            10'b0000010101: begin segment = 6'd0; b = 21'b011111111111110010101; end
-            10'b0000010110: begin segment = 6'd0; b = 21'b011111111111110010110; end
-            10'b0000010111: begin segment = 6'd0; b = 21'b011111111111110010110; end
-            10'b0000011000: begin segment = 6'd0; b = 21'b011111111111110011000; end
-            10'b0000011001: begin segment = 6'd0; b = 21'b011111111111110011010; end
-            10'b0000011010: begin segment = 6'd0; b = 21'b011111111111110011100; end
-            10'b0000011011: begin segment = 6'd0; b = 21'b011111111111110011111; end
-            10'b0000011100: begin segment = 6'd0; b = 21'b011111111111110100010; end
-            10'b0000011101: begin segment = 6'd0; b = 21'b011111111111110100110; end
-            10'b0000011110: begin segment = 6'd0; b = 21'b011111111111110101011; end
-            10'b0000011111: begin segment = 6'd0; b = 21'b011111111111110101111; end
-            10'b0000100000: begin segment = 6'd0; b = 21'b011111111111110110101; end
-            10'b0000100001: begin segment = 6'd0; b = 21'b011111111111110111011; end
-            10'b0000100010: begin segment = 6'd0; b = 21'b011111111111111000001; end
-            10'b0000100011: begin segment = 6'd1; b = 21'b011111111110110000111; end
-            10'b0000100100: begin segment = 6'd1; b = 21'b011111111110101111101; end
-            10'b0000100101: begin segment = 6'd1; b = 21'b011111111110101110101; end
-            10'b0000100110: begin segment = 6'd1; b = 21'b011111111110101101110; end
-            10'b0000100111: begin segment = 6'd1; b = 21'b011111111110101100110; end
-            10'b0000101000: begin segment = 6'd1; b = 21'b011111111110101011111; end
-            10'b0000101001: begin segment = 6'd1; b = 21'b011111111110101011000; end
-            10'b0000101010: begin segment = 6'd1; b = 21'b011111111110101010011; end
-            10'b0000101011: begin segment = 6'd1; b = 21'b011111111110101001101; end
-            10'b0000101100: begin segment = 6'd1; b = 21'b011111111110101001000; end
-            10'b0000101101: begin segment = 6'd1; b = 21'b011111111110101000011; end
-            10'b0000101110: begin segment = 6'd1; b = 21'b011111111110101000000; end
-            10'b0000101111: begin segment = 6'd1; b = 21'b011111111110100111100; end
-            10'b0000110000: begin segment = 6'd1; b = 21'b011111111110100111000; end
-            10'b0000110001: begin segment = 6'd1; b = 21'b011111111110100110110; end
-            10'b0000110010: begin segment = 6'd1; b = 21'b011111111110100110100; end
-            10'b0000110011: begin segment = 6'd1; b = 21'b011111111110100110011; end
-            10'b0000110100: begin segment = 6'd1; b = 21'b011111111110100110001; end
-            10'b0000110101: begin segment = 6'd1; b = 21'b011111111110100110001; end
-            10'b0000110110: begin segment = 6'd1; b = 21'b011111111110100110001; end
-            10'b0000110111: begin segment = 6'd1; b = 21'b011111111110100110010; end
-            10'b0000111000: begin segment = 6'd1; b = 21'b011111111110100110010; end
-            10'b0000111001: begin segment = 6'd1; b = 21'b011111111110100110100; end
-            10'b0000111010: begin segment = 6'd1; b = 21'b011111111110100110110; end
-            10'b0000111011: begin segment = 6'd1; b = 21'b011111111110100111001; end
-            10'b0000111100: begin segment = 6'd1; b = 21'b011111111110100111011; end
-            10'b0000111101: begin segment = 6'd1; b = 21'b011111111110100111111; end
-            10'b0000111110: begin segment = 6'd1; b = 21'b011111111110101000011; end
-            10'b0000111111: begin segment = 6'd1; b = 21'b011111111110101001000; end
-            10'b0001000000: begin segment = 6'd1; b = 21'b011111111110101001100; end
-            10'b0001000001: begin segment = 6'd1; b = 21'b011111111110101010001; end
-            10'b0001000010: begin segment = 6'd1; b = 21'b011111111110101011000; end
-            10'b0001000011: begin segment = 6'd1; b = 21'b011111111110101011110; end
-            10'b0001000100: begin segment = 6'd1; b = 21'b011111111110101100101; end
-            10'b0001000101: begin segment = 6'd1; b = 21'b011111111110101101100; end
-            10'b0001000110: begin segment = 6'd1; b = 21'b011111111110101110101; end
-            10'b0001000111: begin segment = 6'd1; b = 21'b011111111110101111101; end
-            10'b0001001000: begin segment = 6'd1; b = 21'b011111111110110000110; end
-            10'b0001001001: begin segment = 6'd2; b = 21'b011111111011111100100; end
-            10'b0001001010: begin segment = 6'd2; b = 21'b011111111011111011010; end
-            10'b0001001011: begin segment = 6'd2; b = 21'b011111111011111010001; end
-            10'b0001001100: begin segment = 6'd2; b = 21'b011111111011111001000; end
-            10'b0001001101: begin segment = 6'd2; b = 21'b011111111011111000000; end
-            10'b0001001110: begin segment = 6'd2; b = 21'b011111111011110111000; end
-            10'b0001001111: begin segment = 6'd2; b = 21'b011111111011110110001; end
-            10'b0001010000: begin segment = 6'd2; b = 21'b011111111011110101010; end
-            10'b0001010001: begin segment = 6'd2; b = 21'b011111111011110100100; end
-            10'b0001010010: begin segment = 6'd2; b = 21'b011111111011110011110; end
-            10'b0001010011: begin segment = 6'd2; b = 21'b011111111011110011001; end
-            10'b0001010100: begin segment = 6'd2; b = 21'b011111111011110010100; end
-            10'b0001010101: begin segment = 6'd2; b = 21'b011111111011110010000; end
-            10'b0001010110: begin segment = 6'd2; b = 21'b011111111011110001100; end
-            10'b0001010111: begin segment = 6'd2; b = 21'b011111111011110001001; end
-            10'b0001011000: begin segment = 6'd2; b = 21'b011111111011110000111; end
-            10'b0001011001: begin segment = 6'd2; b = 21'b011111111011110000100; end
-            10'b0001011010: begin segment = 6'd2; b = 21'b011111111011110000011; end
-            10'b0001011011: begin segment = 6'd2; b = 21'b011111111011110000010; end
-            10'b0001011100: begin segment = 6'd2; b = 21'b011111111011110000001; end
-            10'b0001011101: begin segment = 6'd2; b = 21'b011111111011110000001; end
-            10'b0001011110: begin segment = 6'd2; b = 21'b011111111011110000001; end
-            10'b0001011111: begin segment = 6'd2; b = 21'b011111111011110000010; end
-            10'b0001100000: begin segment = 6'd2; b = 21'b011111111011110000100; end
-            10'b0001100001: begin segment = 6'd2; b = 21'b011111111011110000110; end
-            10'b0001100010: begin segment = 6'd2; b = 21'b011111111011110001000; end
-            10'b0001100011: begin segment = 6'd2; b = 21'b011111111011110001011; end
-            10'b0001100100: begin segment = 6'd2; b = 21'b011111111011110001111; end
-            10'b0001100101: begin segment = 6'd2; b = 21'b011111111011110010011; end
-            10'b0001100110: begin segment = 6'd2; b = 21'b011111111011110010111; end
-            10'b0001100111: begin segment = 6'd2; b = 21'b011111111011110011100; end
-            10'b0001101000: begin segment = 6'd2; b = 21'b011111111011110100010; end
-            10'b0001101001: begin segment = 6'd2; b = 21'b011111111011110101000; end
-            10'b0001101010: begin segment = 6'd2; b = 21'b011111111011110101110; end
-            10'b0001101011: begin segment = 6'd2; b = 21'b011111111011110110110; end
-            10'b0001101100: begin segment = 6'd2; b = 21'b011111111011110111101; end
-            10'b0001101101: begin segment = 6'd2; b = 21'b011111111011111000101; end
-            10'b0001101110: begin segment = 6'd3; b = 21'b011111111000000001001; end
-            10'b0001101111: begin segment = 6'd3; b = 21'b011111111000000000000; end
-            10'b0001110000: begin segment = 6'd3; b = 21'b011111110111111111000; end
-            10'b0001110001: begin segment = 6'd3; b = 21'b011111110111111110000; end
-            10'b0001110010: begin segment = 6'd3; b = 21'b011111110111111101001; end
-            10'b0001110011: begin segment = 6'd3; b = 21'b011111110111111100010; end
-            10'b0001110100: begin segment = 6'd3; b = 21'b011111110111111011100; end
-            10'b0001110101: begin segment = 6'd3; b = 21'b011111110111111010110; end
-            10'b0001110110: begin segment = 6'd3; b = 21'b011111110111111010001; end
-            10'b0001110111: begin segment = 6'd3; b = 21'b011111110111111001100; end
-            10'b0001111000: begin segment = 6'd3; b = 21'b011111110111111001000; end
-            10'b0001111001: begin segment = 6'd3; b = 21'b011111110111111000100; end
-            10'b0001111010: begin segment = 6'd3; b = 21'b011111110111111000001; end
-            10'b0001111011: begin segment = 6'd3; b = 21'b011111110111110111111; end
-            10'b0001111100: begin segment = 6'd3; b = 21'b011111110111110111101; end
-            10'b0001111101: begin segment = 6'd3; b = 21'b011111110111110111011; end
-            10'b0001111110: begin segment = 6'd3; b = 21'b011111110111110111010; end
-            10'b0001111111: begin segment = 6'd3; b = 21'b011111110111110111001; end
-            10'b0010000000: begin segment = 6'd3; b = 21'b011111110111110111001; end
-            10'b0010000001: begin segment = 6'd3; b = 21'b011111110111110111010; end
-            10'b0010000010: begin segment = 6'd3; b = 21'b011111110111110111011; end
-            10'b0010000011: begin segment = 6'd3; b = 21'b011111110111110111101; end
-            10'b0010000100: begin segment = 6'd3; b = 21'b011111110111110111111; end
-            10'b0010000101: begin segment = 6'd3; b = 21'b011111110111111000010; end
-            10'b0010000110: begin segment = 6'd3; b = 21'b011111110111111000101; end
-            10'b0010000111: begin segment = 6'd3; b = 21'b011111110111111001000; end
-            10'b0010001000: begin segment = 6'd3; b = 21'b011111110111111001101; end
-            10'b0010001001: begin segment = 6'd3; b = 21'b011111110111111010001; end
-            10'b0010001010: begin segment = 6'd3; b = 21'b011111110111111010111; end
-            10'b0010001011: begin segment = 6'd3; b = 21'b011111110111111011100; end
-            10'b0010001100: begin segment = 6'd3; b = 21'b011111110111111100011; end
-            10'b0010001101: begin segment = 6'd3; b = 21'b011111110111111101010; end
-            10'b0010001110: begin segment = 6'd3; b = 21'b011111110111111110001; end
-            10'b0010001111: begin segment = 6'd3; b = 21'b011111110111111111001; end
-            10'b0010010000: begin segment = 6'd3; b = 21'b011111111000000000001; end
-            10'b0010010001: begin segment = 6'd3; b = 21'b011111111000000001010; end
-            10'b0010010010: begin segment = 6'd3; b = 21'b011111111000000010100; end
-            10'b0010010011: begin segment = 6'd4; b = 21'b011111110010110111111; end
-            10'b0010010100: begin segment = 6'd4; b = 21'b011111110010110111000; end
-            10'b0010010101: begin segment = 6'd4; b = 21'b011111110010110110001; end
-            10'b0010010110: begin segment = 6'd4; b = 21'b011111110010110101010; end
-            10'b0010010111: begin segment = 6'd4; b = 21'b011111110010110100100; end
-            10'b0010011000: begin segment = 6'd4; b = 21'b011111110010110011111; end
-            10'b0010011001: begin segment = 6'd4; b = 21'b011111110010110011010; end
-            10'b0010011010: begin segment = 6'd4; b = 21'b011111110010110010110; end
-            10'b0010011011: begin segment = 6'd4; b = 21'b011111110010110010010; end
-            10'b0010011100: begin segment = 6'd4; b = 21'b011111110010110001111; end
-            10'b0010011101: begin segment = 6'd4; b = 21'b011111110010110001101; end
-            10'b0010011110: begin segment = 6'd4; b = 21'b011111110010110001011; end
-            10'b0010011111: begin segment = 6'd4; b = 21'b011111110010110001001; end
-            10'b0010100000: begin segment = 6'd4; b = 21'b011111110010110001000; end
-            10'b0010100001: begin segment = 6'd4; b = 21'b011111110010110000111; end
-            10'b0010100010: begin segment = 6'd4; b = 21'b011111110010110000111; end
-            10'b0010100011: begin segment = 6'd4; b = 21'b011111110010110001000; end
-            10'b0010100100: begin segment = 6'd4; b = 21'b011111110010110001001; end
-            10'b0010100101: begin segment = 6'd4; b = 21'b011111110010110001011; end
-            10'b0010100110: begin segment = 6'd4; b = 21'b011111110010110001101; end
-            10'b0010100111: begin segment = 6'd4; b = 21'b011111110010110010000; end
-            10'b0010101000: begin segment = 6'd4; b = 21'b011111110010110010011; end
-            10'b0010101001: begin segment = 6'd4; b = 21'b011111110010110010111; end
-            10'b0010101010: begin segment = 6'd4; b = 21'b011111110010110011011; end
-            10'b0010101011: begin segment = 6'd4; b = 21'b011111110010110100000; end
-            10'b0010101100: begin segment = 6'd4; b = 21'b011111110010110100101; end
-            10'b0010101101: begin segment = 6'd4; b = 21'b011111110010110101011; end
-            10'b0010101110: begin segment = 6'd4; b = 21'b011111110010110110010; end
-            10'b0010101111: begin segment = 6'd4; b = 21'b011111110010110111001; end
-            10'b0010110000: begin segment = 6'd4; b = 21'b011111110010111000001; end
-            10'b0010110001: begin segment = 6'd4; b = 21'b011111110010111001001; end
-            10'b0010110010: begin segment = 6'd4; b = 21'b011111110010111010001; end
-            10'b0010110011: begin segment = 6'd4; b = 21'b011111110010111011011; end
-            10'b0010110100: begin segment = 6'd4; b = 21'b011111110010111100100; end
-            10'b0010110101: begin segment = 6'd4; b = 21'b011111110010111101111; end
-            10'b0010110110: begin segment = 6'd4; b = 21'b011111110010111111010; end
-            10'b0010110111: begin segment = 6'd5; b = 21'b011111101010011010001; end
-            10'b0010111000: begin segment = 6'd5; b = 21'b011111101010011000101; end
-            10'b0010111001: begin segment = 6'd5; b = 21'b011111101010010111001; end
-            10'b0010111010: begin segment = 6'd5; b = 21'b011111101010010101110; end
-            10'b0010111011: begin segment = 6'd5; b = 21'b011111101010010100100; end
-            10'b0010111100: begin segment = 6'd5; b = 21'b011111101010010011010; end
-            10'b0010111101: begin segment = 6'd5; b = 21'b011111101010010010001; end
-            10'b0010111110: begin segment = 6'd5; b = 21'b011111101010010001000; end
-            10'b0010111111: begin segment = 6'd5; b = 21'b011111101010010000000; end
-            10'b0011000000: begin segment = 6'd5; b = 21'b011111101010001111000; end
-            10'b0011000001: begin segment = 6'd5; b = 21'b011111101010001110001; end
-            10'b0011000010: begin segment = 6'd5; b = 21'b011111101010001101010; end
-            10'b0011000011: begin segment = 6'd5; b = 21'b011111101010001100100; end
-            10'b0011000100: begin segment = 6'd5; b = 21'b011111101010001011110; end
-            10'b0011000101: begin segment = 6'd5; b = 21'b011111101010001011010; end
-            10'b0011000110: begin segment = 6'd5; b = 21'b011111101010001010101; end
-            10'b0011000111: begin segment = 6'd5; b = 21'b011111101010001010001; end
-            10'b0011001000: begin segment = 6'd5; b = 21'b011111101010001001110; end
-            10'b0011001001: begin segment = 6'd5; b = 21'b011111101010001001011; end
-            10'b0011001010: begin segment = 6'd5; b = 21'b011111101010001001001; end
-            10'b0011001011: begin segment = 6'd5; b = 21'b011111101010001000111; end
-            10'b0011001100: begin segment = 6'd5; b = 21'b011111101010001000110; end
-            10'b0011001101: begin segment = 6'd5; b = 21'b011111101010001000110; end
-            10'b0011001110: begin segment = 6'd5; b = 21'b011111101010001000110; end
-            10'b0011001111: begin segment = 6'd5; b = 21'b011111101010001000110; end
-            10'b0011010000: begin segment = 6'd5; b = 21'b011111101010001000111; end
-            10'b0011010001: begin segment = 6'd5; b = 21'b011111101010001001001; end
-            10'b0011010010: begin segment = 6'd5; b = 21'b011111101010001001011; end
-            10'b0011010011: begin segment = 6'd5; b = 21'b011111101010001001110; end
-            10'b0011010100: begin segment = 6'd5; b = 21'b011111101010001010001; end
-            10'b0011010101: begin segment = 6'd5; b = 21'b011111101010001010101; end
-            10'b0011010110: begin segment = 6'd5; b = 21'b011111101010001011001; end
-            10'b0011010111: begin segment = 6'd5; b = 21'b011111101010001011110; end
-            10'b0011011000: begin segment = 6'd5; b = 21'b011111101010001100100; end
-            10'b0011011001: begin segment = 6'd5; b = 21'b011111101010001101010; end
-            10'b0011011010: begin segment = 6'd5; b = 21'b011111101010001110001; end
-            10'b0011011011: begin segment = 6'd6; b = 21'b011111100010111100100; end
-            10'b0011011100: begin segment = 6'd6; b = 21'b011111100010111011011; end
-            10'b0011011101: begin segment = 6'd6; b = 21'b011111100010111010010; end
-            10'b0011011110: begin segment = 6'd6; b = 21'b011111100010111001010; end
-            10'b0011011111: begin segment = 6'd6; b = 21'b011111100010111000010; end
-            10'b0011100000: begin segment = 6'd6; b = 21'b011111100010110111011; end
-            10'b0011100001: begin segment = 6'd6; b = 21'b011111100010110110101; end
-            10'b0011100010: begin segment = 6'd6; b = 21'b011111100010110101111; end
-            10'b0011100011: begin segment = 6'd6; b = 21'b011111100010110101010; end
-            10'b0011100100: begin segment = 6'd6; b = 21'b011111100010110100101; end
-            10'b0011100101: begin segment = 6'd6; b = 21'b011111100010110100001; end
-            10'b0011100110: begin segment = 6'd6; b = 21'b011111100010110011101; end
-            10'b0011100111: begin segment = 6'd6; b = 21'b011111100010110011010; end
-            10'b0011101000: begin segment = 6'd6; b = 21'b011111100010110011000; end
-            10'b0011101001: begin segment = 6'd6; b = 21'b011111100010110010110; end
-            10'b0011101010: begin segment = 6'd6; b = 21'b011111100010110010100; end
-            10'b0011101011: begin segment = 6'd6; b = 21'b011111100010110010100; end
-            10'b0011101100: begin segment = 6'd6; b = 21'b011111100010110010011; end
-            10'b0011101101: begin segment = 6'd6; b = 21'b011111100010110010100; end
-            10'b0011101110: begin segment = 6'd6; b = 21'b011111100010110010100; end
-            10'b0011101111: begin segment = 6'd6; b = 21'b011111100010110010110; end
-            10'b0011110000: begin segment = 6'd6; b = 21'b011111100010110011000; end
-            10'b0011110001: begin segment = 6'd6; b = 21'b011111100010110011010; end
-            10'b0011110010: begin segment = 6'd6; b = 21'b011111100010110011110; end
-            10'b0011110011: begin segment = 6'd6; b = 21'b011111100010110100001; end
-            10'b0011110100: begin segment = 6'd6; b = 21'b011111100010110100110; end
-            10'b0011110101: begin segment = 6'd6; b = 21'b011111100010110101010; end
-            10'b0011110110: begin segment = 6'd6; b = 21'b011111100010110110000; end
-            10'b0011110111: begin segment = 6'd6; b = 21'b011111100010110110110; end
-            10'b0011111000: begin segment = 6'd6; b = 21'b011111100010110111100; end
-            10'b0011111001: begin segment = 6'd6; b = 21'b011111100010111000011; end
-            10'b0011111010: begin segment = 6'd6; b = 21'b011111100010111001011; end
-            10'b0011111011: begin segment = 6'd6; b = 21'b011111100010111010011; end
-            10'b0011111100: begin segment = 6'd6; b = 21'b011111100010111011100; end
-            10'b0011111101: begin segment = 6'd6; b = 21'b011111100010111100101; end
-            10'b0011111110: begin segment = 6'd7; b = 21'b011111011011100000110; end
-            10'b0011111111: begin segment = 6'd7; b = 21'b011111011011100000001; end
-            10'b0100000000: begin segment = 6'd7; b = 21'b011111011011011111101; end
-            10'b0100000001: begin segment = 6'd7; b = 21'b011111011011011111010; end
-            10'b0100000010: begin segment = 6'd7; b = 21'b011111011011011110111; end
-            10'b0100000011: begin segment = 6'd7; b = 21'b011111011011011110101; end
-            10'b0100000100: begin segment = 6'd7; b = 21'b011111011011011110011; end
-            10'b0100000101: begin segment = 6'd7; b = 21'b011111011011011110010; end
-            10'b0100000110: begin segment = 6'd7; b = 21'b011111011011011110010; end
-            10'b0100000111: begin segment = 6'd7; b = 21'b011111011011011110010; end
-            10'b0100001000: begin segment = 6'd7; b = 21'b011111011011011110011; end
-            10'b0100001001: begin segment = 6'd7; b = 21'b011111011011011110100; end
-            10'b0100001010: begin segment = 6'd7; b = 21'b011111011011011110110; end
-            10'b0100001011: begin segment = 6'd7; b = 21'b011111011011011111000; end
-            10'b0100001100: begin segment = 6'd7; b = 21'b011111011011011111011; end
-            10'b0100001101: begin segment = 6'd7; b = 21'b011111011011011111111; end
-            10'b0100001110: begin segment = 6'd7; b = 21'b011111011011100000011; end
-            10'b0100001111: begin segment = 6'd7; b = 21'b011111011011100000111; end
-            10'b0100010000: begin segment = 6'd7; b = 21'b011111011011100001101; end
-            10'b0100010001: begin segment = 6'd7; b = 21'b011111011011100010010; end
-            10'b0100010010: begin segment = 6'd7; b = 21'b011111011011100011001; end
-            10'b0100010011: begin segment = 6'd7; b = 21'b011111011011100100000; end
-            10'b0100010100: begin segment = 6'd7; b = 21'b011111011011100100111; end
-            10'b0100010101: begin segment = 6'd7; b = 21'b011111011011100110000; end
-            10'b0100010110: begin segment = 6'd7; b = 21'b011111011011100111000; end
-            10'b0100010111: begin segment = 6'd7; b = 21'b011111011011101000010; end
-            10'b0100011000: begin segment = 6'd7; b = 21'b011111011011101001100; end
-            10'b0100011001: begin segment = 6'd7; b = 21'b011111011011101010110; end
-            10'b0100011010: begin segment = 6'd7; b = 21'b011111011011101100001; end
-            10'b0100011011: begin segment = 6'd7; b = 21'b011111011011101101101; end
-            10'b0100011100: begin segment = 6'd7; b = 21'b011111011011101111001; end
-            10'b0100011101: begin segment = 6'd7; b = 21'b011111011011110000110; end
-            10'b0100011110: begin segment = 6'd7; b = 21'b011111011011110010011; end
-            10'b0100011111: begin segment = 6'd7; b = 21'b011111011011110100001; end
-            10'b0100100000: begin segment = 6'd7; b = 21'b011111011011110110000; end
-            10'b0100100001: begin segment = 6'd8; b = 21'b011111001110010011011; end
-            10'b0100100010: begin segment = 6'd8; b = 21'b011111001110010010011; end
-            10'b0100100011: begin segment = 6'd8; b = 21'b011111001110010001011; end
-            10'b0100100100: begin segment = 6'd8; b = 21'b011111001110010000100; end
-            10'b0100100101: begin segment = 6'd8; b = 21'b011111001110001111101; end
-            10'b0100100110: begin segment = 6'd8; b = 21'b011111001110001110111; end
-            10'b0100100111: begin segment = 6'd8; b = 21'b011111001110001110010; end
-            10'b0100101000: begin segment = 6'd8; b = 21'b011111001110001101101; end
-            10'b0100101001: begin segment = 6'd8; b = 21'b011111001110001101001; end
-            10'b0100101010: begin segment = 6'd8; b = 21'b011111001110001100110; end
-            10'b0100101011: begin segment = 6'd8; b = 21'b011111001110001100011; end
-            10'b0100101100: begin segment = 6'd8; b = 21'b011111001110001100000; end
-            10'b0100101101: begin segment = 6'd8; b = 21'b011111001110001011110; end
-            10'b0100101110: begin segment = 6'd8; b = 21'b011111001110001011101; end
-            10'b0100101111: begin segment = 6'd8; b = 21'b011111001110001011100; end
-            10'b0100110000: begin segment = 6'd8; b = 21'b011111001110001011100; end
-            10'b0100110001: begin segment = 6'd8; b = 21'b011111001110001011101; end
-            10'b0100110010: begin segment = 6'd8; b = 21'b011111001110001011110; end
-            10'b0100110011: begin segment = 6'd8; b = 21'b011111001110001100000; end
-            10'b0100110100: begin segment = 6'd8; b = 21'b011111001110001100010; end
-            10'b0100110101: begin segment = 6'd8; b = 21'b011111001110001100101; end
-            10'b0100110110: begin segment = 6'd8; b = 21'b011111001110001101001; end
-            10'b0100110111: begin segment = 6'd8; b = 21'b011111001110001101101; end
-            10'b0100111000: begin segment = 6'd8; b = 21'b011111001110001110001; end
-            10'b0100111001: begin segment = 6'd8; b = 21'b011111001110001110111; end
-            10'b0100111010: begin segment = 6'd8; b = 21'b011111001110001111101; end
-            10'b0100111011: begin segment = 6'd8; b = 21'b011111001110010000011; end
-            10'b0100111100: begin segment = 6'd8; b = 21'b011111001110010001010; end
-            10'b0100111101: begin segment = 6'd8; b = 21'b011111001110010010010; end
-            10'b0100111110: begin segment = 6'd8; b = 21'b011111001110010011010; end
-            10'b0100111111: begin segment = 6'd8; b = 21'b011111001110010100011; end
-            10'b0101000000: begin segment = 6'd8; b = 21'b011111001110010101100; end
-            10'b0101000001: begin segment = 6'd8; b = 21'b011111001110010110110; end
-            10'b0101000010: begin segment = 6'd8; b = 21'b011111001110011000001; end
-            10'b0101000011: begin segment = 6'd8; b = 21'b011111001110011001100; end
-            10'b0101000100: begin segment = 6'd9; b = 21'b011111000000011001101; end
-            10'b0101000101: begin segment = 6'd9; b = 21'b011111000000011000011; end
-            10'b0101000110: begin segment = 6'd9; b = 21'b011111000000010111010; end
-            10'b0101000111: begin segment = 6'd9; b = 21'b011111000000010110010; end
-            10'b0101001000: begin segment = 6'd9; b = 21'b011111000000010101001; end
-            10'b0101001001: begin segment = 6'd9; b = 21'b011111000000010100010; end
-            10'b0101001010: begin segment = 6'd9; b = 21'b011111000000010011011; end
-            10'b0101001011: begin segment = 6'd9; b = 21'b011111000000010010101; end
-            10'b0101001100: begin segment = 6'd9; b = 21'b011111000000010010000; end
-            10'b0101001101: begin segment = 6'd9; b = 21'b011111000000010001011; end
-            10'b0101001110: begin segment = 6'd9; b = 21'b011111000000010000111; end
-            10'b0101001111: begin segment = 6'd9; b = 21'b011111000000010000011; end
-            10'b0101010000: begin segment = 6'd9; b = 21'b011111000000001111111; end
-            10'b0101010001: begin segment = 6'd9; b = 21'b011111000000001111101; end
-            10'b0101010010: begin segment = 6'd9; b = 21'b011111000000001111011; end
-            10'b0101010011: begin segment = 6'd9; b = 21'b011111000000001111010; end
-            10'b0101010100: begin segment = 6'd9; b = 21'b011111000000001111010; end
-            10'b0101010101: begin segment = 6'd9; b = 21'b011111000000001111010; end
-            10'b0101010110: begin segment = 6'd9; b = 21'b011111000000001111011; end
-            10'b0101010111: begin segment = 6'd9; b = 21'b011111000000001111100; end
-            10'b0101011000: begin segment = 6'd9; b = 21'b011111000000001111101; end
-            10'b0101011001: begin segment = 6'd9; b = 21'b011111000000001111111; end
-            10'b0101011010: begin segment = 6'd9; b = 21'b011111000000010000011; end
-            10'b0101011011: begin segment = 6'd9; b = 21'b011111000000010000110; end
-            10'b0101011100: begin segment = 6'd9; b = 21'b011111000000010001011; end
-            10'b0101011101: begin segment = 6'd9; b = 21'b011111000000010010000; end
-            10'b0101011110: begin segment = 6'd9; b = 21'b011111000000010010101; end
-            10'b0101011111: begin segment = 6'd9; b = 21'b011111000000010011011; end
-            10'b0101100000: begin segment = 6'd9; b = 21'b011111000000010100001; end
-            10'b0101100001: begin segment = 6'd9; b = 21'b011111000000010101000; end
-            10'b0101100010: begin segment = 6'd9; b = 21'b011111000000010110000; end
-            10'b0101100011: begin segment = 6'd9; b = 21'b011111000000010111001; end
-            10'b0101100100: begin segment = 6'd9; b = 21'b011111000000011000010; end
-            10'b0101100101: begin segment = 6'd9; b = 21'b011111000000011001100; end
-            10'b0101100110: begin segment = 6'd10; b = 21'b011110110001000110011; end
-            10'b0101100111: begin segment = 6'd10; b = 21'b011110110001000101000; end
-            10'b0101101000: begin segment = 6'd10; b = 21'b011110110001000011110; end
-            10'b0101101001: begin segment = 6'd10; b = 21'b011110110001000010100; end
-            10'b0101101010: begin segment = 6'd10; b = 21'b011110110001000001011; end
-            10'b0101101011: begin segment = 6'd10; b = 21'b011110110001000000010; end
-            10'b0101101100: begin segment = 6'd10; b = 21'b011110110000111111010; end
-            10'b0101101101: begin segment = 6'd10; b = 21'b011110110000111110011; end
-            10'b0101101110: begin segment = 6'd10; b = 21'b011110110000111101101; end
-            10'b0101101111: begin segment = 6'd10; b = 21'b011110110000111100111; end
-            10'b0101110000: begin segment = 6'd10; b = 21'b011110110000111100001; end
-            10'b0101110001: begin segment = 6'd10; b = 21'b011110110000111011100; end
-            10'b0101110010: begin segment = 6'd10; b = 21'b011110110000111011000; end
-            10'b0101110011: begin segment = 6'd10; b = 21'b011110110000111010101; end
-            10'b0101110100: begin segment = 6'd10; b = 21'b011110110000111010010; end
-            10'b0101110101: begin segment = 6'd10; b = 21'b011110110000111001111; end
-            10'b0101110110: begin segment = 6'd10; b = 21'b011110110000111001110; end
-            10'b0101110111: begin segment = 6'd10; b = 21'b011110110000111001100; end
-            10'b0101111000: begin segment = 6'd10; b = 21'b011110110000111001100; end
-            10'b0101111001: begin segment = 6'd10; b = 21'b011110110000111001100; end
-            10'b0101111010: begin segment = 6'd10; b = 21'b011110110000111001101; end
-            10'b0101111011: begin segment = 6'd10; b = 21'b011110110000111001110; end
-            10'b0101111100: begin segment = 6'd10; b = 21'b011110110000111010000; end
-            10'b0101111101: begin segment = 6'd10; b = 21'b011110110000111010011; end
-            10'b0101111110: begin segment = 6'd10; b = 21'b011110110000111010110; end
-            10'b0101111111: begin segment = 6'd10; b = 21'b011110110000111011010; end
-            10'b0110000000: begin segment = 6'd10; b = 21'b011110110000111011110; end
-            10'b0110000001: begin segment = 6'd10; b = 21'b011110110000111100011; end
-            10'b0110000010: begin segment = 6'd10; b = 21'b011110110000111101001; end
-            10'b0110000011: begin segment = 6'd10; b = 21'b011110110000111110000; end
-            10'b0110000100: begin segment = 6'd10; b = 21'b011110110000111110110; end
-            10'b0110000101: begin segment = 6'd10; b = 21'b011110110000111111110; end
-            10'b0110000110: begin segment = 6'd10; b = 21'b011110110001000000110; end
-            10'b0110000111: begin segment = 6'd10; b = 21'b011110110001000001111; end
-            10'b0110001000: begin segment = 6'd11; b = 21'b011110100001101101110; end
-            10'b0110001001: begin segment = 6'd11; b = 21'b011110100001101100100; end
-            10'b0110001010: begin segment = 6'd11; b = 21'b011110100001101011011; end
-            10'b0110001011: begin segment = 6'd11; b = 21'b011110100001101010011; end
-            10'b0110001100: begin segment = 6'd11; b = 21'b011110100001101001011; end
-            10'b0110001101: begin segment = 6'd11; b = 21'b011110100001101000011; end
-            10'b0110001110: begin segment = 6'd11; b = 21'b011110100001100111101; end
-            10'b0110001111: begin segment = 6'd11; b = 21'b011110100001100110110; end
-            10'b0110010000: begin segment = 6'd11; b = 21'b011110100001100110001; end
-            10'b0110010001: begin segment = 6'd11; b = 21'b011110100001100101100; end
-            10'b0110010010: begin segment = 6'd11; b = 21'b011110100001100101000; end
-            10'b0110010011: begin segment = 6'd11; b = 21'b011110100001100100100; end
-            10'b0110010100: begin segment = 6'd11; b = 21'b011110100001100100001; end
-            10'b0110010101: begin segment = 6'd11; b = 21'b011110100001100011111; end
-            10'b0110010110: begin segment = 6'd11; b = 21'b011110100001100011101; end
-            10'b0110010111: begin segment = 6'd11; b = 21'b011110100001100011100; end
-            10'b0110011000: begin segment = 6'd11; b = 21'b011110100001100011100; end
-            10'b0110011001: begin segment = 6'd11; b = 21'b011110100001100011100; end
-            10'b0110011010: begin segment = 6'd11; b = 21'b011110100001100011101; end
-            10'b0110011011: begin segment = 6'd11; b = 21'b011110100001100011110; end
-            10'b0110011100: begin segment = 6'd11; b = 21'b011110100001100100000; end
-            10'b0110011101: begin segment = 6'd11; b = 21'b011110100001100100011; end
-            10'b0110011110: begin segment = 6'd11; b = 21'b011110100001100100110; end
-            10'b0110011111: begin segment = 6'd11; b = 21'b011110100001100101010; end
-            10'b0110100000: begin segment = 6'd11; b = 21'b011110100001100101111; end
-            10'b0110100001: begin segment = 6'd11; b = 21'b011110100001100110100; end
-            10'b0110100010: begin segment = 6'd11; b = 21'b011110100001100111010; end
-            10'b0110100011: begin segment = 6'd11; b = 21'b011110100001101000001; end
-            10'b0110100100: begin segment = 6'd11; b = 21'b011110100001101001000; end
-            10'b0110100101: begin segment = 6'd11; b = 21'b011110100001101010000; end
-            10'b0110100110: begin segment = 6'd11; b = 21'b011110100001101011000; end
-            10'b0110100111: begin segment = 6'd11; b = 21'b011110100001101100001; end
-            10'b0110101000: begin segment = 6'd11; b = 21'b011110100001101101011; end
-            10'b0110101001: begin segment = 6'd12; b = 21'b011110010000010001110; end
-            10'b0110101010: begin segment = 6'd12; b = 21'b011110010000010000100; end
-            10'b0110101011: begin segment = 6'd12; b = 21'b011110010000001111011; end
-            10'b0110101100: begin segment = 6'd12; b = 21'b011110010000001110010; end
-            10'b0110101101: begin segment = 6'd12; b = 21'b011110010000001101010; end
-            10'b0110101110: begin segment = 6'd12; b = 21'b011110010000001100010; end
-            10'b0110101111: begin segment = 6'd12; b = 21'b011110010000001011100; end
-            10'b0110110000: begin segment = 6'd12; b = 21'b011110010000001010101; end
-            10'b0110110001: begin segment = 6'd12; b = 21'b011110010000001010000; end
-            10'b0110110010: begin segment = 6'd12; b = 21'b011110010000001001011; end
-            10'b0110110011: begin segment = 6'd12; b = 21'b011110010000001000111; end
-            10'b0110110100: begin segment = 6'd12; b = 21'b011110010000001000011; end
-            10'b0110110101: begin segment = 6'd12; b = 21'b011110010000001000000; end
-            10'b0110110110: begin segment = 6'd12; b = 21'b011110010000000111110; end
-            10'b0110110111: begin segment = 6'd12; b = 21'b011110010000000111101; end
-            10'b0110111000: begin segment = 6'd12; b = 21'b011110010000000111100; end
-            10'b0110111001: begin segment = 6'd12; b = 21'b011110010000000111011; end
-            10'b0110111010: begin segment = 6'd12; b = 21'b011110010000000111100; end
-            10'b0110111011: begin segment = 6'd12; b = 21'b011110010000000111101; end
-            10'b0110111100: begin segment = 6'd12; b = 21'b011110010000000111110; end
-            10'b0110111101: begin segment = 6'd12; b = 21'b011110010000001000000; end
-            10'b0110111110: begin segment = 6'd12; b = 21'b011110010000001000011; end
-            10'b0110111111: begin segment = 6'd12; b = 21'b011110010000001000111; end
-            10'b0111000000: begin segment = 6'd12; b = 21'b011110010000001001011; end
-            10'b0111000001: begin segment = 6'd12; b = 21'b011110010000001010000; end
-            10'b0111000010: begin segment = 6'd12; b = 21'b011110010000001010110; end
-            10'b0111000011: begin segment = 6'd12; b = 21'b011110010000001011100; end
-            10'b0111000100: begin segment = 6'd12; b = 21'b011110010000001100011; end
-            10'b0111000101: begin segment = 6'd12; b = 21'b011110010000001101010; end
-            10'b0111000110: begin segment = 6'd12; b = 21'b011110010000001110010; end
-            10'b0111000111: begin segment = 6'd12; b = 21'b011110010000001111011; end
-            10'b0111001000: begin segment = 6'd12; b = 21'b011110010000010000101; end
-            10'b0111001001: begin segment = 6'd12; b = 21'b011110010000010001111; end
-            10'b0111001010: begin segment = 6'd13; b = 21'b011101111101011111101; end
-            10'b0111001011: begin segment = 6'd13; b = 21'b011101111101011110011; end
-            10'b0111001100: begin segment = 6'd13; b = 21'b011101111101011101010; end
-            10'b0111001101: begin segment = 6'd13; b = 21'b011101111101011100010; end
-            10'b0111001110: begin segment = 6'd13; b = 21'b011101111101011011010; end
-            10'b0111001111: begin segment = 6'd13; b = 21'b011101111101011010011; end
-            10'b0111010000: begin segment = 6'd13; b = 21'b011101111101011001101; end
-            10'b0111010001: begin segment = 6'd13; b = 21'b011101111101011000111; end
-            10'b0111010010: begin segment = 6'd13; b = 21'b011101111101011000010; end
-            10'b0111010011: begin segment = 6'd13; b = 21'b011101111101010111110; end
-            10'b0111010100: begin segment = 6'd13; b = 21'b011101111101010111010; end
-            10'b0111010101: begin segment = 6'd13; b = 21'b011101111101010110111; end
-            10'b0111010110: begin segment = 6'd13; b = 21'b011101111101010110101; end
-            10'b0111010111: begin segment = 6'd13; b = 21'b011101111101010110011; end
-            10'b0111011000: begin segment = 6'd13; b = 21'b011101111101010110010; end
-            10'b0111011001: begin segment = 6'd13; b = 21'b011101111101010110010; end
-            10'b0111011010: begin segment = 6'd13; b = 21'b011101111101010110010; end
-            10'b0111011011: begin segment = 6'd13; b = 21'b011101111101010110011; end
-            10'b0111011100: begin segment = 6'd13; b = 21'b011101111101010110101; end
-            10'b0111011101: begin segment = 6'd13; b = 21'b011101111101010110111; end
-            10'b0111011110: begin segment = 6'd13; b = 21'b011101111101010111010; end
-            10'b0111011111: begin segment = 6'd13; b = 21'b011101111101010111110; end
-            10'b0111100000: begin segment = 6'd13; b = 21'b011101111101011000010; end
-            10'b0111100001: begin segment = 6'd13; b = 21'b011101111101011000111; end
-            10'b0111100010: begin segment = 6'd13; b = 21'b011101111101011001101; end
-            10'b0111100011: begin segment = 6'd13; b = 21'b011101111101011010011; end
-            10'b0111100100: begin segment = 6'd13; b = 21'b011101111101011011010; end
-            10'b0111100101: begin segment = 6'd13; b = 21'b011101111101011100001; end
-            10'b0111100110: begin segment = 6'd13; b = 21'b011101111101011101010; end
-            10'b0111100111: begin segment = 6'd13; b = 21'b011101111101011110011; end
-            10'b0111101000: begin segment = 6'd13; b = 21'b011101111101011111100; end
-            10'b0111101001: begin segment = 6'd13; b = 21'b011101111101100000111; end
-            10'b0111101010: begin segment = 6'd13; b = 21'b011101111101100010010; end
-            10'b0111101011: begin segment = 6'd14; b = 21'b011101100111111101010; end
-            10'b0111101100: begin segment = 6'd14; b = 21'b011101100111111100000; end
-            10'b0111101101: begin segment = 6'd14; b = 21'b011101100111111010110; end
-            10'b0111101110: begin segment = 6'd14; b = 21'b011101100111111001101; end
-            10'b0111101111: begin segment = 6'd14; b = 21'b011101100111111000101; end
-            10'b0111110000: begin segment = 6'd14; b = 21'b011101100111110111110; end
-            10'b0111110001: begin segment = 6'd14; b = 21'b011101100111110110111; end
-            10'b0111110010: begin segment = 6'd14; b = 21'b011101100111110110001; end
-            10'b0111110011: begin segment = 6'd14; b = 21'b011101100111110101011; end
-            10'b0111110100: begin segment = 6'd14; b = 21'b011101100111110100110; end
-            10'b0111110101: begin segment = 6'd14; b = 21'b011101100111110100010; end
-            10'b0111110110: begin segment = 6'd14; b = 21'b011101100111110011111; end
-            10'b0111110111: begin segment = 6'd14; b = 21'b011101100111110011100; end
-            10'b0111111000: begin segment = 6'd14; b = 21'b011101100111110011010; end
-            10'b0111111001: begin segment = 6'd14; b = 21'b011101100111110011001; end
-            10'b0111111010: begin segment = 6'd14; b = 21'b011101100111110011000; end
-            10'b0111111011: begin segment = 6'd14; b = 21'b011101100111110011000; end
-            10'b0111111100: begin segment = 6'd14; b = 21'b011101100111110011000; end
-            10'b0111111101: begin segment = 6'd14; b = 21'b011101100111110011010; end
-            10'b0111111110: begin segment = 6'd14; b = 21'b011101100111110011011; end
-            10'b0111111111: begin segment = 6'd14; b = 21'b011101100111110011110; end
-            10'b1000000000: begin segment = 6'd14; b = 21'b011101100111110100001; end
-            10'b1000000001: begin segment = 6'd14; b = 21'b011101100111110100110; end
-            10'b1000000010: begin segment = 6'd14; b = 21'b011101100111110101010; end
-            10'b1000000011: begin segment = 6'd14; b = 21'b011101100111110110000; end
-            10'b1000000100: begin segment = 6'd14; b = 21'b011101100111110110101; end
-            10'b1000000101: begin segment = 6'd14; b = 21'b011101100111110111100; end
-            10'b1000000110: begin segment = 6'd14; b = 21'b011101100111111000011; end
-            10'b1000000111: begin segment = 6'd14; b = 21'b011101100111111001100; end
-            10'b1000001000: begin segment = 6'd14; b = 21'b011101100111111010100; end
-            10'b1000001001: begin segment = 6'd14; b = 21'b011101100111111011110; end
-            10'b1000001010: begin segment = 6'd14; b = 21'b011101100111111100111; end
-            10'b1000001011: begin segment = 6'd15; b = 21'b011101010001101011000; end
-            10'b1000001100: begin segment = 6'd15; b = 21'b011101010001101001101; end
-            10'b1000001101: begin segment = 6'd15; b = 21'b011101010001101000100; end
-            10'b1000001110: begin segment = 6'd15; b = 21'b011101010001100111011; end
-            10'b1000001111: begin segment = 6'd15; b = 21'b011101010001100110011; end
-            10'b1000010000: begin segment = 6'd15; b = 21'b011101010001100101010; end
-            10'b1000010001: begin segment = 6'd15; b = 21'b011101010001100100011; end
-            10'b1000010010: begin segment = 6'd15; b = 21'b011101010001100011101; end
-            10'b1000010011: begin segment = 6'd15; b = 21'b011101010001100011000; end
-            10'b1000010100: begin segment = 6'd15; b = 21'b011101010001100010011; end
-            10'b1000010101: begin segment = 6'd15; b = 21'b011101010001100001111; end
-            10'b1000010110: begin segment = 6'd15; b = 21'b011101010001100001100; end
-            10'b1000010111: begin segment = 6'd15; b = 21'b011101010001100001001; end
-            10'b1000011000: begin segment = 6'd15; b = 21'b011101010001100000110; end
-            10'b1000011001: begin segment = 6'd15; b = 21'b011101010001100000101; end
-            10'b1000011010: begin segment = 6'd15; b = 21'b011101010001100000101; end
-            10'b1000011011: begin segment = 6'd15; b = 21'b011101010001100000101; end
-            10'b1000011100: begin segment = 6'd15; b = 21'b011101010001100000101; end
-            10'b1000011101: begin segment = 6'd15; b = 21'b011101010001100000111; end
-            10'b1000011110: begin segment = 6'd15; b = 21'b011101010001100001010; end
-            10'b1000011111: begin segment = 6'd15; b = 21'b011101010001100001100; end
-            10'b1000100000: begin segment = 6'd15; b = 21'b011101010001100001110; end
-            10'b1000100001: begin segment = 6'd15; b = 21'b011101010001100010011; end
-            10'b1000100010: begin segment = 6'd15; b = 21'b011101010001100011000; end
-            10'b1000100011: begin segment = 6'd15; b = 21'b011101010001100011110; end
-            10'b1000100100: begin segment = 6'd15; b = 21'b011101010001100100011; end
-            10'b1000100101: begin segment = 6'd15; b = 21'b011101010001100101011; end
-            10'b1000100110: begin segment = 6'd15; b = 21'b011101010001100110011; end
-            10'b1000100111: begin segment = 6'd15; b = 21'b011101010001100111011; end
-            10'b1000101000: begin segment = 6'd15; b = 21'b011101010001101000100; end
-            10'b1000101001: begin segment = 6'd15; b = 21'b011101010001101001110; end
-            10'b1000101010: begin segment = 6'd15; b = 21'b011101010001101011000; end
-            10'b1000101011: begin segment = 6'd16; b = 21'b011100111001000100111; end
-            10'b1000101100: begin segment = 6'd16; b = 21'b011100111001000011100; end
-            10'b1000101101: begin segment = 6'd16; b = 21'b011100111001000010010; end
-            10'b1000101110: begin segment = 6'd16; b = 21'b011100111001000001000; end
-            10'b1000101111: begin segment = 6'd16; b = 21'b011100111001000000000; end
-            10'b1000110000: begin segment = 6'd16; b = 21'b011100111000111110111; end
-            10'b1000110001: begin segment = 6'd16; b = 21'b011100111000111110000; end
-            10'b1000110010: begin segment = 6'd16; b = 21'b011100111000111101001; end
-            10'b1000110011: begin segment = 6'd16; b = 21'b011100111000111100100; end
-            10'b1000110100: begin segment = 6'd16; b = 21'b011100111000111011110; end
-            10'b1000110101: begin segment = 6'd16; b = 21'b011100111000111011010; end
-            10'b1000110110: begin segment = 6'd16; b = 21'b011100111000111010110; end
-            10'b1000110111: begin segment = 6'd16; b = 21'b011100111000111010011; end
-            10'b1000111000: begin segment = 6'd16; b = 21'b011100111000111010001; end
-            10'b1000111001: begin segment = 6'd16; b = 21'b011100111000111001111; end
-            10'b1000111010: begin segment = 6'd16; b = 21'b011100111000111001110; end
-            10'b1000111011: begin segment = 6'd16; b = 21'b011100111000111001110; end
-            10'b1000111100: begin segment = 6'd16; b = 21'b011100111000111001111; end
-            10'b1000111101: begin segment = 6'd16; b = 21'b011100111000111010000; end
-            10'b1000111110: begin segment = 6'd16; b = 21'b011100111000111010010; end
-            10'b1000111111: begin segment = 6'd16; b = 21'b011100111000111010100; end
-            10'b1001000000: begin segment = 6'd16; b = 21'b011100111000111010111; end
-            10'b1001000001: begin segment = 6'd16; b = 21'b011100111000111011011; end
-            10'b1001000010: begin segment = 6'd16; b = 21'b011100111000111100000; end
-            10'b1001000011: begin segment = 6'd16; b = 21'b011100111000111100101; end
-            10'b1001000100: begin segment = 6'd16; b = 21'b011100111000111101011; end
-            10'b1001000101: begin segment = 6'd16; b = 21'b011100111000111110010; end
-            10'b1001000110: begin segment = 6'd16; b = 21'b011100111000111111010; end
-            10'b1001000111: begin segment = 6'd16; b = 21'b011100111001000000010; end
-            10'b1001001000: begin segment = 6'd16; b = 21'b011100111001000001011; end
-            10'b1001001001: begin segment = 6'd16; b = 21'b011100111001000010100; end
-            10'b1001001010: begin segment = 6'd16; b = 21'b011100111001000011111; end
-            10'b1001001011: begin segment = 6'd17; b = 21'b011100011110101100001; end
-            10'b1001001100: begin segment = 6'd17; b = 21'b011100011110101010110; end
-            10'b1001001101: begin segment = 6'd17; b = 21'b011100011110101001100; end
-            10'b1001001110: begin segment = 6'd17; b = 21'b011100011110101000010; end
-            10'b1001001111: begin segment = 6'd17; b = 21'b011100011110100111001; end
-            10'b1001010000: begin segment = 6'd17; b = 21'b011100011110100110000; end
-            10'b1001010001: begin segment = 6'd17; b = 21'b011100011110100101001; end
-            10'b1001010010: begin segment = 6'd17; b = 21'b011100011110100100010; end
-            10'b1001010011: begin segment = 6'd17; b = 21'b011100011110100011100; end
-            10'b1001010100: begin segment = 6'd17; b = 21'b011100011110100010110; end
-            10'b1001010101: begin segment = 6'd17; b = 21'b011100011110100010001; end
-            10'b1001010110: begin segment = 6'd17; b = 21'b011100011110100001101; end
-            10'b1001010111: begin segment = 6'd17; b = 21'b011100011110100001010; end
-            10'b1001011000: begin segment = 6'd17; b = 21'b011100011110100000111; end
-            10'b1001011001: begin segment = 6'd17; b = 21'b011100011110100000101; end
-            10'b1001011010: begin segment = 6'd17; b = 21'b011100011110100000100; end
-            10'b1001011011: begin segment = 6'd17; b = 21'b011100011110100000100; end
-            10'b1001011100: begin segment = 6'd17; b = 21'b011100011110100000100; end
-            10'b1001011101: begin segment = 6'd17; b = 21'b011100011110100000101; end
-            10'b1001011110: begin segment = 6'd17; b = 21'b011100011110100000111; end
-            10'b1001011111: begin segment = 6'd17; b = 21'b011100011110100001001; end
-            10'b1001100000: begin segment = 6'd17; b = 21'b011100011110100001100; end
-            10'b1001100001: begin segment = 6'd17; b = 21'b011100011110100010000; end
-            10'b1001100010: begin segment = 6'd17; b = 21'b011100011110100010101; end
-            10'b1001100011: begin segment = 6'd17; b = 21'b011100011110100011010; end
-            10'b1001100100: begin segment = 6'd17; b = 21'b011100011110100100001; end
-            10'b1001100101: begin segment = 6'd17; b = 21'b011100011110100100111; end
-            10'b1001100110: begin segment = 6'd17; b = 21'b011100011110100101111; end
-            10'b1001100111: begin segment = 6'd17; b = 21'b011100011110100110111; end
-            10'b1001101000: begin segment = 6'd17; b = 21'b011100011110101000000; end
-            10'b1001101001: begin segment = 6'd17; b = 21'b011100011110101001010; end
-            10'b1001101010: begin segment = 6'd18; b = 21'b011100000100001111010; end
-            10'b1001101011: begin segment = 6'd18; b = 21'b011100000100001101111; end
-            10'b1001101100: begin segment = 6'd18; b = 21'b011100000100001100101; end
-            10'b1001101101: begin segment = 6'd18; b = 21'b011100000100001011100; end
-            10'b1001101110: begin segment = 6'd18; b = 21'b011100000100001010011; end
-            10'b1001101111: begin segment = 6'd18; b = 21'b011100000100001001100; end
-            10'b1001110000: begin segment = 6'd18; b = 21'b011100000100001000101; end
-            10'b1001110001: begin segment = 6'd18; b = 21'b011100000100000111111; end
-            10'b1001110010: begin segment = 6'd18; b = 21'b011100000100000111001; end
-            10'b1001110011: begin segment = 6'd18; b = 21'b011100000100000110100; end
-            10'b1001110100: begin segment = 6'd18; b = 21'b011100000100000110000; end
-            10'b1001110101: begin segment = 6'd18; b = 21'b011100000100000101100; end
-            10'b1001110110: begin segment = 6'd18; b = 21'b011100000100000101010; end
-            10'b1001110111: begin segment = 6'd18; b = 21'b011100000100000101000; end
-            10'b1001111000: begin segment = 6'd18; b = 21'b011100000100000101000; end
-            10'b1001111001: begin segment = 6'd18; b = 21'b011100000100000100111; end
-            10'b1001111010: begin segment = 6'd18; b = 21'b011100000100000101000; end
-            10'b1001111011: begin segment = 6'd18; b = 21'b011100000100000101001; end
-            10'b1001111100: begin segment = 6'd18; b = 21'b011100000100000101010; end
-            10'b1001111101: begin segment = 6'd18; b = 21'b011100000100000101101; end
-            10'b1001111110: begin segment = 6'd18; b = 21'b011100000100000110000; end
-            10'b1001111111: begin segment = 6'd18; b = 21'b011100000100000110100; end
-            10'b1010000000: begin segment = 6'd18; b = 21'b011100000100000111001; end
-            10'b1010000001: begin segment = 6'd18; b = 21'b011100000100000111111; end
-            10'b1010000010: begin segment = 6'd18; b = 21'b011100000100001000101; end
-            10'b1010000011: begin segment = 6'd18; b = 21'b011100000100001001100; end
-            10'b1010000100: begin segment = 6'd18; b = 21'b011100000100001010011; end
-            10'b1010000101: begin segment = 6'd18; b = 21'b011100000100001011100; end
-            10'b1010000110: begin segment = 6'd18; b = 21'b011100000100001100101; end
-            10'b1010000111: begin segment = 6'd18; b = 21'b011100000100001101111; end
-            10'b1010001000: begin segment = 6'd18; b = 21'b011100000100001111010; end
-            10'b1010001001: begin segment = 6'd19; b = 21'b011011101000001100011; end
-            10'b1010001010: begin segment = 6'd19; b = 21'b011011101000001011001; end
-            10'b1010001011: begin segment = 6'd19; b = 21'b011011101000001010000; end
-            10'b1010001100: begin segment = 6'd19; b = 21'b011011101000001000111; end
-            10'b1010001101: begin segment = 6'd19; b = 21'b011011101000001000000; end
-            10'b1010001110: begin segment = 6'd19; b = 21'b011011101000000111001; end
-            10'b1010001111: begin segment = 6'd19; b = 21'b011011101000000110011; end
-            10'b1010010000: begin segment = 6'd19; b = 21'b011011101000000101101; end
-            10'b1010010001: begin segment = 6'd19; b = 21'b011011101000000101000; end
-            10'b1010010010: begin segment = 6'd19; b = 21'b011011101000000100101; end
-            10'b1010010011: begin segment = 6'd19; b = 21'b011011101000000100001; end
-            10'b1010010100: begin segment = 6'd19; b = 21'b011011101000000011111; end
-            10'b1010010101: begin segment = 6'd19; b = 21'b011011101000000011101; end
-            10'b1010010110: begin segment = 6'd19; b = 21'b011011101000000011100; end
-            10'b1010010111: begin segment = 6'd19; b = 21'b011011101000000011100; end
-            10'b1010011000: begin segment = 6'd19; b = 21'b011011101000000011101; end
-            10'b1010011001: begin segment = 6'd19; b = 21'b011011101000000011110; end
-            10'b1010011010: begin segment = 6'd19; b = 21'b011011101000000100000; end
-            10'b1010011011: begin segment = 6'd19; b = 21'b011011101000000100011; end
-            10'b1010011100: begin segment = 6'd19; b = 21'b011011101000000100110; end
-            10'b1010011101: begin segment = 6'd19; b = 21'b011011101000000101011; end
-            10'b1010011110: begin segment = 6'd19; b = 21'b011011101000000110000; end
-            10'b1010011111: begin segment = 6'd19; b = 21'b011011101000000110110; end
-            10'b1010100000: begin segment = 6'd19; b = 21'b011011101000000111100; end
-            10'b1010100001: begin segment = 6'd19; b = 21'b011011101000001000100; end
-            10'b1010100010: begin segment = 6'd19; b = 21'b011011101000001001100; end
-            10'b1010100011: begin segment = 6'd19; b = 21'b011011101000001010101; end
-            10'b1010100100: begin segment = 6'd19; b = 21'b011011101000001011110; end
-            10'b1010100101: begin segment = 6'd19; b = 21'b011011101000001101001; end
-            10'b1010100110: begin segment = 6'd19; b = 21'b011011101000001110100; end
-            10'b1010100111: begin segment = 6'd19; b = 21'b011011101000010000000; end
-            10'b1010101000: begin segment = 6'd20; b = 21'b011011001000000010110; end
-            10'b1010101001: begin segment = 6'd20; b = 21'b011011001000000001011; end
-            10'b1010101010: begin segment = 6'd20; b = 21'b011011001000000000010; end
-            10'b1010101011: begin segment = 6'd20; b = 21'b011011000111111111000; end
-            10'b1010101100: begin segment = 6'd20; b = 21'b011011000111111101111; end
-            10'b1010101101: begin segment = 6'd20; b = 21'b011011000111111101000; end
-            10'b1010101110: begin segment = 6'd20; b = 21'b011011000111111100001; end
-            10'b1010101111: begin segment = 6'd20; b = 21'b011011000111111011011; end
-            10'b1010110000: begin segment = 6'd20; b = 21'b011011000111111010101; end
-            10'b1010110001: begin segment = 6'd20; b = 21'b011011000111111010000; end
-            10'b1010110010: begin segment = 6'd20; b = 21'b011011000111111001101; end
-            10'b1010110011: begin segment = 6'd20; b = 21'b011011000111111001010; end
-            10'b1010110100: begin segment = 6'd20; b = 21'b011011000111111000111; end
-            10'b1010110101: begin segment = 6'd20; b = 21'b011011000111111000101; end
-            10'b1010110110: begin segment = 6'd20; b = 21'b011011000111111000101; end
-            10'b1010110111: begin segment = 6'd20; b = 21'b011011000111111000101; end
-            10'b1010111000: begin segment = 6'd20; b = 21'b011011000111111000101; end
-            10'b1010111001: begin segment = 6'd20; b = 21'b011011000111111000110; end
-            10'b1010111010: begin segment = 6'd20; b = 21'b011011000111111001001; end
-            10'b1010111011: begin segment = 6'd20; b = 21'b011011000111111001100; end
-            10'b1010111100: begin segment = 6'd20; b = 21'b011011000111111001111; end
-            10'b1010111101: begin segment = 6'd20; b = 21'b011011000111111010100; end
-            10'b1010111110: begin segment = 6'd20; b = 21'b011011000111111011001; end
-            10'b1010111111: begin segment = 6'd20; b = 21'b011011000111111100000; end
-            10'b1011000000: begin segment = 6'd20; b = 21'b011011000111111100110; end
-            10'b1011000001: begin segment = 6'd20; b = 21'b011011000111111101110; end
-            10'b1011000010: begin segment = 6'd20; b = 21'b011011000111111110110; end
-            10'b1011000011: begin segment = 6'd20; b = 21'b011011001000000000000; end
-            10'b1011000100: begin segment = 6'd20; b = 21'b011011001000000001001; end
-            10'b1011000101: begin segment = 6'd20; b = 21'b011011001000000010100; end
-            10'b1011000110: begin segment = 6'd21; b = 21'b011010100111110011000; end
-            10'b1011000111: begin segment = 6'd21; b = 21'b011010100111110001101; end
-            10'b1011001000: begin segment = 6'd21; b = 21'b011010100111110000011; end
-            10'b1011001001: begin segment = 6'd21; b = 21'b011010100111101111010; end
-            10'b1011001010: begin segment = 6'd21; b = 21'b011010100111101110001; end
-            10'b1011001011: begin segment = 6'd21; b = 21'b011010100111101101001; end
-            10'b1011001100: begin segment = 6'd21; b = 21'b011010100111101100010; end
-            10'b1011001101: begin segment = 6'd21; b = 21'b011010100111101011100; end
-            10'b1011001110: begin segment = 6'd21; b = 21'b011010100111101010110; end
-            10'b1011001111: begin segment = 6'd21; b = 21'b011010100111101010001; end
-            10'b1011010000: begin segment = 6'd21; b = 21'b011010100111101001110; end
-            10'b1011010001: begin segment = 6'd21; b = 21'b011010100111101001010; end
-            10'b1011010010: begin segment = 6'd21; b = 21'b011010100111101001000; end
-            10'b1011010011: begin segment = 6'd21; b = 21'b011010100111101000110; end
-            10'b1011010100: begin segment = 6'd21; b = 21'b011010100111101000110; end
-            10'b1011010101: begin segment = 6'd21; b = 21'b011010100111101000101; end
-            10'b1011010110: begin segment = 6'd21; b = 21'b011010100111101000111; end
-            10'b1011010111: begin segment = 6'd21; b = 21'b011010100111101001000; end
-            10'b1011011000: begin segment = 6'd21; b = 21'b011010100111101001011; end
-            10'b1011011001: begin segment = 6'd21; b = 21'b011010100111101001101; end
-            10'b1011011010: begin segment = 6'd21; b = 21'b011010100111101010010; end
-            10'b1011011011: begin segment = 6'd21; b = 21'b011010100111101010110; end
-            10'b1011011100: begin segment = 6'd21; b = 21'b011010100111101011100; end
-            10'b1011011101: begin segment = 6'd21; b = 21'b011010100111101100001; end
-            10'b1011011110: begin segment = 6'd21; b = 21'b011010100111101101001; end
-            10'b1011011111: begin segment = 6'd21; b = 21'b011010100111101110000; end
-            10'b1011100000: begin segment = 6'd21; b = 21'b011010100111101111001; end
-            10'b1011100001: begin segment = 6'd21; b = 21'b011010100111110000010; end
-            10'b1011100010: begin segment = 6'd21; b = 21'b011010100111110001101; end
-            10'b1011100011: begin segment = 6'd21; b = 21'b011010100111110011000; end
-            10'b1011100100: begin segment = 6'd22; b = 21'b011010000101110101010; end
-            10'b1011100101: begin segment = 6'd22; b = 21'b011010000101110011111; end
-            10'b1011100110: begin segment = 6'd22; b = 21'b011010000101110010101; end
-            10'b1011100111: begin segment = 6'd22; b = 21'b011010000101110001100; end
-            10'b1011101000: begin segment = 6'd22; b = 21'b011010000101110000011; end
-            10'b1011101001: begin segment = 6'd22; b = 21'b011010000101101111011; end
-            10'b1011101010: begin segment = 6'd22; b = 21'b011010000101101110100; end
-            10'b1011101011: begin segment = 6'd22; b = 21'b011010000101101101110; end
-            10'b1011101100: begin segment = 6'd22; b = 21'b011010000101101101001; end
-            10'b1011101101: begin segment = 6'd22; b = 21'b011010000101101100100; end
-            10'b1011101110: begin segment = 6'd22; b = 21'b011010000101101100001; end
-            10'b1011101111: begin segment = 6'd22; b = 21'b011010000101101011110; end
-            10'b1011110000: begin segment = 6'd22; b = 21'b011010000101101011100; end
-            10'b1011110001: begin segment = 6'd22; b = 21'b011010000101101011010; end
-            10'b1011110010: begin segment = 6'd22; b = 21'b011010000101101011010; end
-            10'b1011110011: begin segment = 6'd22; b = 21'b011010000101101011010; end
-            10'b1011110100: begin segment = 6'd22; b = 21'b011010000101101011011; end
-            10'b1011110101: begin segment = 6'd22; b = 21'b011010000101101011101; end
-            10'b1011110110: begin segment = 6'd22; b = 21'b011010000101101011111; end
-            10'b1011110111: begin segment = 6'd22; b = 21'b011010000101101100011; end
-            10'b1011111000: begin segment = 6'd22; b = 21'b011010000101101100111; end
-            10'b1011111001: begin segment = 6'd22; b = 21'b011010000101101101100; end
-            10'b1011111010: begin segment = 6'd22; b = 21'b011010000101101110010; end
-            10'b1011111011: begin segment = 6'd22; b = 21'b011010000101101111001; end
-            10'b1011111100: begin segment = 6'd22; b = 21'b011010000101110000000; end
-            10'b1011111101: begin segment = 6'd22; b = 21'b011010000101110001000; end
-            10'b1011111110: begin segment = 6'd22; b = 21'b011010000101110010010; end
-            10'b1011111111: begin segment = 6'd22; b = 21'b011010000101110011011; end
-            10'b1100000000: begin segment = 6'd22; b = 21'b011010000101110100110; end
-            10'b1100000001: begin segment = 6'd22; b = 21'b011010000101110110010; end
-            10'b1100000010: begin segment = 6'd23; b = 21'b011001100000010000000; end
-            10'b1100000011: begin segment = 6'd23; b = 21'b011001100000001110100; end
-            10'b1100000100: begin segment = 6'd23; b = 21'b011001100000001101001; end
-            10'b1100000101: begin segment = 6'd23; b = 21'b011001100000001011110; end
-            10'b1100000110: begin segment = 6'd23; b = 21'b011001100000001010101; end
-            10'b1100000111: begin segment = 6'd23; b = 21'b011001100000001001100; end
-            10'b1100001000: begin segment = 6'd23; b = 21'b011001100000001000101; end
-            10'b1100001001: begin segment = 6'd23; b = 21'b011001100000000111110; end
-            10'b1100001010: begin segment = 6'd23; b = 21'b011001100000000110111; end
-            10'b1100001011: begin segment = 6'd23; b = 21'b011001100000000110010; end
-            10'b1100001100: begin segment = 6'd23; b = 21'b011001100000000101101; end
-            10'b1100001101: begin segment = 6'd23; b = 21'b011001100000000101010; end
-            10'b1100001110: begin segment = 6'd23; b = 21'b011001100000000100111; end
-            10'b1100001111: begin segment = 6'd23; b = 21'b011001100000000100101; end
-            10'b1100010000: begin segment = 6'd23; b = 21'b011001100000000100011; end
-            10'b1100010001: begin segment = 6'd23; b = 21'b011001100000000100011; end
-            10'b1100010010: begin segment = 6'd23; b = 21'b011001100000000100011; end
-            10'b1100010011: begin segment = 6'd23; b = 21'b011001100000000100100; end
-            10'b1100010100: begin segment = 6'd23; b = 21'b011001100000000100110; end
-            10'b1100010101: begin segment = 6'd23; b = 21'b011001100000000101001; end
-            10'b1100010110: begin segment = 6'd23; b = 21'b011001100000000101101; end
-            10'b1100010111: begin segment = 6'd23; b = 21'b011001100000000110001; end
-            10'b1100011000: begin segment = 6'd23; b = 21'b011001100000000110110; end
-            10'b1100011001: begin segment = 6'd23; b = 21'b011001100000000111101; end
-            10'b1100011010: begin segment = 6'd23; b = 21'b011001100000001000011; end
-            10'b1100011011: begin segment = 6'd23; b = 21'b011001100000001001011; end
-            10'b1100011100: begin segment = 6'd23; b = 21'b011001100000001010100; end
-            10'b1100011101: begin segment = 6'd23; b = 21'b011001100000001011101; end
-            10'b1100011110: begin segment = 6'd23; b = 21'b011001100000001100111; end
-            10'b1100011111: begin segment = 6'd24; b = 21'b011000111010101111110; end
-            10'b1100100000: begin segment = 6'd24; b = 21'b011000111010101110010; end
-            10'b1100100001: begin segment = 6'd24; b = 21'b011000111010101100111; end
-            10'b1100100010: begin segment = 6'd24; b = 21'b011000111010101011100; end
-            10'b1100100011: begin segment = 6'd24; b = 21'b011000111010101010011; end
-            10'b1100100100: begin segment = 6'd24; b = 21'b011000111010101001010; end
-            10'b1100100101: begin segment = 6'd24; b = 21'b011000111010101000010; end
-            10'b1100100110: begin segment = 6'd24; b = 21'b011000111010100111011; end
-            10'b1100100111: begin segment = 6'd24; b = 21'b011000111010100110100; end
-            10'b1100101000: begin segment = 6'd24; b = 21'b011000111010100101111; end
-            10'b1100101001: begin segment = 6'd24; b = 21'b011000111010100101010; end
-            10'b1100101010: begin segment = 6'd24; b = 21'b011000111010100100110; end
-            10'b1100101011: begin segment = 6'd24; b = 21'b011000111010100100011; end
-            10'b1100101100: begin segment = 6'd24; b = 21'b011000111010100100001; end
-            10'b1100101101: begin segment = 6'd24; b = 21'b011000111010100100000; end
-            10'b1100101110: begin segment = 6'd24; b = 21'b011000111010100011111; end
-            10'b1100101111: begin segment = 6'd24; b = 21'b011000111010100011111; end
-            10'b1100110000: begin segment = 6'd24; b = 21'b011000111010100100000; end
-            10'b1100110001: begin segment = 6'd24; b = 21'b011000111010100100010; end
-            10'b1100110010: begin segment = 6'd24; b = 21'b011000111010100100101; end
-            10'b1100110011: begin segment = 6'd24; b = 21'b011000111010100101001; end
-            10'b1100110100: begin segment = 6'd24; b = 21'b011000111010100101101; end
-            10'b1100110101: begin segment = 6'd24; b = 21'b011000111010100110011; end
-            10'b1100110110: begin segment = 6'd24; b = 21'b011000111010100111001; end
-            10'b1100110111: begin segment = 6'd24; b = 21'b011000111010101000000; end
-            10'b1100111000: begin segment = 6'd24; b = 21'b011000111010101001000; end
-            10'b1100111001: begin segment = 6'd24; b = 21'b011000111010101010000; end
-            10'b1100111010: begin segment = 6'd24; b = 21'b011000111010101011010; end
-            10'b1100111011: begin segment = 6'd24; b = 21'b011000111010101100100; end
-            10'b1100111100: begin segment = 6'd25; b = 21'b011000010011111000011; end
-            10'b1100111101: begin segment = 6'd25; b = 21'b011000010011110110111; end
-            10'b1100111110: begin segment = 6'd25; b = 21'b011000010011110101100; end
-            10'b1100111111: begin segment = 6'd25; b = 21'b011000010011110100010; end
-            10'b1101000000: begin segment = 6'd25; b = 21'b011000010011110011000; end
-            10'b1101000001: begin segment = 6'd25; b = 21'b011000010011110010000; end
-            10'b1101000010: begin segment = 6'd25; b = 21'b011000010011110001000; end
-            10'b1101000011: begin segment = 6'd25; b = 21'b011000010011110000001; end
-            10'b1101000100: begin segment = 6'd25; b = 21'b011000010011101111011; end
-            10'b1101000101: begin segment = 6'd25; b = 21'b011000010011101110110; end
-            10'b1101000110: begin segment = 6'd25; b = 21'b011000010011101110010; end
-            10'b1101000111: begin segment = 6'd25; b = 21'b011000010011101101110; end
-            10'b1101001000: begin segment = 6'd25; b = 21'b011000010011101101011; end
-            10'b1101001001: begin segment = 6'd25; b = 21'b011000010011101101010; end
-            10'b1101001010: begin segment = 6'd25; b = 21'b011000010011101101001; end
-            10'b1101001011: begin segment = 6'd25; b = 21'b011000010011101101000; end
-            10'b1101001100: begin segment = 6'd25; b = 21'b011000010011101101001; end
-            10'b1101001101: begin segment = 6'd25; b = 21'b011000010011101101011; end
-            10'b1101001110: begin segment = 6'd25; b = 21'b011000010011101101101; end
-            10'b1101001111: begin segment = 6'd25; b = 21'b011000010011101110000; end
-            10'b1101010000: begin segment = 6'd25; b = 21'b011000010011101110101; end
-            10'b1101010001: begin segment = 6'd25; b = 21'b011000010011101111010; end
-            10'b1101010010: begin segment = 6'd25; b = 21'b011000010011101111111; end
-            10'b1101010011: begin segment = 6'd25; b = 21'b011000010011110000110; end
-            10'b1101010100: begin segment = 6'd25; b = 21'b011000010011110001110; end
-            10'b1101010101: begin segment = 6'd25; b = 21'b011000010011110010110; end
-            10'b1101010110: begin segment = 6'd25; b = 21'b011000010011110011111; end
-            10'b1101010111: begin segment = 6'd25; b = 21'b011000010011110101001; end
-            10'b1101011000: begin segment = 6'd25; b = 21'b011000010011110110100; end
-            10'b1101011001: begin segment = 6'd26; b = 21'b010111101011000011011; end
-            10'b1101011010: begin segment = 6'd26; b = 21'b010111101011000001111; end
-            10'b1101011011: begin segment = 6'd26; b = 21'b010111101011000000100; end
-            10'b1101011100: begin segment = 6'd26; b = 21'b010111101010111111010; end
-            10'b1101011101: begin segment = 6'd26; b = 21'b010111101010111110000; end
-            10'b1101011110: begin segment = 6'd26; b = 21'b010111101010111101000; end
-            10'b1101011111: begin segment = 6'd26; b = 21'b010111101010111100001; end
-            10'b1101100000: begin segment = 6'd26; b = 21'b010111101010111011011; end
-            10'b1101100001: begin segment = 6'd26; b = 21'b010111101010111010101; end
-            10'b1101100010: begin segment = 6'd26; b = 21'b010111101010111010000; end
-            10'b1101100011: begin segment = 6'd26; b = 21'b010111101010111001100; end
-            10'b1101100100: begin segment = 6'd26; b = 21'b010111101010111001001; end
-            10'b1101100101: begin segment = 6'd26; b = 21'b010111101010111000111; end
-            10'b1101100110: begin segment = 6'd26; b = 21'b010111101010111000101; end
-            10'b1101100111: begin segment = 6'd26; b = 21'b010111101010111000101; end
-            10'b1101101000: begin segment = 6'd26; b = 21'b010111101010111000110; end
-            10'b1101101001: begin segment = 6'd26; b = 21'b010111101010111001000; end
-            10'b1101101010: begin segment = 6'd26; b = 21'b010111101010111001001; end
-            10'b1101101011: begin segment = 6'd26; b = 21'b010111101010111001101; end
-            10'b1101101100: begin segment = 6'd26; b = 21'b010111101010111010000; end
-            10'b1101101101: begin segment = 6'd26; b = 21'b010111101010111010101; end
-            10'b1101101110: begin segment = 6'd26; b = 21'b010111101010111011010; end
-            10'b1101101111: begin segment = 6'd26; b = 21'b010111101010111100001; end
-            10'b1101110000: begin segment = 6'd26; b = 21'b010111101010111101000; end
-            10'b1101110001: begin segment = 6'd26; b = 21'b010111101010111110001; end
-            10'b1101110010: begin segment = 6'd26; b = 21'b010111101010111111001; end
-            10'b1101110011: begin segment = 6'd26; b = 21'b010111101011000000100; end
-            10'b1101110100: begin segment = 6'd26; b = 21'b010111101011000001110; end
-            10'b1101110101: begin segment = 6'd26; b = 21'b010111101011000011010; end
-            10'b1101110110: begin segment = 6'd27; b = 21'b010111000010001010111; end
-            10'b1101110111: begin segment = 6'd27; b = 21'b010111000010001001101; end
-            10'b1101111000: begin segment = 6'd27; b = 21'b010111000010001000100; end
-            10'b1101111001: begin segment = 6'd27; b = 21'b010111000010000111011; end
-            10'b1101111010: begin segment = 6'd27; b = 21'b010111000010000110100; end
-            10'b1101111011: begin segment = 6'd27; b = 21'b010111000010000101101; end
-            10'b1101111100: begin segment = 6'd27; b = 21'b010111000010000100111; end
-            10'b1101111101: begin segment = 6'd27; b = 21'b010111000010000100010; end
-            10'b1101111110: begin segment = 6'd27; b = 21'b010111000010000011110; end
-            10'b1101111111: begin segment = 6'd27; b = 21'b010111000010000011011; end
-            10'b1110000000: begin segment = 6'd27; b = 21'b010111000010000011001; end
-            10'b1110000001: begin segment = 6'd27; b = 21'b010111000010000011000; end
-            10'b1110000010: begin segment = 6'd27; b = 21'b010111000010000010111; end
-            10'b1110000011: begin segment = 6'd27; b = 21'b010111000010000011000; end
-            10'b1110000100: begin segment = 6'd27; b = 21'b010111000010000011001; end
-            10'b1110000101: begin segment = 6'd27; b = 21'b010111000010000011011; end
-            10'b1110000110: begin segment = 6'd27; b = 21'b010111000010000011110; end
-            10'b1110000111: begin segment = 6'd27; b = 21'b010111000010000100010; end
-            10'b1110001000: begin segment = 6'd27; b = 21'b010111000010000100111; end
-            10'b1110001001: begin segment = 6'd27; b = 21'b010111000010000101101; end
-            10'b1110001010: begin segment = 6'd27; b = 21'b010111000010000110011; end
-            10'b1110001011: begin segment = 6'd27; b = 21'b010111000010000111010; end
-            10'b1110001100: begin segment = 6'd27; b = 21'b010111000010001000011; end
-            10'b1110001101: begin segment = 6'd27; b = 21'b010111000010001001100; end
-            10'b1110001110: begin segment = 6'd27; b = 21'b010111000010001010110; end
-            10'b1110001111: begin segment = 6'd27; b = 21'b010111000010001100001; end
-            10'b1110010000: begin segment = 6'd27; b = 21'b010111000010001101101; end
-            10'b1110010001: begin segment = 6'd27; b = 21'b010111000010001111010; end
-            10'b1110010010: begin segment = 6'd28; b = 21'b010110010111011001100; end
-            10'b1110010011: begin segment = 6'd28; b = 21'b010110010111011000010; end
-            10'b1110010100: begin segment = 6'd28; b = 21'b010110010111010111010; end
-            10'b1110010101: begin segment = 6'd28; b = 21'b010110010111010110010; end
-            10'b1110010110: begin segment = 6'd28; b = 21'b010110010111010101100; end
-            10'b1110010111: begin segment = 6'd28; b = 21'b010110010111010100110; end
-            10'b1110011000: begin segment = 6'd28; b = 21'b010110010111010100001; end
-            10'b1110011001: begin segment = 6'd28; b = 21'b010110010111010011101; end
-            10'b1110011010: begin segment = 6'd28; b = 21'b010110010111010011010; end
-            10'b1110011011: begin segment = 6'd28; b = 21'b010110010111010010111; end
-            10'b1110011100: begin segment = 6'd28; b = 21'b010110010111010010110; end
-            10'b1110011101: begin segment = 6'd28; b = 21'b010110010111010010110; end
-            10'b1110011110: begin segment = 6'd28; b = 21'b010110010111010010110; end
-            10'b1110011111: begin segment = 6'd28; b = 21'b010110010111010010111; end
-            10'b1110100000: begin segment = 6'd28; b = 21'b010110010111010011010; end
-            10'b1110100001: begin segment = 6'd28; b = 21'b010110010111010011101; end
-            10'b1110100010: begin segment = 6'd28; b = 21'b010110010111010100001; end
-            10'b1110100011: begin segment = 6'd28; b = 21'b010110010111010100110; end
-            10'b1110100100: begin segment = 6'd28; b = 21'b010110010111010101100; end
-            10'b1110100101: begin segment = 6'd28; b = 21'b010110010111010110010; end
-            10'b1110100110: begin segment = 6'd28; b = 21'b010110010111010111010; end
-            10'b1110100111: begin segment = 6'd28; b = 21'b010110010111011000011; end
-            10'b1110101000: begin segment = 6'd28; b = 21'b010110010111011001100; end
-            10'b1110101001: begin segment = 6'd28; b = 21'b010110010111011010111; end
-            10'b1110101010: begin segment = 6'd28; b = 21'b010110010111011100010; end
-            10'b1110101011: begin segment = 6'd28; b = 21'b010110010111011101110; end
-            10'b1110101100: begin segment = 6'd28; b = 21'b010110010111011111011; end
-            10'b1110101101: begin segment = 6'd28; b = 21'b010110010111100001001; end
-            10'b1110101110: begin segment = 6'd29; b = 21'b010101011100101000111; end
-            10'b1110101111: begin segment = 6'd29; b = 21'b010101011100100110111; end
-            10'b1110110000: begin segment = 6'd29; b = 21'b010101011100100101000; end
-            10'b1110110001: begin segment = 6'd29; b = 21'b010101011100100011010; end
-            10'b1110110010: begin segment = 6'd29; b = 21'b010101011100100001100; end
-            10'b1110110011: begin segment = 6'd29; b = 21'b010101011100100000000; end
-            10'b1110110100: begin segment = 6'd29; b = 21'b010101011100011110100; end
-            10'b1110110101: begin segment = 6'd29; b = 21'b010101011100011101001; end
-            10'b1110110110: begin segment = 6'd29; b = 21'b010101011100011100000; end
-            10'b1110110111: begin segment = 6'd29; b = 21'b010101011100011010111; end
-            10'b1110111000: begin segment = 6'd29; b = 21'b010101011100011001111; end
-            10'b1110111001: begin segment = 6'd29; b = 21'b010101011100011001000; end
-            10'b1110111010: begin segment = 6'd29; b = 21'b010101011100011000010; end
-            10'b1110111011: begin segment = 6'd29; b = 21'b010101011100010111101; end
-            10'b1110111100: begin segment = 6'd29; b = 21'b010101011100010111000; end
-            10'b1110111101: begin segment = 6'd29; b = 21'b010101011100010110101; end
-            10'b1110111110: begin segment = 6'd29; b = 21'b010101011100010110011; end
-            10'b1110111111: begin segment = 6'd29; b = 21'b010101011100010110001; end
-            10'b1111000000: begin segment = 6'd29; b = 21'b010101011100010110001; end
-            10'b1111000001: begin segment = 6'd29; b = 21'b010101011100010110001; end
-            10'b1111000010: begin segment = 6'd29; b = 21'b010101011100010110010; end
-            10'b1111000011: begin segment = 6'd29; b = 21'b010101011100010110100; end
-            10'b1111000100: begin segment = 6'd29; b = 21'b010101011100010110111; end
-            10'b1111000101: begin segment = 6'd29; b = 21'b010101011100010111011; end
-            10'b1111000110: begin segment = 6'd29; b = 21'b010101011100011000000; end
-            10'b1111000111: begin segment = 6'd29; b = 21'b010101011100011000110; end
-            10'b1111001000: begin segment = 6'd29; b = 21'b010101011100011001101; end
-            10'b1111001001: begin segment = 6'd29; b = 21'b010101011100011010100; end
-            10'b1111001010: begin segment = 6'd30; b = 21'b010100111110000110101; end
-            10'b1111001011: begin segment = 6'd30; b = 21'b010100111110000101111; end
-            10'b1111001100: begin segment = 6'd30; b = 21'b010100111110000101001; end
-            10'b1111001101: begin segment = 6'd30; b = 21'b010100111110000100101; end
-            10'b1111001110: begin segment = 6'd30; b = 21'b010100111110000100001; end
-            10'b1111001111: begin segment = 6'd30; b = 21'b010100111110000011110; end
-            10'b1111010000: begin segment = 6'd30; b = 21'b010100111110000011100; end
-            10'b1111010001: begin segment = 6'd30; b = 21'b010100111110000011011; end
-            10'b1111010010: begin segment = 6'd30; b = 21'b010100111110000011011; end
-            10'b1111010011: begin segment = 6'd30; b = 21'b010100111110000011100; end
-            10'b1111010100: begin segment = 6'd30; b = 21'b010100111110000011110; end
-            10'b1111010101: begin segment = 6'd30; b = 21'b010100111110000100001; end
-            10'b1111010110: begin segment = 6'd30; b = 21'b010100111110000100101; end
-            10'b1111010111: begin segment = 6'd30; b = 21'b010100111110000101010; end
-            10'b1111011000: begin segment = 6'd30; b = 21'b010100111110000101111; end
-            10'b1111011001: begin segment = 6'd30; b = 21'b010100111110000110110; end
-            10'b1111011010: begin segment = 6'd30; b = 21'b010100111110000111101; end
-            10'b1111011011: begin segment = 6'd30; b = 21'b010100111110001000110; end
-            10'b1111011100: begin segment = 6'd30; b = 21'b010100111110001001111; end
-            10'b1111011101: begin segment = 6'd30; b = 21'b010100111110001011010; end
-            10'b1111011110: begin segment = 6'd30; b = 21'b010100111110001100101; end
-            10'b1111011111: begin segment = 6'd30; b = 21'b010100111110001110001; end
-            10'b1111100000: begin segment = 6'd30; b = 21'b010100111110001111110; end
-            10'b1111100001: begin segment = 6'd30; b = 21'b010100111110010001100; end
-            10'b1111100010: begin segment = 6'd30; b = 21'b010100111110010011011; end
-            10'b1111100011: begin segment = 6'd30; b = 21'b010100111110010101011; end
-            10'b1111100100: begin segment = 6'd30; b = 21'b010100111110010111100; end
-            10'b1111100101: begin segment = 6'd31; b = 21'b010100000010000000100; end
-            10'b1111100110: begin segment = 6'd31; b = 21'b010100000001111110111; end
-            10'b1111100111: begin segment = 6'd31; b = 21'b010100000001111101100; end
-            10'b1111101000: begin segment = 6'd31; b = 21'b010100000001111100010; end
-            10'b1111101001: begin segment = 6'd31; b = 21'b010100000001111011001; end
-            10'b1111101010: begin segment = 6'd31; b = 21'b010100000001111010000; end
-            10'b1111101011: begin segment = 6'd31; b = 21'b010100000001111001001; end
-            10'b1111101100: begin segment = 6'd31; b = 21'b010100000001111000010; end
-            10'b1111101101: begin segment = 6'd31; b = 21'b010100000001110111101; end
-            10'b1111101110: begin segment = 6'd31; b = 21'b010100000001110111000; end
-            10'b1111101111: begin segment = 6'd31; b = 21'b010100000001110110100; end
-            10'b1111110000: begin segment = 6'd31; b = 21'b010100000001110110001; end
-            10'b1111110001: begin segment = 6'd31; b = 21'b010100000001110110000; end
-            10'b1111110010: begin segment = 6'd31; b = 21'b010100000001110101111; end
-            10'b1111110011: begin segment = 6'd31; b = 21'b010100000001110101111; end
-            10'b1111110100: begin segment = 6'd31; b = 21'b010100000001110110000; end
-            10'b1111110101: begin segment = 6'd31; b = 21'b010100000001110110010; end
-            10'b1111110110: begin segment = 6'd31; b = 21'b010100000001110110101; end
-            10'b1111110111: begin segment = 6'd31; b = 21'b010100000001110111001; end
-            10'b1111111000: begin segment = 6'd31; b = 21'b010100000001110111110; end
-            10'b1111111001: begin segment = 6'd31; b = 21'b010100000001111000100; end
-            10'b1111111010: begin segment = 6'd31; b = 21'b010100000001111001011; end
-            10'b1111111011: begin segment = 6'd31; b = 21'b010100000001111010011; end
-            10'b1111111100: begin segment = 6'd31; b = 21'b010100000001111011011; end
-            10'b1111111101: begin segment = 6'd31; b = 21'b010100000001111100101; end
-            10'b1111111110: begin segment = 6'd31; b = 21'b010100000001111110000; end
-            10'b1111111111: begin segment = 6'd31; b = 21'b010100000001111111011; end
-      endcase
-    end
-
-// Auto-generated neg assignments for WIDTH=22
-    wire neg_1;
-    assign neg_1 = ~f[21];
-    wire [1:0] neg_2;
-    assign neg_2 = ~f[21:20];
-    wire [2:0] neg_3;
-    assign neg_3 = ~f[21:19];
-    wire [3:0] neg_4;
-    assign neg_4 = ~f[21:18];
-    wire [4:0] neg_5;
-    assign neg_5 = ~f[21:17];
-    wire [5:0] neg_6;
-    assign neg_6 = ~f[21:16];
-    wire [6:0] neg_7;
-    assign neg_7 = ~f[21:15];
-    wire [7:0] neg_8;
-    assign neg_8 = ~f[21:14];
-    wire [8:0] neg_9;
-    assign neg_9 = ~f[21:13];
-    wire [9:0] neg_10;
-    assign neg_10 = ~f[21:12];
-    wire [10:0] neg_11;
-    assign neg_11 = ~f[21:11];
-    wire [11:0] neg_12;
-    assign neg_12 = ~f[21:10];
-    wire [12:0] neg_13;
-    assign neg_13 = ~f[21:9];
-    wire [13:0] neg_14;
-    assign neg_14 = ~f[21:8];
-    wire [14:0] neg_15;
-    assign neg_15 = ~f[21:7];
-    wire [15:0] neg_16;
-    assign neg_16 = ~f[21:6];
-    wire [16:0] neg_17;
-    assign neg_17 = ~f[21:5];
-    wire [17:0] neg_18;
-    assign neg_18 = ~f[21:4];
-    wire [18:0] neg_19;
-    assign neg_19 = ~f[21:3];
-    wire [19:0] neg_20;
-    assign neg_20 = ~f[21:2];
-    wire [20:0] neg_21;
-    assign neg_21 = ~f[21:1];
-// End of auto-generated section
-
-
-// Auto-generated register declarations for 4 registers
-    reg [20:0] A1;
-    reg [20:0] A2;
-    reg [20:0] A3;
-    reg [20:0] A4;
-// End of auto-generated section
-
-    always @(*) begin
-        case(segment[4:0])//fixed
-            5'd0: begin A1 = {3'b111, neg_18}; A2 = {5'b11111, neg_16}; A3 = {7'b0000000, f[21:8]}; end
-            5'd1: begin A1 = {3'b111, neg_18}; A2 = {6'b111111, neg_15}; A3 = {13'b0000000000000, f[21:14]}; end
-            5'd2: begin A1 = {3'b111, neg_18}; A2 = {7'b1111111, neg_14}; A3 = {9'b000000000, f[21:10]}; end
-            5'd3: begin A1 = {3'b111, neg_18}; A2 = {8'b00000000, f[21:9]}; A3 = {10'b1111111111, neg_11}; end
-            5'd4: begin A1 = {3'b111, neg_18}; A2 = {6'b000000, f[21:7]}; A3 = {8'b11111111, neg_13}; end
-            5'd5: begin A1 = {3'b111, neg_18}; A2 = {5'b00000, f[21:6]}; A3 = {7'b1111111, neg_14}; end
-            5'd6: begin A1 = {3'b111, neg_18}; A2 = {5'b00000, f[21:6]}; A3 = {11'b00000000000, f[21:12]}; end
-            5'd7: begin A1 = {3'b111, neg_18}; A2 = {5'b00000, f[21:6]}; A3 = {7'b0000000, f[21:8]}; end
-            5'd8: begin A1 = {4'b1111, neg_17}; A2 = {6'b111111, neg_15}; A3 = {8'b00000000, f[21:9]}; end
-            5'd9: begin A1 = {4'b1111, neg_17}; A2 = {10'b1111111111, neg_11}; A3 = {14'b00000000000000, f[21:15]}; end
-            5'd10: begin A1 = {4'b1111, neg_17}; A2 = {7'b0000000, f[21:8]}; A3 = {9'b000000000, f[21:10]}; end
-            5'd11: begin A1 = {4'b1111, neg_17}; A2 = {6'b000000, f[21:7]}; A3 = {8'b00000000, f[21:9]}; end
-            5'd12: begin A1 = {5'b11111, neg_16}; A2 = {9'b111111111, neg_12}; A3 = {11'b00000000000, f[21:12]}; end
-            5'd13: begin A1 = {5'b11111, neg_16}; A2 = {7'b0000000, f[21:8]}; A3 = {10'b0000000000, f[21:11]}; end
-            5'd14: begin A1 = {6'b111111, neg_15}; A2 = {8'b00000000, f[21:9]}; A3 = {12'b000000000000, f[21:13]}; end
-            5'd15: begin A1 = {10'b1111111111, neg_11}; A2 = {13'b0000000000000, f[21:14]}; A3 = {15'b000000000000000, f[21:16]}; end
-            5'd16: begin A1 = {7'b0000000, f[21:8]}; A2 = {9'b000000000, f[21:10]}; A3 = {11'b00000000000, f[21:12]}; end
-            5'd17: begin A1 = {5'b00000, f[21:6]}; A2 = {7'b1111111, neg_14}; A3 = {9'b111111111, neg_12}; end
-            5'd18: begin A1 = {5'b00000, f[21:6]}; A2 = {10'b0000000000, f[21:11]}; A3 = {14'b11111111111111, neg_7}; end
-            5'd19: begin A1 = {4'b0000, f[21:5]}; A2 = {6'b111111, neg_15}; A3 = {8'b11111111, neg_13}; end
-            5'd20: begin A1 = {4'b0000, f[21:5]}; A2 = {7'b1111111, neg_14}; A3 = {13'b0000000000000, f[21:14]}; end
-            5'd21: begin A1 = {4'b0000, f[21:5]}; A2 = {8'b00000000, f[21:9]}; A3 = {12'b111111111111, neg_9}; end
-            5'd22: begin A1 = {4'b0000, f[21:5]}; A2 = {6'b000000, f[21:7]}; A3 = {11'b11111111111, neg_10}; end
-            5'd23: begin A1 = {3'b000, f[21:4]}; A2 = {5'b11111, neg_16}; A3 = {8'b11111111, neg_13}; end
-            5'd24: begin A1 = {3'b000, f[21:4]}; A2 = {5'b11111, neg_16}; A3 = {7'b0000000, f[21:8]}; end
-            5'd25: begin A1 = {3'b000, f[21:4]}; A2 = {6'b111111, neg_15}; A3 = {8'b00000000, f[21:9]}; end
-            5'd26: begin A1 = {3'b000, f[21:4]}; A2 = {12'b000000000000, f[21:13]}; A3 = {14'b11111111111111, neg_7}; end
-            5'd27: begin A1 = {3'b000, f[21:4]}; A2 = {6'b000000, f[21:7]}; A3 = {8'b11111111, neg_13}; end
-            5'd28: begin A1 = {3'b000, f[21:4]}; A2 = {5'b00000, f[21:6]}; A3 = {7'b1111111, neg_14}; end
-            5'd29: begin A1 = {3'b000, f[21:4]}; A2 = {5'b00000, f[21:6]}; A3 = {7'b0000000, f[21:8]}; end
-            5'd30: begin A1 = {2'b00, f[21:3]}; A2 = {4'b1111, neg_17}; A3 = {6'b111111, neg_15}; end
-            5'd31: begin A1 = {2'b00, f[21:3]}; A2 = {4'b1111, neg_17}; A3 = {11'b11111111111, neg_10}; end
-            default: begin A1 = 21'b0; A2 = 21'b0; A3 = 21'b0; end //fixed default
-      endcase
-    end
-
-// Auto-generated CSA tree for final_N=4, final_M=22, final_add_M=20
-    wire [20:0] csa1_carry, csa1_sum;
-    wire [20:0] csa2_carry, csa2_sum;
-    wire [20:0] csa3_carry, csa3_sum;
-    wire [20:0] final_sum;
-
-    CSA_anticonv4 csa1 (
-        .a({1'b0, f[21:2]}),  // f的高20位
-        .b(A1),
-        .c(A2),
-        .sum(csa1_sum),
-        .carry(csa1_carry)
-    );
-
-    CSA_anticonv4 csa2 (
-        .a(csa1_sum),
-        .b(A3),
-        .c({csa1_carry[19:0], 1'b0}),  // 左移1位
-        .sum(csa2_sum),
-        .carry(csa2_carry)
-    );
-
-    CSA_anticonv4 csa3 (
-        .a(csa2_sum),
-         .b(b),
-        .c({csa2_carry[19:0], 1'b0}),
-        .sum(csa3_sum),
-        .carry(csa3_carry)
-    );
-
-    CPA_anticonv4 cpa (
-        .a(csa3_sum),
-        .b({csa3_carry[19:0], 1'b0}),  // 左移1位
-        .sum(final_sum)
-    );
-
-    assign f_e2_out = {final_sum, f[1:0]};  // 拼接高位和原始低位
-// End of auto-generated CSA tree
-
-endmodule
-module CSA_anticonv4 #(parameter ADD_WIDTH = 21
-)(
-    input [ADD_WIDTH-1:0] a,
-    input [ADD_WIDTH-1:0] b,
-    input [ADD_WIDTH-1:0] c,
-    output [ADD_WIDTH-1:0] sum,
-    output [ADD_WIDTH-1:0] carry
-);
-    assign sum = a ^ b ^ c;          // XOR for sum
-    assign carry = (a & b) | (b & c) | (c & a); // Majority logic for carry
-endmodule
-
-// Carry-Propagate Adder (CPA) module
-module CPA_anticonv4 #(parameter ADD_WIDTH = 21
-)(
-    input [ADD_WIDTH-1:0] a,
-    input [ADD_WIDTH-1:0] b,
-    output [ADD_WIDTH-1:0] sum
-);
-    assign sum = a + b;  // Simple binary addition
-endmodule
-
-module Shift_operation32(
-    input [7:0] shift,    // 6-bit signed shift signal
-    input [23:0] e,       // 24-bit signed input signal
-    output [31:0] result     // 32-bit output result
-);
-    reg [31:0] result0;
-    reg sel;
-    always @(*) begin
-        case(shift)
-            8'b00000000: begin result0 = {8'b00000000, e}; sel = 1'b0; end
-            8'b00000001: begin result0 = {7'b0000000, e, 1'b0}; sel = 1'b0; end
-            8'b00000010: begin result0 = {6'b000000, e, 2'b00};sel = 1'b0; end
-            8'b00000011: begin result0 = {5'b00000, e, 3'b000};sel = 1'b0; end
-            8'b00000100: begin result0 = {4'b0000, e, 4'b0000};sel = 1'b0; end
-            8'b00000101: begin result0 = {3'b000, e, 5'b00000};sel = 1'b0; end
-            8'b00000110: begin result0 = {2'b00, e, 6'b000000};sel = 1'b0; end
-            8'b00000111: begin result0 = {1'b0, e, 7'b0000000};sel = 1'b0; end
-            8'b00001000: begin result0 = {e, 8'b00000000}; sel = 1'b0; end
-            8'b00001001: begin result0 = {e[22:0], 9'b000000000}; sel = 1'b0; end
-            8'b00001010: begin result0 = {e[21:0], 10'b0000000000}; sel = 1'b0; end
-            8'b00001011: begin result0 = {e[20:0], 11'b00000000000}; sel = 1'b0; end
-            8'b00001100: begin result0 = {e[19:0], 12'b000000000000}; sel = 1'b0; end
-            8'b00001101: begin result0 = {e[18:0], 13'b0000000000000}; sel = 1'b0; end
-            8'b00001110: begin result0 = {e[17:0], 14'b00000000000000}; sel = 1'b0; end
-            8'b00001111: begin result0 = {e[16:0], 15'b000000000000000}; sel = 1'b0; end
-            8'b00010000: begin result0 = {e[15:0], 16'b0000000000000000}; sel = 1'b0; end
-            8'b00010001: begin result0 = {e[14:0], 17'b00000000000000000}; sel = 1'b0; end
-            8'b00010010: begin result0 = {e[13:0], 18'b000000000000000000}; sel = 1'b0; end
-            8'b00010011: begin result0 = {e[12:0], 19'b0000000000000000000}; sel = 1'b0; end
-            8'b00010100: begin result0 = {e[11:0], 20'b00000000000000000000}; sel = 1'b0; end
-            8'b00010101: begin result0 = {e[10:0], 21'b000000000000000000000}; sel = 1'b0; end
-            8'b00010110: begin result0 = {e[9:0], 22'b0000000000000000000000}; sel = 1'b0; end
-            8'b00010111: begin result0 = {e[8:0], 23'b00000000000000000000000}; sel = 1'b0; end
-            8'b00011000: begin result0 = {e[7:0], 24'b000000000000000000000000}; sel = 1'b0; end
-            8'b00011001: begin result0 = {e[6:0], 25'b0000000000000000000000000}; sel = 1'b0; end
-            8'b00011010: begin result0 = {e[5:0], 26'b00000000000000000000000000}; sel = 1'b0; end
-            8'b00011011: begin result0 = {e[4:0], 27'b000000000000000000000000000}; sel = 1'b0; end
-            8'b00011100: begin result0 = {e[3:0], 28'b0000000000000000000000000000}; sel = 1'b0; end
-            8'b00011101: begin result0 = {e[2:0], 29'b00000000000000000000000000000}; sel = 1'b0; end
-            8'b00011110: begin result0 = {e[1:0], 30'b000000000000000000000000000000}; sel = 1'b0; end
-            8'b00011111: begin result0 = {e[0], 31'b0000000000000000000000000000000}; sel = 1'b0; end
-            8'b11111111: begin result0 = {9'b000000000, e[23:1]};  sel = e[0]; end
-            8'b11111110: begin result0 = {10'b0000000000, e[23:2]}; sel = e[1]; end
-            8'b11111101: begin result0 = {11'b00000000000, e[23:3]}; sel = e[2]; end
-            8'b11111100: begin result0 = {12'b000000000000, e[23:4]}; sel = e[3]; end
-            8'b11111011: begin result0 = {13'b0000000000000, e[23:5]}; sel = e[4]; end
-            8'b11111010: begin result0 = {14'b00000000000000, e[23:6]}; sel = e[5]; end
-            8'b11111001: begin result0 = {15'b000000000000000, e[23:7]}; sel = e[6]; end
-            8'b11111000: begin result0 = {16'b0000000000000000, e[23:8]}; sel = e[7]; end
-            8'b11110111: begin result0 = {17'b00000000000000000, e[23:9]}; sel = e[8]; end
-            8'b11110110: begin result0 = {18'b000000000000000000, e[23:10]}; sel = e[9]; end
-            8'b11110101: begin result0 = {19'b0000000000000000000, e[23:11]}; sel = e[10]; end
-            8'b11110100: begin result0 = {20'b00000000000000000000, e[23:12]}; sel = e[11]; end
-            8'b11110011: begin result0 = {21'b000000000000000000000, e[23:13]}; sel = e[12]; end
-            8'b11110010: begin result0 = {22'b0000000000000000000000, e[23:14]}; sel = e[13]; end
-            8'b11110001: begin result0 = {23'b00000000000000000000000, e[23:15]}; sel = e[14]; end
-            8'b11110000: begin result0 = {24'b000000000000000000000000, e[23:16]}; sel = e[15]; end
-            8'b11101111: begin result0 = {25'b0000000000000000000000000, e[23:17]}; sel = e[16]; end
-            8'b11101110: begin result0 = {26'b00000000000000000000000000, e[23:18]}; sel = e[17]; end
-            8'b11101101: begin result0 = {27'b000000000000000000000000000, e[23:19]}; sel = e[18]; end
-            8'b11101100: begin result0 = {28'b0000000000000000000000000000, e[23:20]}; sel = e[19]; end
-            8'b11101011: begin result0 = {29'b00000000000000000000000000000, e[23:21]}; sel = e[20]; end
-            8'b11101010: begin result0 = {30'b00000000000000000000000000000, e[23:22]}; sel = e[21]; end
-            8'b11101001: begin result0 = {31'b000000000000000000000000000000, e[23]}; sel = e[22]; end
-            default : begin result0 = 32'd0; sel = 1'b0; end //fixed latch
-        endcase
-    end
-    assign result = result0 + sel;
-endmodule
-
-module new_Shift_operation32(
-    input [7:0] shift,    // 6-bit signed shift signal
-    input [23:0] e,       // 24-bit signed input signal
-    output [31:0] result     // 32-bit output result
-);
-    reg [31:0] result0;
-    reg sel;
-    always @(*) begin
-        case(shift)
-            8'b00010111: begin result0 = {8'b00000000, e}; sel = 1'b0; end
-            8'b00011000: begin result0 = {7'b0000000, e, 1'b0}; sel = 1'b0; end
-            8'b00011001: begin result0 = {6'b000000, e, 2'b00};sel = 1'b0; end
-            8'b00011010: begin result0 = {5'b00000, e, 3'b000};sel = 1'b0; end
-            8'b00011011: begin result0 = {4'b0000, e, 4'b0000};sel = 1'b0; end
-            8'b00011100: begin result0 = {3'b000, e, 5'b00000};sel = 1'b0; end
-            8'b00011101: begin result0 = {2'b00, e, 6'b000000};sel = 1'b0; end
-            8'b00011110: begin result0 = {1'b0, e, 7'b0000000};sel = 1'b0; end
-            8'b00011111: begin result0 = {e, 8'b00000000}; sel = 1'b0; end
-            8'b00100000: begin result0 = {e[22:0], 9'b000000000}; sel = 1'b0; end
-            8'b00100001: begin result0 = {e[21:0], 10'b0000000000}; sel = 1'b0; end
-            8'b00100010: begin result0 = {e[20:0], 11'b00000000000}; sel = 1'b0; end
-            8'b00100011: begin result0 = {e[19:0], 12'b000000000000}; sel = 1'b0; end
-            8'b00100100: begin result0 = {e[18:0], 13'b0000000000000}; sel = 1'b0; end
-            8'b00100101: begin result0 = {e[17:0], 14'b00000000000000}; sel = 1'b0; end
-            8'b00100110: begin result0 = {e[16:0], 15'b000000000000000}; sel = 1'b0; end
-            8'b00100111: begin result0 = {e[15:0], 16'b0000000000000000}; sel = 1'b0; end
-            8'b00101000: begin result0 = {e[14:0], 17'b00000000000000000}; sel = 1'b0; end
-            8'b00101001: begin result0 = {e[13:0], 18'b000000000000000000}; sel = 1'b0; end
-            8'b00101010: begin result0 = {e[12:0], 19'b0000000000000000000}; sel = 1'b0; end
-            8'b00101011: begin result0 = {e[11:0], 20'b00000000000000000000}; sel = 1'b0; end
-            8'b00101100: begin result0 = {e[10:0], 21'b000000000000000000000}; sel = 1'b0; end
-            8'b00101101: begin result0 = {e[9:0], 22'b0000000000000000000000}; sel = 1'b0; end
-            8'b00101110: begin result0 = {e[8:0], 23'b00000000000000000000000}; sel = 1'b0; end
-            8'b00101111: begin result0 = {e[7:0], 24'b000000000000000000000000}; sel = 1'b0; end
-            8'b00110000: begin result0 = {e[6:0], 25'b0000000000000000000000000}; sel = 1'b0; end
-            8'b00110001: begin result0 = {e[5:0], 26'b00000000000000000000000000}; sel = 1'b0; end
-            8'b00110010: begin result0 = {e[4:0], 27'b000000000000000000000000000}; sel = 1'b0; end
-            8'b00110011: begin result0 = {e[3:0], 28'b0000000000000000000000000000}; sel = 1'b0; end
-            8'b00110100: begin result0 = {e[2:0], 29'b00000000000000000000000000000}; sel = 1'b0; end
-            8'b00110101: begin result0 = {e[1:0], 30'b000000000000000000000000000000}; sel = 1'b0; end
-            8'b00110110: begin result0 = {e[0], 31'b0000000000000000000000000000000}; sel = 1'b0; end
-            8'b00010110: begin result0 = {9'b000000000, e[23:1]};  sel = e[0]; end
-            8'b00010101: begin result0 = {10'b0000000000, e[23:2]}; sel = e[1]; end
-            8'b00010100: begin result0 = {11'b00000000000, e[23:3]}; sel = e[2]; end
-            8'b00010011: begin result0 = {12'b000000000000, e[23:4]}; sel = e[3]; end
-            8'b00010010: begin result0 = {13'b0000000000000, e[23:5]}; sel = e[4]; end
-            8'b00010001: begin result0 = {14'b00000000000000, e[23:6]}; sel = e[5]; end
-            8'b00010000: begin result0 = {15'b000000000000000, e[23:7]}; sel = e[6]; end
-            8'b00001111: begin result0 = {16'b0000000000000000, e[23:8]}; sel = e[7]; end
-            8'b00001110: begin result0 = {17'b00000000000000000, e[23:9]}; sel = e[8]; end
-            8'b00001101: begin result0 = {18'b000000000000000000, e[23:10]}; sel = e[9]; end
-            8'b00001100: begin result0 = {19'b0000000000000000000, e[23:11]}; sel = e[10]; end
-            8'b00001011: begin result0 = {20'b00000000000000000000, e[23:12]}; sel = e[11]; end
-            8'b00001010: begin result0 = {21'b000000000000000000000, e[23:13]}; sel = e[12]; end
-            8'b00001001: begin result0 = {22'b0000000000000000000000, e[23:14]}; sel = e[13]; end
-            8'b00001000: begin result0 = {23'b00000000000000000000000, e[23:15]}; sel = e[14]; end
-            8'b00000111: begin result0 = {24'b000000000000000000000000, e[23:16]}; sel = e[15]; end
-            8'b00000110: begin result0 = {25'b0000000000000000000000000, e[23:17]}; sel = e[16]; end
-            8'b00000101: begin result0 = {26'b00000000000000000000000000, e[23:18]}; sel = e[17]; end
-            8'b00000100: begin result0 = {27'b000000000000000000000000000, e[23:19]}; sel = e[18]; end
-            8'b00000011: begin result0 = {28'b0000000000000000000000000000, e[23:20]}; sel = e[19]; end
-            8'b00000010: begin result0 = {29'b00000000000000000000000000000, e[23:21]}; sel = e[20]; end
-            8'b00000001: begin result0 = {30'b00000000000000000000000000000, e[23:22]}; sel = e[21]; end
-            8'b00000000: begin result0 = {31'b000000000000000000000000000000, e[23]}; sel = e[22]; end
-            default : begin result0 = 32'd0; sel = 1'b0; end //fixed latch
-        endcase
-    end
-    assign result = result0 + sel;
-endmodule
-
-module  APP_22_17_8_4_28_anticonv1(
-    input [21:0] f,               // 22-bit input
-    output [22:0] f_e2_out     // 23-bit output 
-);
-    reg [4:0] segment;
-    reg [17:0] b;
-    always @(*) begin
-        case(f[21:14])
-            8'b00000000: begin segment = 5'd0; b = 18'b011111111111111111; end
-            8'b00000001: begin segment = 5'd0; b = 18'b011111111111111011; end
-            8'b00000010: begin segment = 5'd0; b = 18'b011111111111110111; end
-            8'b00000011: begin segment = 5'd0; b = 18'b011111111111110101; end
-            8'b00000100: begin segment = 5'd0; b = 18'b011111111111110100; end
-            8'b00000101: begin segment = 5'd0; b = 18'b011111111111110100; end
-            8'b00000110: begin segment = 5'd0; b = 18'b011111111111110100; end
-            8'b00000111: begin segment = 5'd0; b = 18'b011111111111110110; end
-            8'b00001000: begin segment = 5'd0; b = 18'b011111111111111001; end
-            8'b00001001: begin segment = 5'd0; b = 18'b011111111111111100; end
-            8'b00001010: begin segment = 5'd1; b = 18'b011111111110011000; end
-            8'b00001011: begin segment = 5'd1; b = 18'b011111111110010100; end
-            8'b00001100: begin segment = 5'd1; b = 18'b011111111110010000; end
-            8'b00001101: begin segment = 5'd1; b = 18'b011111111110001110; end
-            8'b00001110: begin segment = 5'd1; b = 18'b011111111110001100; end
-            8'b00001111: begin segment = 5'd1; b = 18'b011111111110001100; end
-            8'b00010000: begin segment = 5'd1; b = 18'b011111111110001101; end
-            8'b00010001: begin segment = 5'd1; b = 18'b011111111110001110; end
-            8'b00010010: begin segment = 5'd1; b = 18'b011111111110010001; end
-            8'b00010011: begin segment = 5'd1; b = 18'b011111111110010100; end
-            8'b00010100: begin segment = 5'd1; b = 18'b011111111110011001; end
-            8'b00010101: begin segment = 5'd2; b = 18'b011111111010110010; end
-            8'b00010110: begin segment = 5'd2; b = 18'b011111111010101110; end
-            8'b00010111: begin segment = 5'd2; b = 18'b011111111010101011; end
-            8'b00011000: begin segment = 5'd2; b = 18'b011111111010101000; end
-            8'b00011001: begin segment = 5'd2; b = 18'b011111111010100111; end
-            8'b00011010: begin segment = 5'd2; b = 18'b011111111010100111; end
-            8'b00011011: begin segment = 5'd2; b = 18'b011111111010101000; end
-            8'b00011100: begin segment = 5'd2; b = 18'b011111111010101001; end
-            8'b00011101: begin segment = 5'd2; b = 18'b011111111010101100; end
-            8'b00011110: begin segment = 5'd2; b = 18'b011111111010110000; end
-            8'b00011111: begin segment = 5'd3; b = 18'b011111110101111010; end
-            8'b00100000: begin segment = 5'd3; b = 18'b011111110101110110; end
-            8'b00100001: begin segment = 5'd3; b = 18'b011111110101110011; end
-            8'b00100010: begin segment = 5'd3; b = 18'b011111110101110001; end
-            8'b00100011: begin segment = 5'd3; b = 18'b011111110101110001; end
-            8'b00100100: begin segment = 5'd3; b = 18'b011111110101110001; end
-            8'b00100101: begin segment = 5'd3; b = 18'b011111110101110010; end
-            8'b00100110: begin segment = 5'd3; b = 18'b011111110101110101; end
-            8'b00100111: begin segment = 5'd3; b = 18'b011111110101111000; end
-            8'b00101000: begin segment = 5'd3; b = 18'b011111110101111101; end
-            8'b00101001: begin segment = 5'd4; b = 18'b011111101110111001; end
-            8'b00101010: begin segment = 5'd4; b = 18'b011111101110110101; end
-            8'b00101011: begin segment = 5'd4; b = 18'b011111101110110010; end
-            8'b00101100: begin segment = 5'd4; b = 18'b011111101110101111; end
-            8'b00101101: begin segment = 5'd4; b = 18'b011111101110101110; end
-            8'b00101110: begin segment = 5'd4; b = 18'b011111101110101110; end
-            8'b00101111: begin segment = 5'd4; b = 18'b011111101110110000; end
-            8'b00110000: begin segment = 5'd4; b = 18'b011111101110110010; end
-            8'b00110001: begin segment = 5'd4; b = 18'b011111101110110101; end
-            8'b00110010: begin segment = 5'd4; b = 18'b011111101110111001; end
-            8'b00110011: begin segment = 5'd5; b = 18'b011111100110111100; end
-            8'b00110100: begin segment = 5'd5; b = 18'b011111100110111000; end
-            8'b00110101: begin segment = 5'd5; b = 18'b011111100110110110; end
-            8'b00110110: begin segment = 5'd5; b = 18'b011111100110110101; end
-            8'b00110111: begin segment = 5'd5; b = 18'b011111100110110100; end
-            8'b00111000: begin segment = 5'd5; b = 18'b011111100110110101; end
-            8'b00111001: begin segment = 5'd5; b = 18'b011111100110111000; end
-            8'b00111010: begin segment = 5'd5; b = 18'b011111100110111011; end
-            8'b00111011: begin segment = 5'd5; b = 18'b011111100110111111; end
-            8'b00111100: begin segment = 5'd5; b = 18'b011111100111000101; end
-            8'b00111101: begin segment = 5'd6; b = 18'b011111011011101001; end
-            8'b00111110: begin segment = 5'd6; b = 18'b011111011011100101; end
-            8'b00111111: begin segment = 5'd6; b = 18'b011111011011100010; end
-            8'b01000000: begin segment = 5'd6; b = 18'b011111011011100000; end
-            8'b01000001: begin segment = 5'd6; b = 18'b011111011011011111; end
-            8'b01000010: begin segment = 5'd6; b = 18'b011111011011100000; end
-            8'b01000011: begin segment = 5'd6; b = 18'b011111011011100001; end
-            8'b01000100: begin segment = 5'd6; b = 18'b011111011011100100; end
-            8'b01000101: begin segment = 5'd6; b = 18'b011111011011100111; end
-            8'b01000110: begin segment = 5'd6; b = 18'b011111011011101100; end
-            8'b01000111: begin segment = 5'd6; b = 18'b011111011011110011; end
-            8'b01001000: begin segment = 5'd7; b = 18'b011111001110010100; end
-            8'b01001001: begin segment = 5'd7; b = 18'b011111001110010000; end
-            8'b01001010: begin segment = 5'd7; b = 18'b011111001110001110; end
-            8'b01001011: begin segment = 5'd7; b = 18'b011111001110001101; end
-            8'b01001100: begin segment = 5'd7; b = 18'b011111001110001101; end
-            8'b01001101: begin segment = 5'd7; b = 18'b011111001110001110; end
-            8'b01001110: begin segment = 5'd7; b = 18'b011111001110010000; end
-            8'b01001111: begin segment = 5'd7; b = 18'b011111001110010100; end
-            8'b01010000: begin segment = 5'd7; b = 18'b011111001110011000; end
-            8'b01010001: begin segment = 5'd7; b = 18'b011111001110011110; end
-            8'b01010010: begin segment = 5'd8; b = 18'b011110111101100000; end
-            8'b01010011: begin segment = 5'd8; b = 18'b011110111101011011; end
-            8'b01010100: begin segment = 5'd8; b = 18'b011110111101010111; end
-            8'b01010101: begin segment = 5'd8; b = 18'b011110111101010101; end
-            8'b01010110: begin segment = 5'd8; b = 18'b011110111101010100; end
-            8'b01010111: begin segment = 5'd8; b = 18'b011110111101010100; end
-            8'b01011000: begin segment = 5'd8; b = 18'b011110111101010101; end
-            8'b01011001: begin segment = 5'd8; b = 18'b011110111101010111; end
-            8'b01011010: begin segment = 5'd8; b = 18'b011110111101011011; end
-            8'b01011011: begin segment = 5'd8; b = 18'b011110111101100000; end
-            8'b01011100: begin segment = 5'd9; b = 18'b011110101110000011; end
-            8'b01011101: begin segment = 5'd9; b = 18'b011110101110000000; end
-            8'b01011110: begin segment = 5'd9; b = 18'b011110101101111110; end
-            8'b01011111: begin segment = 5'd9; b = 18'b011110101101111101; end
-            8'b01100000: begin segment = 5'd9; b = 18'b011110101101111101; end
-            8'b01100001: begin segment = 5'd9; b = 18'b011110101101111110; end
-            8'b01100010: begin segment = 5'd9; b = 18'b011110101110000001; end
-            8'b01100011: begin segment = 5'd9; b = 18'b011110101110000101; end
-            8'b01100100: begin segment = 5'd9; b = 18'b011110101110001010; end
-            8'b01100101: begin segment = 5'd10; b = 18'b011110011010110101; end
-            8'b01100110: begin segment = 5'd10; b = 18'b011110011010110001; end
-            8'b01100111: begin segment = 5'd10; b = 18'b011110011010101110; end
-            8'b01101000: begin segment = 5'd10; b = 18'b011110011010101011; end
-            8'b01101001: begin segment = 5'd10; b = 18'b011110011010101011; end
-            8'b01101010: begin segment = 5'd10; b = 18'b011110011010101100; end
-            8'b01101011: begin segment = 5'd10; b = 18'b011110011010101110; end
-            8'b01101100: begin segment = 5'd10; b = 18'b011110011010110001; end
-            8'b01101101: begin segment = 5'd10; b = 18'b011110011010110101; end
-            8'b01101110: begin segment = 5'd11; b = 18'b011110000110110110; end
-            8'b01101111: begin segment = 5'd11; b = 18'b011110000110110001; end
-            8'b01110000: begin segment = 5'd11; b = 18'b011110000110101111; end
-            8'b01110001: begin segment = 5'd11; b = 18'b011110000110101101; end
-            8'b01110010: begin segment = 5'd11; b = 18'b011110000110101100; end
-            8'b01110011: begin segment = 5'd11; b = 18'b011110000110101101; end
-            8'b01110100: begin segment = 5'd11; b = 18'b011110000110101111; end
-            8'b01110101: begin segment = 5'd11; b = 18'b011110000110110010; end
-            8'b01110110: begin segment = 5'd11; b = 18'b011110000110110110; end
-            8'b01110111: begin segment = 5'd12; b = 18'b011101110000101010; end
-            8'b01111000: begin segment = 5'd12; b = 18'b011101110000100110; end
-            8'b01111001: begin segment = 5'd12; b = 18'b011101110000100010; end
-            8'b01111010: begin segment = 5'd12; b = 18'b011101110000100000; end
-            8'b01111011: begin segment = 5'd12; b = 18'b011101110000100000; end
-            8'b01111100: begin segment = 5'd12; b = 18'b011101110000100001; end
-            8'b01111101: begin segment = 5'd12; b = 18'b011101110000100011; end
-            8'b01111110: begin segment = 5'd12; b = 18'b011101110000100110; end
-            8'b01111111: begin segment = 5'd12; b = 18'b011101110000101010; end
-            8'b10000000: begin segment = 5'd13; b = 18'b011101010110110010; end
-            8'b10000001: begin segment = 5'd13; b = 18'b011101010110101100; end
-            8'b10000010: begin segment = 5'd13; b = 18'b011101010110101000; end
-            8'b10000011: begin segment = 5'd13; b = 18'b011101010110100101; end
-            8'b10000100: begin segment = 5'd13; b = 18'b011101010110100100; end
-            8'b10000101: begin segment = 5'd13; b = 18'b011101010110100100; end
-            8'b10000110: begin segment = 5'd13; b = 18'b011101010110100101; end
-            8'b10000111: begin segment = 5'd13; b = 18'b011101010110101000; end
-            8'b10001000: begin segment = 5'd13; b = 18'b011101010110101101; end
-            8'b10001001: begin segment = 5'd13; b = 18'b011101010110110010; end
-            8'b10001010: begin segment = 5'd14; b = 18'b011100111010001100; end
-            8'b10001011: begin segment = 5'd14; b = 18'b011100111010000111; end
-            8'b10001100: begin segment = 5'd14; b = 18'b011100111010000100; end
-            8'b10001101: begin segment = 5'd14; b = 18'b011100111010000010; end
-            8'b10001110: begin segment = 5'd14; b = 18'b011100111010000010; end
-            8'b10001111: begin segment = 5'd14; b = 18'b011100111010000010; end
-            8'b10010000: begin segment = 5'd14; b = 18'b011100111010000100; end
-            8'b10010001: begin segment = 5'd14; b = 18'b011100111010001000; end
-            8'b10010010: begin segment = 5'd14; b = 18'b011100111010001101; end
-            8'b10010011: begin segment = 5'd15; b = 18'b011100011100010110; end
-            8'b10010100: begin segment = 5'd15; b = 18'b011100011100010001; end
-            8'b10010101: begin segment = 5'd15; b = 18'b011100011100001101; end
-            8'b10010110: begin segment = 5'd15; b = 18'b011100011100001011; end
-            8'b10010111: begin segment = 5'd15; b = 18'b011100011100001010; end
-            8'b10011000: begin segment = 5'd15; b = 18'b011100011100001011; end
-            8'b10011001: begin segment = 5'd15; b = 18'b011100011100001101; end
-            8'b10011010: begin segment = 5'd15; b = 18'b011100011100010001; end
-            8'b10011011: begin segment = 5'd15; b = 18'b011100011100010110; end
-            8'b10011100: begin segment = 5'd16; b = 18'b011011111100011111; end
-            8'b10011101: begin segment = 5'd16; b = 18'b011011111100011010; end
-            8'b10011110: begin segment = 5'd16; b = 18'b011011111100010111; end
-            8'b10011111: begin segment = 5'd16; b = 18'b011011111100010100; end
-            8'b10100000: begin segment = 5'd16; b = 18'b011011111100010011; end
-            8'b10100001: begin segment = 5'd16; b = 18'b011011111100010100; end
-            8'b10100010: begin segment = 5'd16; b = 18'b011011111100010110; end
-            8'b10100011: begin segment = 5'd16; b = 18'b011011111100011010; end
-            8'b10100100: begin segment = 5'd16; b = 18'b011011111100011111; end
-            8'b10100101: begin segment = 5'd17; b = 18'b011011011000100011; end
-            8'b10100110: begin segment = 5'd17; b = 18'b011011011000011110; end
-            8'b10100111: begin segment = 5'd17; b = 18'b011011011000011010; end
-            8'b10101000: begin segment = 5'd17; b = 18'b011011011000010111; end
-            8'b10101001: begin segment = 5'd17; b = 18'b011011011000010110; end
-            8'b10101010: begin segment = 5'd17; b = 18'b011011011000010110; end
-            8'b10101011: begin segment = 5'd17; b = 18'b011011011000011000; end
-            8'b10101100: begin segment = 5'd17; b = 18'b011011011000011011; end
-            8'b10101101: begin segment = 5'd17; b = 18'b011011011000100000; end
-            8'b10101110: begin segment = 5'd18; b = 18'b011010110110100001; end
-            8'b10101111: begin segment = 5'd18; b = 18'b011010110110011101; end
-            8'b10110000: begin segment = 5'd18; b = 18'b011010110110011010; end
-            8'b10110001: begin segment = 5'd18; b = 18'b011010110110011001; end
-            8'b10110010: begin segment = 5'd18; b = 18'b011010110110011000; end
-            8'b10110011: begin segment = 5'd18; b = 18'b011010110110011011; end
-            8'b10110100: begin segment = 5'd18; b = 18'b011010110110011110; end
-            8'b10110101: begin segment = 5'd18; b = 18'b011010110110100011; end
-            8'b10110110: begin segment = 5'd19; b = 18'b011010010000001001; end
-            8'b10110111: begin segment = 5'd19; b = 18'b011010010000000100; end
-            8'b10111000: begin segment = 5'd19; b = 18'b011010010000000000; end
-            8'b10111001: begin segment = 5'd19; b = 18'b011010001111111110; end
-            8'b10111010: begin segment = 5'd19; b = 18'b011010001111111101; end
-            8'b10111011: begin segment = 5'd19; b = 18'b011010001111111101; end
-            8'b10111100: begin segment = 5'd19; b = 18'b011010010000000000; end
-            8'b10111101: begin segment = 5'd19; b = 18'b011010010000000100; end
-            8'b10111110: begin segment = 5'd20; b = 18'b011001101100011100; end
-            8'b10111111: begin segment = 5'd20; b = 18'b011001101100010111; end
-            8'b11000000: begin segment = 5'd20; b = 18'b011001101100010100; end
-            8'b11000001: begin segment = 5'd20; b = 18'b011001101100010010; end
-            8'b11000010: begin segment = 5'd20; b = 18'b011001101100010010; end
-            8'b11000011: begin segment = 5'd20; b = 18'b011001101100010100; end
-            8'b11000100: begin segment = 5'd20; b = 18'b011001101100010111; end
-            8'b11000101: begin segment = 5'd20; b = 18'b011001101100011100; end
-            8'b11000110: begin segment = 5'd20; b = 18'b011001101100100011; end
-            8'b11000111: begin segment = 5'd21; b = 18'b011000111010110011; end
-            8'b11001000: begin segment = 5'd21; b = 18'b011000111010101101; end
-            8'b11001001: begin segment = 5'd21; b = 18'b011000111010101001; end
-            8'b11001010: begin segment = 5'd21; b = 18'b011000111010100110; end
-            8'b11001011: begin segment = 5'd21; b = 18'b011000111010100101; end
-            8'b11001100: begin segment = 5'd21; b = 18'b011000111010100110; end
-            8'b11001101: begin segment = 5'd21; b = 18'b011000111010101000; end
-            8'b11001110: begin segment = 5'd21; b = 18'b011000111010101100; end
-            8'b11001111: begin segment = 5'd22; b = 18'b011000010011110111; end
-            8'b11010000: begin segment = 5'd22; b = 18'b011000010011110010; end
-            8'b11010001: begin segment = 5'd22; b = 18'b011000010011101111; end
-            8'b11010010: begin segment = 5'd22; b = 18'b011000010011101110; end
-            8'b11010011: begin segment = 5'd22; b = 18'b011000010011101111; end
-            8'b11010100: begin segment = 5'd22; b = 18'b011000010011110001; end
-            8'b11010101: begin segment = 5'd22; b = 18'b011000010011110100; end
-            8'b11010110: begin segment = 5'd22; b = 18'b011000010011111010; end
-            8'b11010111: begin segment = 5'd23; b = 18'b010111100100011101; end
-            8'b11011000: begin segment = 5'd23; b = 18'b010111100100010111; end
-            8'b11011001: begin segment = 5'd23; b = 18'b010111100100010100; end
-            8'b11011010: begin segment = 5'd23; b = 18'b010111100100010010; end
-            8'b11011011: begin segment = 5'd23; b = 18'b010111100100010011; end
-            8'b11011100: begin segment = 5'd23; b = 18'b010111100100010101; end
-            8'b11011101: begin segment = 5'd23; b = 18'b010111100100011000; end
-            8'b11011110: begin segment = 5'd23; b = 18'b010111100100011101; end
-            8'b11011111: begin segment = 5'd24; b = 18'b010110110011001111; end
-            8'b11100000: begin segment = 5'd24; b = 18'b010110110011001001; end
-            8'b11100001: begin segment = 5'd24; b = 18'b010110110011000110; end
-            8'b11100010: begin segment = 5'd24; b = 18'b010110110011000100; end
-            8'b11100011: begin segment = 5'd24; b = 18'b010110110011000101; end
-            8'b11100100: begin segment = 5'd24; b = 18'b010110110011000110; end
-            8'b11100101: begin segment = 5'd24; b = 18'b010110110011001001; end
-            8'b11100110: begin segment = 5'd24; b = 18'b010110110011001111; end
-            8'b11100111: begin segment = 5'd25; b = 18'b010110000001100111; end
-            8'b11101000: begin segment = 5'd25; b = 18'b010110000001100010; end
-            8'b11101001: begin segment = 5'd25; b = 18'b010110000001011111; end
-            8'b11101010: begin segment = 5'd25; b = 18'b010110000001011110; end
-            8'b11101011: begin segment = 5'd25; b = 18'b010110000001011110; end
-            8'b11101100: begin segment = 5'd25; b = 18'b010110000001100000; end
-            8'b11101101: begin segment = 5'd25; b = 18'b010110000001100101; end
-            8'b11101110: begin segment = 5'd25; b = 18'b010110000001101011; end
-            8'b11101111: begin segment = 5'd26; b = 18'b010100111110011100; end
-            8'b11110000: begin segment = 5'd26; b = 18'b010100111110010011; end
-            8'b11110001: begin segment = 5'd26; b = 18'b010100111110001101; end
-            8'b11110010: begin segment = 5'd26; b = 18'b010100111110001000; end
-            8'b11110011: begin segment = 5'd26; b = 18'b010100111110000101; end
-            8'b11110100: begin segment = 5'd26; b = 18'b010100111110000100; end
-            8'b11110101: begin segment = 5'd26; b = 18'b010100111110000101; end
-            8'b11110110: begin segment = 5'd26; b = 18'b010100111110001000; end
-            8'b11110111: begin segment = 5'd27; b = 18'b010100001111110011; end
-            8'b11111000: begin segment = 5'd27; b = 18'b010100001111101110; end
-            8'b11111001: begin segment = 5'd27; b = 18'b010100001111101010; end
-            8'b11111010: begin segment = 5'd27; b = 18'b010100001111101000; end
-            8'b11111011: begin segment = 5'd27; b = 18'b010100001111101000; end
-            8'b11111100: begin segment = 5'd27; b = 18'b010100001111101011; end
-            8'b11111101: begin segment = 5'd27; b = 18'b010100001111101111; end
-            8'b11111110: begin segment = 5'd27; b = 18'b010100001111110101; end
-            8'b11111111: begin segment = 5'd27; b = 18'b010100001111111101; end
-      endcase
-    end
-
-// Auto-generated neg assignments for WIDTH=22
-    wire neg_1;
-    assign neg_1 = ~f[21];
-    wire [1:0] neg_2;
-    assign neg_2 = ~f[21:20];
-    wire [2:0] neg_3;
-    assign neg_3 = ~f[21:19];
-    wire [3:0] neg_4;
-    assign neg_4 = ~f[21:18];
-    wire [4:0] neg_5;
-    assign neg_5 = ~f[21:17];
-    wire [5:0] neg_6;
-    assign neg_6 = ~f[21:16];
-    wire [6:0] neg_7;
-    assign neg_7 = ~f[21:15];
-    wire [7:0] neg_8;
-    assign neg_8 = ~f[21:14];
-    wire [8:0] neg_9;
-    assign neg_9 = ~f[21:13];
-    wire [9:0] neg_10;
-    assign neg_10 = ~f[21:12];
-    wire [10:0] neg_11;
-    assign neg_11 = ~f[21:11];
-    wire [11:0] neg_12;
-    assign neg_12 = ~f[21:10];
-    wire [12:0] neg_13;
-    assign neg_13 = ~f[21:9];
-    wire [13:0] neg_14;
-    assign neg_14 = ~f[21:8];
-    wire [14:0] neg_15;
-    assign neg_15 = ~f[21:7];
-    wire [15:0] neg_16;
-    assign neg_16 = ~f[21:6];
-    wire [16:0] neg_17;
-    assign neg_17 = ~f[21:5];
-    wire [17:0] neg_18;
-    assign neg_18 = ~f[21:4];
-    wire [18:0] neg_19;
-    assign neg_19 = ~f[21:3];
-    wire [19:0] neg_20;
-    assign neg_20 = ~f[21:2];
-    wire [20:0] neg_21;
-    assign neg_21 = ~f[21:1];
-// End of auto-generated section
-
-
-// Auto-generated register declarations for 4 registers
-    reg [17:0] A1;
-    reg [17:0] A2;
-    reg [17:0] A3;
-    reg [17:0] A4;
-// End of auto-generated section
-
-    always @(*) begin
-        case(segment)
-            5'd0: begin A1 = {3'b111, neg_15}; A2 = {5'b11111, neg_13}; A3 = {7'b0000000, f[21:11]}; end
-            5'd1: begin A1 = {3'b111, neg_15}; A2 = {6'b111111, neg_12}; A3 = {9'b000000000, f[21:13]}; end
-            5'd2: begin A1 = {3'b111, neg_15}; A2 = {8'b11111111, neg_10}; A3 = {10'b0000000000, f[21:14]}; end
-            5'd3: begin A1 = {3'b111, neg_15}; A2 = {7'b0000000, f[21:11]}; A3 = {10'b1111111111, neg_8}; end
-            5'd4: begin A1 = {3'b111, neg_15}; A2 = {6'b000000, f[21:10]}; A3 = {9'b000000000, f[21:13]}; end
-            5'd5: begin A1 = {3'b111, neg_15}; A2 = {5'b00000, f[21:9]}; A3 = {8'b11111111, neg_10}; end
-            5'd6: begin A1 = {3'b111, neg_15}; A2 = {5'b00000, f[21:9]}; A3 = {7'b0000000, f[21:11]}; end
-            5'd7: begin A1 = {4'b1111, neg_14}; A2 = {6'b111111, neg_12}; A3 = {8'b00000000, f[21:12]}; end
-            5'd8: begin A1 = {4'b1111, neg_14}; A2 = {10'b0000000000, f[21:14]}; A3 = {12'b000000000000, f[21:16]}; end
-            5'd9: begin A1 = {4'b1111, neg_14}; A2 = {6'b000000, f[21:10]}; A3 = {8'b11111111, neg_10}; end
-            5'd10: begin A1 = {5'b11111, neg_13}; A2 = {7'b1111111, neg_11}; A3 = {12'b000000000000, f[21:16]}; end
-            5'd11: begin A1 = {5'b11111, neg_13}; A2 = {8'b00000000, f[21:12]}; A3 = {13'b1111111111111, neg_5}; end
-            5'd12: begin A1 = {6'b111111, neg_12}; A2 = {12'b111111111111, neg_6}; A3 = {14'b00000000000000, f[21:18]}; end
-            5'd13: begin A1 = {8'b11111111, neg_10}; A2 = {10'b0000000000, f[21:14]}; A3 = {12'b111111111111, neg_6}; end
-            5'd14: begin A1 = {7'b0000000, f[21:11]}; A2 = {9'b000000000, f[21:13]}; A3 = {18'b000000000000000000};end
-            5'd15: begin A1 = {5'b00000, f[21:9]}; A2 = {7'b1111111, neg_11}; A3 = {10'b1111111111, neg_8}; end
-            5'd16: begin A1 = {5'b00000, f[21:9]}; A2 = {8'b00000000, f[21:12]}; A3 = {14'b00000000000000, f[21:18]}; end
-            5'd17: begin A1 = {4'b0000, f[21:8]}; A2 = {6'b111111, neg_12}; A3 = {9'b000000000, f[21:13]}; end
-            5'd18: begin A1 = {4'b0000, f[21:8]}; A2 = {9'b111111111, neg_9}; A3 = {11'b00000000000, f[21:15]}; end
-            5'd19: begin A1 = {4'b0000, f[21:8]}; A2 = {6'b000000, f[21:10]}; A3 = {8'b11111111, neg_10}; end
-            5'd20: begin A1 = {3'b000, f[21:7]}; A2 = {5'b11111, neg_13}; A3 = {7'b1111111, neg_11}; end
-            5'd21: begin A1 = {3'b000, f[21:7]}; A2 = {5'b11111, neg_13}; A3 = {7'b0000000, f[21:11]}; end
-            5'd22: begin A1 = {3'b000, f[21:7]}; A2 = {6'b111111, neg_12}; A3 = {8'b00000000, f[21:12]}; end
-            5'd23: begin A1 = {3'b000, f[21:7]}; A2 = {9'b000000000, f[21:13]}; A3 = {13'b0000000000000, f[21:17]}; end
-            5'd24: begin A1 = {3'b000, f[21:7]}; A2 = {6'b000000, f[21:10]}; A3 = {12'b000000000000, f[21:16]}; end
-            5'd25: begin A1 = {3'b000, f[21:7]}; A2 = {5'b00000, f[21:9]}; A3 = {9'b111111111, neg_9}; end
-            5'd26: begin A1 = {2'b00, f[21:6]}; A2 = {4'b1111, neg_14}; A3 = {6'b111111, neg_12}; end
-            5'd27: begin A1 = {2'b00, f[21:6]}; A2 = {4'b1111, neg_14}; A3 = {8'b11111111, neg_10}; end
-            default: begin A1 = 18'b0; A2 = 18'b0; A3 = 18'b0; end //fixed default case to avoid latches
-      endcase
-    end
-
-// Auto-generated CSA tree for final_N=4, final_M=22, final_add_M=17
-    wire [17:0] csa1_carry, csa1_sum;
-    wire [17:0] csa2_carry, csa2_sum;
-    wire [17:0] csa3_carry, csa3_sum;
-    wire [17:0] final_sum;
-
-    CSA_anticonv1 csa1 (
-        .a({1'b0, f[21:5]}),  // f的高17位
-        .b(A1),
-        .c(A2),
-        .sum(csa1_sum),
-        .carry(csa1_carry)
-    );
-
-    CSA_anticonv1 csa2 (
-        .a(csa1_sum),
-        .b(A3),
-        .c({csa1_carry[16:0], 1'b0}),  // 左移1位
-        .sum(csa2_sum),
-        .carry(csa2_carry)
-    );
-
-    CSA_anticonv1 csa3 (
-        .a(csa2_sum),
-         .b(b),
-        .c({csa2_carry[16:0], 1'b0}),
-        .sum(csa3_sum),
-        .carry(csa3_carry)
-    );
-
-    CPA_anticonv1 cpa (
-        .a(csa3_sum),
-        .b({csa3_carry[16:0], 1'b0}),  // 左移1位
-        .sum(final_sum)
-    );
-
-    assign f_e2_out = {final_sum, f[4:0]};  // 拼接高位和原始低位
-// End of auto-generated CSA tree
-
-endmodule
-module CSA_anticonv1 #(parameter ADD_WIDTH = 18
-)(
-    input [ADD_WIDTH-1:0] a,
-    input [ADD_WIDTH-1:0] b,
-    input [ADD_WIDTH-1:0] c,
-    output [ADD_WIDTH-1:0] sum,
-    output [ADD_WIDTH-1:0] carry
-);
-    assign sum = a ^ b ^ c;          // XOR for sum
-    assign carry = (a & b) | (b & c) | (c & a); // Majority logic for carry
-endmodule
-
-// Carry-Propagate Adder (CPA) module
-module CPA_anticonv1 #(parameter ADD_WIDTH = 18
-)(
-    input [ADD_WIDTH-1:0] a,
-    input [ADD_WIDTH-1:0] b,
-    output [ADD_WIDTH-1:0] sum
-);
-    assign sum = a + b;  // Simple binary addition
-endmodule
-
-module  APP_22_18_9_4_32_anticonv2(
-    input [21:0] f,               // 22-bit input
-    output [22:0] f_e2_out     // 23-bit output 
-);
-    reg [5:0] segment;
-    reg [18:0] b;
-    always @(*) begin
-        case(f[21:13])
-            9'b000000000: begin segment = 6'd0; b = 19'b0111111111111111111; end
-            9'b000000001: begin segment = 6'd0; b = 19'b0111111111111111010; end
-            9'b000000010: begin segment = 6'd0; b = 19'b0111111111111110110; end
-            9'b000000011: begin segment = 6'd0; b = 19'b0111111111111110010; end
-            9'b000000100: begin segment = 6'd0; b = 19'b0111111111111101111; end
-            9'b000000101: begin segment = 6'd0; b = 19'b0111111111111101100; end
-            9'b000000110: begin segment = 6'd0; b = 19'b0111111111111101010; end
-            9'b000000111: begin segment = 6'd0; b = 19'b0111111111111101000; end
-            9'b000001000: begin segment = 6'd0; b = 19'b0111111111111100111; end
-            9'b000001001: begin segment = 6'd0; b = 19'b0111111111111100110; end
-            9'b000001010: begin segment = 6'd0; b = 19'b0111111111111100110; end
-            9'b000001011: begin segment = 6'd0; b = 19'b0111111111111100110; end
-            9'b000001100: begin segment = 6'd0; b = 19'b0111111111111100111; end
-            9'b000001101: begin segment = 6'd0; b = 19'b0111111111111101000; end
-            9'b000001110: begin segment = 6'd0; b = 19'b0111111111111101010; end
-            9'b000001111: begin segment = 6'd0; b = 19'b0111111111111101100; end
-            9'b000010000: begin segment = 6'd1; b = 19'b0111111111101110011; end
-            9'b000010001: begin segment = 6'd1; b = 19'b0111111111101101110; end
-            9'b000010010: begin segment = 6'd1; b = 19'b0111111111101101011; end
-            9'b000010011: begin segment = 6'd1; b = 19'b0111111111101100111; end
-            9'b000010100: begin segment = 6'd1; b = 19'b0111111111101100101; end
-            9'b000010101: begin segment = 6'd1; b = 19'b0111111111101100010; end
-            9'b000010110: begin segment = 6'd1; b = 19'b0111111111101100001; end
-            9'b000010111: begin segment = 6'd1; b = 19'b0111111111101011111; end
-            9'b000011000: begin segment = 6'd1; b = 19'b0111111111101011110; end
-            9'b000011001: begin segment = 6'd1; b = 19'b0111111111101011110; end
-            9'b000011010: begin segment = 6'd1; b = 19'b0111111111101011110; end
-            9'b000011011: begin segment = 6'd1; b = 19'b0111111111101011111; end
-            9'b000011100: begin segment = 6'd1; b = 19'b0111111111101100000; end
-            9'b000011101: begin segment = 6'd1; b = 19'b0111111111101100001; end
-            9'b000011110: begin segment = 6'd1; b = 19'b0111111111101100011; end
-            9'b000011111: begin segment = 6'd1; b = 19'b0111111111101100110; end
-            9'b000100000: begin segment = 6'd1; b = 19'b0111111111101101001; end
-            9'b000100001: begin segment = 6'd1; b = 19'b0111111111101101101; end
-            9'b000100010: begin segment = 6'd1; b = 19'b0111111111101110001; end
-            9'b000100011: begin segment = 6'd2; b = 19'b0111111111000100100; end
-            9'b000100100: begin segment = 6'd2; b = 19'b0111111111000100000; end
-            9'b000100101: begin segment = 6'd2; b = 19'b0111111111000011100; end
-            9'b000100110: begin segment = 6'd2; b = 19'b0111111111000011000; end
-            9'b000100111: begin segment = 6'd2; b = 19'b0111111111000010101; end
-            9'b000101000: begin segment = 6'd2; b = 19'b0111111111000010011; end
-            9'b000101001: begin segment = 6'd2; b = 19'b0111111111000010001; end
-            9'b000101010: begin segment = 6'd2; b = 19'b0111111111000010000; end
-            9'b000101011: begin segment = 6'd2; b = 19'b0111111111000001111; end
-            9'b000101100: begin segment = 6'd2; b = 19'b0111111111000001111; end
-            9'b000101101: begin segment = 6'd2; b = 19'b0111111111000001111; end
-            9'b000101110: begin segment = 6'd2; b = 19'b0111111111000010000; end
-            9'b000101111: begin segment = 6'd2; b = 19'b0111111111000010001; end
-            9'b000110000: begin segment = 6'd2; b = 19'b0111111111000010010; end
-            9'b000110001: begin segment = 6'd2; b = 19'b0111111111000010101; end
-            9'b000110010: begin segment = 6'd2; b = 19'b0111111111000010111; end
-            9'b000110011: begin segment = 6'd2; b = 19'b0111111111000011011; end
-            9'b000110100: begin segment = 6'd2; b = 19'b0111111111000011110; end
-            9'b000110101: begin segment = 6'd2; b = 19'b0111111111000100011; end
-            9'b000110110: begin segment = 6'd3; b = 19'b0111111110000100010; end
-            9'b000110111: begin segment = 6'd3; b = 19'b0111111110000011101; end
-            9'b000111000: begin segment = 6'd3; b = 19'b0111111110000011010; end
-            9'b000111001: begin segment = 6'd3; b = 19'b0111111110000010111; end
-            9'b000111010: begin segment = 6'd3; b = 19'b0111111110000010100; end
-            9'b000111011: begin segment = 6'd3; b = 19'b0111111110000010010; end
-            9'b000111100: begin segment = 6'd3; b = 19'b0111111110000010000; end
-            9'b000111101: begin segment = 6'd3; b = 19'b0111111110000010000; end
-            9'b000111110: begin segment = 6'd3; b = 19'b0111111110000001111; end
-            9'b000111111: begin segment = 6'd3; b = 19'b0111111110000001111; end
-            9'b001000000: begin segment = 6'd3; b = 19'b0111111110000001111; end
-            9'b001000001: begin segment = 6'd3; b = 19'b0111111110000010001; end
-            9'b001000010: begin segment = 6'd3; b = 19'b0111111110000010010; end
-            9'b001000011: begin segment = 6'd3; b = 19'b0111111110000010100; end
-            9'b001000100: begin segment = 6'd3; b = 19'b0111111110000010111; end
-            9'b001000101: begin segment = 6'd3; b = 19'b0111111110000011010; end
-            9'b001000110: begin segment = 6'd3; b = 19'b0111111110000011101; end
-            9'b001000111: begin segment = 6'd3; b = 19'b0111111110000100010; end
-            9'b001001000: begin segment = 6'd4; b = 19'b0111111100101110110; end
-            9'b001001001: begin segment = 6'd4; b = 19'b0111111100101110001; end
-            9'b001001010: begin segment = 6'd4; b = 19'b0111111100101101110; end
-            9'b001001011: begin segment = 6'd4; b = 19'b0111111100101101011; end
-            9'b001001100: begin segment = 6'd4; b = 19'b0111111100101101000; end
-            9'b001001101: begin segment = 6'd4; b = 19'b0111111100101100110; end
-            9'b001001110: begin segment = 6'd4; b = 19'b0111111100101100100; end
-            9'b001001111: begin segment = 6'd4; b = 19'b0111111100101100011; end
-            9'b001010000: begin segment = 6'd4; b = 19'b0111111100101100011; end
-            9'b001010001: begin segment = 6'd4; b = 19'b0111111100101100011; end
-            9'b001010010: begin segment = 6'd4; b = 19'b0111111100101100011; end
-            9'b001010011: begin segment = 6'd4; b = 19'b0111111100101100100; end
-            9'b001010100: begin segment = 6'd4; b = 19'b0111111100101100110; end
-            9'b001010101: begin segment = 6'd4; b = 19'b0111111100101101000; end
-            9'b001010110: begin segment = 6'd4; b = 19'b0111111100101101011; end
-            9'b001010111: begin segment = 6'd4; b = 19'b0111111100101101110; end
-            9'b001011000: begin segment = 6'd4; b = 19'b0111111100101110010; end
-            9'b001011001: begin segment = 6'd4; b = 19'b0111111100101110110; end
-            9'b001011010: begin segment = 6'd5; b = 19'b0111111010100111101; end
-            9'b001011011: begin segment = 6'd5; b = 19'b0111111010100110111; end
-            9'b001011100: begin segment = 6'd5; b = 19'b0111111010100110001; end
-            9'b001011101: begin segment = 6'd5; b = 19'b0111111010100101011; end
-            9'b001011110: begin segment = 6'd5; b = 19'b0111111010100100110; end
-            9'b001011111: begin segment = 6'd5; b = 19'b0111111010100100010; end
-            9'b001100000: begin segment = 6'd5; b = 19'b0111111010100011110; end
-            9'b001100001: begin segment = 6'd5; b = 19'b0111111010100011011; end
-            9'b001100010: begin segment = 6'd5; b = 19'b0111111010100011000; end
-            9'b001100011: begin segment = 6'd5; b = 19'b0111111010100010110; end
-            9'b001100100: begin segment = 6'd5; b = 19'b0111111010100010100; end
-            9'b001100101: begin segment = 6'd5; b = 19'b0111111010100010011; end
-            9'b001100110: begin segment = 6'd5; b = 19'b0111111010100010010; end
-            9'b001100111: begin segment = 6'd5; b = 19'b0111111010100010010; end
-            9'b001101000: begin segment = 6'd5; b = 19'b0111111010100010011; end
-            9'b001101001: begin segment = 6'd5; b = 19'b0111111010100010100; end
-            9'b001101010: begin segment = 6'd5; b = 19'b0111111010100010110; end
-            9'b001101011: begin segment = 6'd5; b = 19'b0111111010100011000; end
-            9'b001101100: begin segment = 6'd6; b = 19'b0111111000111010010; end
-            9'b001101101: begin segment = 6'd6; b = 19'b0111111000111001101; end
-            9'b001101110: begin segment = 6'd6; b = 19'b0111111000111001001; end
-            9'b001101111: begin segment = 6'd6; b = 19'b0111111000111000110; end
-            9'b001110000: begin segment = 6'd6; b = 19'b0111111000111000100; end
-            9'b001110001: begin segment = 6'd6; b = 19'b0111111000111000001; end
-            9'b001110010: begin segment = 6'd6; b = 19'b0111111000110111111; end
-            9'b001110011: begin segment = 6'd6; b = 19'b0111111000110111110; end
-            9'b001110100: begin segment = 6'd6; b = 19'b0111111000110111110; end
-            9'b001110101: begin segment = 6'd6; b = 19'b0111111000110111110; end
-            9'b001110110: begin segment = 6'd6; b = 19'b0111111000110111110; end
-            9'b001110111: begin segment = 6'd6; b = 19'b0111111000110111111; end
-            9'b001111000: begin segment = 6'd6; b = 19'b0111111000111000010; end
-            9'b001111001: begin segment = 6'd6; b = 19'b0111111000111000100; end
-            9'b001111010: begin segment = 6'd6; b = 19'b0111111000111000111; end
-            9'b001111011: begin segment = 6'd6; b = 19'b0111111000111001010; end
-            9'b001111100: begin segment = 6'd6; b = 19'b0111111000111001110; end
-            9'b001111101: begin segment = 6'd6; b = 19'b0111111000111010011; end
-            9'b001111110: begin segment = 6'd7; b = 19'b0111110110111000100; end
-            9'b001111111: begin segment = 6'd7; b = 19'b0111110110111000010; end
-            9'b010000000: begin segment = 6'd7; b = 19'b0111110110111000000; end
-            9'b010000001: begin segment = 6'd7; b = 19'b0111110110110111110; end
-            9'b010000010: begin segment = 6'd7; b = 19'b0111110110110111101; end
-            9'b010000011: begin segment = 6'd7; b = 19'b0111110110110111101; end
-            9'b010000100: begin segment = 6'd7; b = 19'b0111110110110111110; end
-            9'b010000101: begin segment = 6'd7; b = 19'b0111110110110111110; end
-            9'b010000110: begin segment = 6'd7; b = 19'b0111110110111000000; end
-            9'b010000111: begin segment = 6'd7; b = 19'b0111110110111000010; end
-            9'b010001000: begin segment = 6'd7; b = 19'b0111110110111000101; end
-            9'b010001001: begin segment = 6'd7; b = 19'b0111110110111001000; end
-            9'b010001010: begin segment = 6'd7; b = 19'b0111110110111001100; end
-            9'b010001011: begin segment = 6'd7; b = 19'b0111110110111010000; end
-            9'b010001100: begin segment = 6'd7; b = 19'b0111110110111010101; end
-            9'b010001101: begin segment = 6'd7; b = 19'b0111110110111011011; end
-            9'b010001110: begin segment = 6'd7; b = 19'b0111110110111100001; end
-            9'b010001111: begin segment = 6'd7; b = 19'b0111110110111100111; end
-            9'b010010000: begin segment = 6'd8; b = 19'b0111110011100101001; end
-            9'b010010001: begin segment = 6'd8; b = 19'b0111110011100100100; end
-            9'b010010010: begin segment = 6'd8; b = 19'b0111110011100100001; end
-            9'b010010011: begin segment = 6'd8; b = 19'b0111110011100011110; end
-            9'b010010100: begin segment = 6'd8; b = 19'b0111110011100011100; end
-            9'b010010101: begin segment = 6'd8; b = 19'b0111110011100011010; end
-            9'b010010110: begin segment = 6'd8; b = 19'b0111110011100011001; end
-            9'b010010111: begin segment = 6'd8; b = 19'b0111110011100011000; end
-            9'b010011000: begin segment = 6'd8; b = 19'b0111110011100011000; end
-            9'b010011001: begin segment = 6'd8; b = 19'b0111110011100011001; end
-            9'b010011010: begin segment = 6'd8; b = 19'b0111110011100011010; end
-            9'b010011011: begin segment = 6'd8; b = 19'b0111110011100011011; end
-            9'b010011100: begin segment = 6'd8; b = 19'b0111110011100011110; end
-            9'b010011101: begin segment = 6'd8; b = 19'b0111110011100100001; end
-            9'b010011110: begin segment = 6'd8; b = 19'b0111110011100100100; end
-            9'b010011111: begin segment = 6'd8; b = 19'b0111110011100101000; end
-            9'b010100000: begin segment = 6'd8; b = 19'b0111110011100101101; end
-            9'b010100001: begin segment = 6'd9; b = 19'b0111110000010010011; end
-            9'b010100010: begin segment = 6'd9; b = 19'b0111110000010001110; end
-            9'b010100011: begin segment = 6'd9; b = 19'b0111110000010001010; end
-            9'b010100100: begin segment = 6'd9; b = 19'b0111110000010000111; end
-            9'b010100101: begin segment = 6'd9; b = 19'b0111110000010000100; end
-            9'b010100110: begin segment = 6'd9; b = 19'b0111110000010000010; end
-            9'b010100111: begin segment = 6'd9; b = 19'b0111110000010000000; end
-            9'b010101000: begin segment = 6'd9; b = 19'b0111110000001111111; end
-            9'b010101001: begin segment = 6'd9; b = 19'b0111110000001111111; end
-            9'b010101010: begin segment = 6'd9; b = 19'b0111110000001111111; end
-            9'b010101011: begin segment = 6'd9; b = 19'b0111110000010000000; end
-            9'b010101100: begin segment = 6'd9; b = 19'b0111110000010000010; end
-            9'b010101101: begin segment = 6'd9; b = 19'b0111110000010000100; end
-            9'b010101110: begin segment = 6'd9; b = 19'b0111110000010000110; end
-            9'b010101111: begin segment = 6'd9; b = 19'b0111110000010001010; end
-            9'b010110000: begin segment = 6'd9; b = 19'b0111110000010001101; end
-            9'b010110001: begin segment = 6'd9; b = 19'b0111110000010010010; end
-            9'b010110010: begin segment = 6'd10; b = 19'b0111101100101000100; end
-            9'b010110011: begin segment = 6'd10; b = 19'b0111101100100111111; end
-            9'b010110100: begin segment = 6'd10; b = 19'b0111101100100111011; end
-            9'b010110101: begin segment = 6'd10; b = 19'b0111101100100111000; end
-            9'b010110110: begin segment = 6'd10; b = 19'b0111101100100110101; end
-            9'b010110111: begin segment = 6'd10; b = 19'b0111101100100110011; end
-            9'b010111000: begin segment = 6'd10; b = 19'b0111101100100110001; end
-            9'b010111001: begin segment = 6'd10; b = 19'b0111101100100110000; end
-            9'b010111010: begin segment = 6'd10; b = 19'b0111101100100101111; end
-            9'b010111011: begin segment = 6'd10; b = 19'b0111101100100110000; end
-            9'b010111100: begin segment = 6'd10; b = 19'b0111101100100110000; end
-            9'b010111101: begin segment = 6'd10; b = 19'b0111101100100110010; end
-            9'b010111110: begin segment = 6'd10; b = 19'b0111101100100110100; end
-            9'b010111111: begin segment = 6'd10; b = 19'b0111101100100110110; end
-            9'b011000000: begin segment = 6'd10; b = 19'b0111101100100111010; end
-            9'b011000001: begin segment = 6'd10; b = 19'b0111101100100111101; end
-            9'b011000010: begin segment = 6'd10; b = 19'b0111101100101000010; end
-            9'b011000011: begin segment = 6'd11; b = 19'b0111101000011100000; end
-            9'b011000100: begin segment = 6'd11; b = 19'b0111101000011011011; end
-            9'b011000101: begin segment = 6'd11; b = 19'b0111101000011010110; end
-            9'b011000110: begin segment = 6'd11; b = 19'b0111101000011010010; end
-            9'b011000111: begin segment = 6'd11; b = 19'b0111101000011001111; end
-            9'b011001000: begin segment = 6'd11; b = 19'b0111101000011001100; end
-            9'b011001001: begin segment = 6'd11; b = 19'b0111101000011001010; end
-            9'b011001010: begin segment = 6'd11; b = 19'b0111101000011001001; end
-            9'b011001011: begin segment = 6'd11; b = 19'b0111101000011001000; end
-            9'b011001100: begin segment = 6'd11; b = 19'b0111101000011001000; end
-            9'b011001101: begin segment = 6'd11; b = 19'b0111101000011001000; end
-            9'b011001110: begin segment = 6'd11; b = 19'b0111101000011001001; end
-            9'b011001111: begin segment = 6'd11; b = 19'b0111101000011001011; end
-            9'b011010000: begin segment = 6'd11; b = 19'b0111101000011001101; end
-            9'b011010001: begin segment = 6'd11; b = 19'b0111101000011010000; end
-            9'b011010010: begin segment = 6'd11; b = 19'b0111101000011010100; end
-            9'b011010011: begin segment = 6'd11; b = 19'b0111101000011011000; end
-            9'b011010100: begin segment = 6'd12; b = 19'b0111100100000100101; end
-            9'b011010101: begin segment = 6'd12; b = 19'b0111100100000100001; end
-            9'b011010110: begin segment = 6'd12; b = 19'b0111100100000011100; end
-            9'b011010111: begin segment = 6'd12; b = 19'b0111100100000011001; end
-            9'b011011000: begin segment = 6'd12; b = 19'b0111100100000010101; end
-            9'b011011001: begin segment = 6'd12; b = 19'b0111100100000010011; end
-            9'b011011010: begin segment = 6'd12; b = 19'b0111100100000010001; end
-            9'b011011011: begin segment = 6'd12; b = 19'b0111100100000010000; end
-            9'b011011100: begin segment = 6'd12; b = 19'b0111100100000001111; end
-            9'b011011101: begin segment = 6'd12; b = 19'b0111100100000010000; end
-            9'b011011110: begin segment = 6'd12; b = 19'b0111100100000010001; end
-            9'b011011111: begin segment = 6'd12; b = 19'b0111100100000010010; end
-            9'b011100000: begin segment = 6'd12; b = 19'b0111100100000010100; end
-            9'b011100001: begin segment = 6'd12; b = 19'b0111100100000010111; end
-            9'b011100010: begin segment = 6'd12; b = 19'b0111100100000011011; end
-            9'b011100011: begin segment = 6'd12; b = 19'b0111100100000011111; end
-            9'b011100100: begin segment = 6'd12; b = 19'b0111100100000100011; end
-            9'b011100101: begin segment = 6'd13; b = 19'b0111011111010111110; end
-            9'b011100110: begin segment = 6'd13; b = 19'b0111011111010111010; end
-            9'b011100111: begin segment = 6'd13; b = 19'b0111011111010110110; end
-            9'b011101000: begin segment = 6'd13; b = 19'b0111011111010110011; end
-            9'b011101001: begin segment = 6'd13; b = 19'b0111011111010110001; end
-            9'b011101010: begin segment = 6'd13; b = 19'b0111011111010101111; end
-            9'b011101011: begin segment = 6'd13; b = 19'b0111011111010101110; end
-            9'b011101100: begin segment = 6'd13; b = 19'b0111011111010101101; end
-            9'b011101101: begin segment = 6'd13; b = 19'b0111011111010101110; end
-            9'b011101110: begin segment = 6'd13; b = 19'b0111011111010101110; end
-            9'b011101111: begin segment = 6'd13; b = 19'b0111011111010110000; end
-            9'b011110000: begin segment = 6'd13; b = 19'b0111011111010110010; end
-            9'b011110001: begin segment = 6'd13; b = 19'b0111011111010110101; end
-            9'b011110010: begin segment = 6'd13; b = 19'b0111011111010111000; end
-            9'b011110011: begin segment = 6'd13; b = 19'b0111011111010111100; end
-            9'b011110100: begin segment = 6'd13; b = 19'b0111011111011000001; end
-            9'b011110101: begin segment = 6'd14; b = 19'b0111011010001011001; end
-            9'b011110110: begin segment = 6'd14; b = 19'b0111011010001010100; end
-            9'b011110111: begin segment = 6'd14; b = 19'b0111011010001010000; end
-            9'b011111000: begin segment = 6'd14; b = 19'b0111011010001001101; end
-            9'b011111001: begin segment = 6'd14; b = 19'b0111011010001001010; end
-            9'b011111010: begin segment = 6'd14; b = 19'b0111011010001001000; end
-            9'b011111011: begin segment = 6'd14; b = 19'b0111011010001000111; end
-            9'b011111100: begin segment = 6'd14; b = 19'b0111011010001000110; end
-            9'b011111101: begin segment = 6'd14; b = 19'b0111011010001000110; end
-            9'b011111110: begin segment = 6'd14; b = 19'b0111011010001000110; end
-            9'b011111111: begin segment = 6'd14; b = 19'b0111011010001001000; end
-            9'b100000000: begin segment = 6'd14; b = 19'b0111011010001001010; end
-            9'b100000001: begin segment = 6'd14; b = 19'b0111011010001001101; end
-            9'b100000010: begin segment = 6'd14; b = 19'b0111011010001010000; end
-            9'b100000011: begin segment = 6'd14; b = 19'b0111011010001010100; end
-            9'b100000100: begin segment = 6'd14; b = 19'b0111011010001011001; end
-            9'b100000101: begin segment = 6'd15; b = 19'b0111010100100110010; end
-            9'b100000110: begin segment = 6'd15; b = 19'b0111010100100101101; end
-            9'b100000111: begin segment = 6'd15; b = 19'b0111010100100101001; end
-            9'b100001000: begin segment = 6'd15; b = 19'b0111010100100100110; end
-            9'b100001001: begin segment = 6'd15; b = 19'b0111010100100100011; end
-            9'b100001010: begin segment = 6'd15; b = 19'b0111010100100100001; end
-            9'b100001011: begin segment = 6'd15; b = 19'b0111010100100011111; end
-            9'b100001100: begin segment = 6'd15; b = 19'b0111010100100011111; end
-            9'b100001101: begin segment = 6'd15; b = 19'b0111010100100011111; end
-            9'b100001110: begin segment = 6'd15; b = 19'b0111010100100100000; end
-            9'b100001111: begin segment = 6'd15; b = 19'b0111010100100100001; end
-            9'b100010000: begin segment = 6'd15; b = 19'b0111010100100100011; end
-            9'b100010001: begin segment = 6'd15; b = 19'b0111010100100100110; end
-            9'b100010010: begin segment = 6'd15; b = 19'b0111010100100101001; end
-            9'b100010011: begin segment = 6'd15; b = 19'b0111010100100101101; end
-            9'b100010100: begin segment = 6'd15; b = 19'b0111010100100110011; end
-            9'b100010101: begin segment = 6'd16; b = 19'b0111001110100010111; end
-            9'b100010110: begin segment = 6'd16; b = 19'b0111001110100010010; end
-            9'b100010111: begin segment = 6'd16; b = 19'b0111001110100001110; end
-            9'b100011000: begin segment = 6'd16; b = 19'b0111001110100001010; end
-            9'b100011001: begin segment = 6'd16; b = 19'b0111001110100000111; end
-            9'b100011010: begin segment = 6'd16; b = 19'b0111001110100000101; end
-            9'b100011011: begin segment = 6'd16; b = 19'b0111001110100000100; end
-            9'b100011100: begin segment = 6'd16; b = 19'b0111001110100000100; end
-            9'b100011101: begin segment = 6'd16; b = 19'b0111001110100000100; end
-            9'b100011110: begin segment = 6'd16; b = 19'b0111001110100000100; end
-            9'b100011111: begin segment = 6'd16; b = 19'b0111001110100000110; end
-            9'b100100000: begin segment = 6'd16; b = 19'b0111001110100001000; end
-            9'b100100001: begin segment = 6'd16; b = 19'b0111001110100001011; end
-            9'b100100010: begin segment = 6'd16; b = 19'b0111001110100001110; end
-            9'b100100011: begin segment = 6'd16; b = 19'b0111001110100010010; end
-            9'b100100100: begin segment = 6'd16; b = 19'b0111001110100010111; end
-            9'b100100101: begin segment = 6'd17; b = 19'b0111000111101011011; end
-            9'b100100110: begin segment = 6'd17; b = 19'b0111000111101010101; end
-            9'b100100111: begin segment = 6'd17; b = 19'b0111000111101010000; end
-            9'b100101000: begin segment = 6'd17; b = 19'b0111000111101001100; end
-            9'b100101001: begin segment = 6'd17; b = 19'b0111000111101001000; end
-            9'b100101010: begin segment = 6'd17; b = 19'b0111000111101000110; end
-            9'b100101011: begin segment = 6'd17; b = 19'b0111000111101000100; end
-            9'b100101100: begin segment = 6'd17; b = 19'b0111000111101000010; end
-            9'b100101101: begin segment = 6'd17; b = 19'b0111000111101000010; end
-            9'b100101110: begin segment = 6'd17; b = 19'b0111000111101000010; end
-            9'b100101111: begin segment = 6'd17; b = 19'b0111000111101000011; end
-            9'b100110000: begin segment = 6'd17; b = 19'b0111000111101000100; end
-            9'b100110001: begin segment = 6'd17; b = 19'b0111000111101000111; end
-            9'b100110010: begin segment = 6'd17; b = 19'b0111000111101001010; end
-            9'b100110011: begin segment = 6'd17; b = 19'b0111000111101001110; end
-            9'b100110100: begin segment = 6'd17; b = 19'b0111000111101010010; end
-            9'b100110101: begin segment = 6'd18; b = 19'b0111000001001011000; end
-            9'b100110110: begin segment = 6'd18; b = 19'b0111000001001010011; end
-            9'b100110111: begin segment = 6'd18; b = 19'b0111000001001001111; end
-            9'b100111000: begin segment = 6'd18; b = 19'b0111000001001001100; end
-            9'b100111001: begin segment = 6'd18; b = 19'b0111000001001001001; end
-            9'b100111010: begin segment = 6'd18; b = 19'b0111000001001000111; end
-            9'b100111011: begin segment = 6'd18; b = 19'b0111000001001000110; end
-            9'b100111100: begin segment = 6'd18; b = 19'b0111000001001000110; end
-            9'b100111101: begin segment = 6'd18; b = 19'b0111000001001000110; end
-            9'b100111110: begin segment = 6'd18; b = 19'b0111000001001000111; end
-            9'b100111111: begin segment = 6'd18; b = 19'b0111000001001001001; end
-            9'b101000000: begin segment = 6'd18; b = 19'b0111000001001001100; end
-            9'b101000001: begin segment = 6'd18; b = 19'b0111000001001001111; end
-            9'b101000010: begin segment = 6'd18; b = 19'b0111000001001010011; end
-            9'b101000011: begin segment = 6'd18; b = 19'b0111000001001011000; end
-            9'b101000100: begin segment = 6'd19; b = 19'b0110111010000011011; end
-            9'b101000101: begin segment = 6'd19; b = 19'b0110111010000010110; end
-            9'b101000110: begin segment = 6'd19; b = 19'b0110111010000010010; end
-            9'b101000111: begin segment = 6'd19; b = 19'b0110111010000001110; end
-            9'b101001000: begin segment = 6'd19; b = 19'b0110111010000001100; end
-            9'b101001001: begin segment = 6'd19; b = 19'b0110111010000001010; end
-            9'b101001010: begin segment = 6'd19; b = 19'b0110111010000001000; end
-            9'b101001011: begin segment = 6'd19; b = 19'b0110111010000001000; end
-            9'b101001100: begin segment = 6'd19; b = 19'b0110111010000001000; end
-            9'b101001101: begin segment = 6'd19; b = 19'b0110111010000001001; end
-            9'b101001110: begin segment = 6'd19; b = 19'b0110111010000001011; end
-            9'b101001111: begin segment = 6'd19; b = 19'b0110111010000001101; end
-            9'b101010000: begin segment = 6'd19; b = 19'b0110111010000010001; end
-            9'b101010001: begin segment = 6'd19; b = 19'b0110111010000010101; end
-            9'b101010010: begin segment = 6'd19; b = 19'b0110111010000011010; end
-            9'b101010011: begin segment = 6'd20; b = 19'b0110110010110001001; end
-            9'b101010100: begin segment = 6'd20; b = 19'b0110110010110000100; end
-            9'b101010101: begin segment = 6'd20; b = 19'b0110110010110000000; end
-            9'b101010110: begin segment = 6'd20; b = 19'b0110110010101111101; end
-            9'b101010111: begin segment = 6'd20; b = 19'b0110110010101111011; end
-            9'b101011000: begin segment = 6'd20; b = 19'b0110110010101111001; end
-            9'b101011001: begin segment = 6'd20; b = 19'b0110110010101111000; end
-            9'b101011010: begin segment = 6'd20; b = 19'b0110110010101111000; end
-            9'b101011011: begin segment = 6'd20; b = 19'b0110110010101111001; end
-            9'b101011100: begin segment = 6'd20; b = 19'b0110110010101111010; end
-            9'b101011101: begin segment = 6'd20; b = 19'b0110110010101111101; end
-            9'b101011110: begin segment = 6'd20; b = 19'b0110110010110000000; end
-            9'b101011111: begin segment = 6'd20; b = 19'b0110110010110000100; end
-            9'b101100000: begin segment = 6'd20; b = 19'b0110110010110001000; end
-            9'b101100001: begin segment = 6'd20; b = 19'b0110110010110001101; end
-            9'b101100010: begin segment = 6'd21; b = 19'b0110101010011110101; end
-            9'b101100011: begin segment = 6'd21; b = 19'b0110101010011110000; end
-            9'b101100100: begin segment = 6'd21; b = 19'b0110101010011101100; end
-            9'b101100101: begin segment = 6'd21; b = 19'b0110101010011101000; end
-            9'b101100110: begin segment = 6'd21; b = 19'b0110101010011100101; end
-            9'b101100111: begin segment = 6'd21; b = 19'b0110101010011100011; end
-            9'b101101000: begin segment = 6'd21; b = 19'b0110101010011100010; end
-            9'b101101001: begin segment = 6'd21; b = 19'b0110101010011100010; end
-            9'b101101010: begin segment = 6'd21; b = 19'b0110101010011100010; end
-            9'b101101011: begin segment = 6'd21; b = 19'b0110101010011100011; end
-            9'b101101100: begin segment = 6'd21; b = 19'b0110101010011100101; end
-            9'b101101101: begin segment = 6'd21; b = 19'b0110101010011101000; end
-            9'b101101110: begin segment = 6'd21; b = 19'b0110101010011101011; end
-            9'b101101111: begin segment = 6'd21; b = 19'b0110101010011110000; end
-            9'b101110000: begin segment = 6'd21; b = 19'b0110101010011110101; end
-            9'b101110001: begin segment = 6'd22; b = 19'b0110100001110101001; end
-            9'b101110010: begin segment = 6'd22; b = 19'b0110100001110100011; end
-            9'b101110011: begin segment = 6'd22; b = 19'b0110100001110011111; end
-            9'b101110100: begin segment = 6'd22; b = 19'b0110100001110011011; end
-            9'b101110101: begin segment = 6'd22; b = 19'b0110100001110011000; end
-            9'b101110110: begin segment = 6'd22; b = 19'b0110100001110010110; end
-            9'b101110111: begin segment = 6'd22; b = 19'b0110100001110010100; end
-            9'b101111000: begin segment = 6'd22; b = 19'b0110100001110010100; end
-            9'b101111001: begin segment = 6'd22; b = 19'b0110100001110010100; end
-            9'b101111010: begin segment = 6'd22; b = 19'b0110100001110010101; end
-            9'b101111011: begin segment = 6'd22; b = 19'b0110100001110010111; end
-            9'b101111100: begin segment = 6'd22; b = 19'b0110100001110011001; end
-            9'b101111101: begin segment = 6'd22; b = 19'b0110100001110011101; end
-            9'b101111110: begin segment = 6'd22; b = 19'b0110100001110100001; end
-            9'b101111111: begin segment = 6'd22; b = 19'b0110100001110100110; end
-            9'b110000000: begin segment = 6'd23; b = 19'b0110011000000100110; end
-            9'b110000001: begin segment = 6'd23; b = 19'b0110011000000011111; end
-            9'b110000010: begin segment = 6'd23; b = 19'b0110011000000011010; end
-            9'b110000011: begin segment = 6'd23; b = 19'b0110011000000010101; end
-            9'b110000100: begin segment = 6'd23; b = 19'b0110011000000010001; end
-            9'b110000101: begin segment = 6'd23; b = 19'b0110011000000001110; end
-            9'b110000110: begin segment = 6'd23; b = 19'b0110011000000001100; end
-            9'b110000111: begin segment = 6'd23; b = 19'b0110011000000001010; end
-            9'b110001000: begin segment = 6'd23; b = 19'b0110011000000001010; end
-            9'b110001001: begin segment = 6'd23; b = 19'b0110011000000001010; end
-            9'b110001010: begin segment = 6'd23; b = 19'b0110011000000001011; end
-            9'b110001011: begin segment = 6'd23; b = 19'b0110011000000001100; end
-            9'b110001100: begin segment = 6'd23; b = 19'b0110011000000001111; end
-            9'b110001101: begin segment = 6'd23; b = 19'b0110011000000010011; end
-            9'b110001110: begin segment = 6'd23; b = 19'b0110011000000010111; end
-            9'b110001111: begin segment = 6'd24; b = 19'b0110001110101100010; end
-            9'b110010000: begin segment = 6'd24; b = 19'b0110001110101011100; end
-            9'b110010001: begin segment = 6'd24; b = 19'b0110001110101010111; end
-            9'b110010010: begin segment = 6'd24; b = 19'b0110001110101010010; end
-            9'b110010011: begin segment = 6'd24; b = 19'b0110001110101001111; end
-            9'b110010100: begin segment = 6'd24; b = 19'b0110001110101001100; end
-            9'b110010101: begin segment = 6'd24; b = 19'b0110001110101001010; end
-            9'b110010110: begin segment = 6'd24; b = 19'b0110001110101001001; end
-            9'b110010111: begin segment = 6'd24; b = 19'b0110001110101001001; end
-            9'b110011000: begin segment = 6'd24; b = 19'b0110001110101001001; end
-            9'b110011001: begin segment = 6'd24; b = 19'b0110001110101001011; end
-            9'b110011010: begin segment = 6'd24; b = 19'b0110001110101001101; end
-            9'b110011011: begin segment = 6'd24; b = 19'b0110001110101010000; end
-            9'b110011100: begin segment = 6'd24; b = 19'b0110001110101010100; end
-            9'b110011101: begin segment = 6'd24; b = 19'b0110001110101011001; end
-            9'b110011110: begin segment = 6'd25; b = 19'b0110000100111110000; end
-            9'b110011111: begin segment = 6'd25; b = 19'b0110000100111101010; end
-            9'b110100000: begin segment = 6'd25; b = 19'b0110000100111100110; end
-            9'b110100001: begin segment = 6'd25; b = 19'b0110000100111100010; end
-            9'b110100010: begin segment = 6'd25; b = 19'b0110000100111011111; end
-            9'b110100011: begin segment = 6'd25; b = 19'b0110000100111011101; end
-            9'b110100100: begin segment = 6'd25; b = 19'b0110000100111011011; end
-            9'b110100101: begin segment = 6'd25; b = 19'b0110000100111011011; end
-            9'b110100110: begin segment = 6'd25; b = 19'b0110000100111011011; end
-            9'b110100111: begin segment = 6'd25; b = 19'b0110000100111011100; end
-            9'b110101000: begin segment = 6'd25; b = 19'b0110000100111011111; end
-            9'b110101001: begin segment = 6'd25; b = 19'b0110000100111100001; end
-            9'b110101010: begin segment = 6'd25; b = 19'b0110000100111100101; end
-            9'b110101011: begin segment = 6'd25; b = 19'b0110000100111101010; end
-            9'b110101100: begin segment = 6'd26; b = 19'b0101111011010100010; end
-            9'b110101101: begin segment = 6'd26; b = 19'b0101111011010011101; end
-            9'b110101110: begin segment = 6'd26; b = 19'b0101111011010011001; end
-            9'b110101111: begin segment = 6'd26; b = 19'b0101111011010010101; end
-            9'b110110000: begin segment = 6'd26; b = 19'b0101111011010010011; end
-            9'b110110001: begin segment = 6'd26; b = 19'b0101111011010010001; end
-            9'b110110010: begin segment = 6'd26; b = 19'b0101111011010010000; end
-            9'b110110011: begin segment = 6'd26; b = 19'b0101111011010010000; end
-            9'b110110100: begin segment = 6'd26; b = 19'b0101111011010010001; end
-            9'b110110101: begin segment = 6'd26; b = 19'b0101111011010010010; end
-            9'b110110110: begin segment = 6'd26; b = 19'b0101111011010010110; end
-            9'b110110111: begin segment = 6'd26; b = 19'b0101111011010011001; end
-            9'b110111000: begin segment = 6'd26; b = 19'b0101111011010011101; end
-            9'b110111001: begin segment = 6'd26; b = 19'b0101111011010100010; end
-            9'b110111010: begin segment = 6'd27; b = 19'b0101110000100011011; end
-            9'b110111011: begin segment = 6'd27; b = 19'b0101110000100010101; end
-            9'b110111100: begin segment = 6'd27; b = 19'b0101110000100010001; end
-            9'b110111101: begin segment = 6'd27; b = 19'b0101110000100001101; end
-            9'b110111110: begin segment = 6'd27; b = 19'b0101110000100001010; end
-            9'b110111111: begin segment = 6'd27; b = 19'b0101110000100001000; end
-            9'b111000000: begin segment = 6'd27; b = 19'b0101110000100000111; end
-            9'b111000001: begin segment = 6'd27; b = 19'b0101110000100000111; end
-            9'b111000010: begin segment = 6'd27; b = 19'b0101110000100000111; end
-            9'b111000011: begin segment = 6'd27; b = 19'b0101110000100001001; end
-            9'b111000100: begin segment = 6'd27; b = 19'b0101110000100001011; end
-            9'b111000101: begin segment = 6'd27; b = 19'b0101110000100001110; end
-            9'b111000110: begin segment = 6'd27; b = 19'b0101110000100010011; end
-            9'b111000111: begin segment = 6'd27; b = 19'b0101110000100011000; end
-            9'b111001000: begin segment = 6'd28; b = 19'b0101100101110111000; end
-            9'b111001001: begin segment = 6'd28; b = 19'b0101100101110110011; end
-            9'b111001010: begin segment = 6'd28; b = 19'b0101100101110101110; end
-            9'b111001011: begin segment = 6'd28; b = 19'b0101100101110101011; end
-            9'b111001100: begin segment = 6'd28; b = 19'b0101100101110101000; end
-            9'b111001101: begin segment = 6'd28; b = 19'b0101100101110100111; end
-            9'b111001110: begin segment = 6'd28; b = 19'b0101100101110100110; end
-            9'b111001111: begin segment = 6'd28; b = 19'b0101100101110100110; end
-            9'b111010000: begin segment = 6'd28; b = 19'b0101100101110101000; end
-            9'b111010001: begin segment = 6'd28; b = 19'b0101100101110101010; end
-            9'b111010010: begin segment = 6'd28; b = 19'b0101100101110101101; end
-            9'b111010011: begin segment = 6'd28; b = 19'b0101100101110110000; end
-            9'b111010100: begin segment = 6'd28; b = 19'b0101100101110110101; end
-            9'b111010101: begin segment = 6'd28; b = 19'b0101100101110111011; end
-            9'b111010110: begin segment = 6'd29; b = 19'b0101011010110110011; end
-            9'b111010111: begin segment = 6'd29; b = 19'b0101011010110101110; end
-            9'b111011000: begin segment = 6'd29; b = 19'b0101011010110101011; end
-            9'b111011001: begin segment = 6'd29; b = 19'b0101011010110101000; end
-            9'b111011010: begin segment = 6'd29; b = 19'b0101011010110100110; end
-            9'b111011011: begin segment = 6'd29; b = 19'b0101011010110100110; end
-            9'b111011100: begin segment = 6'd29; b = 19'b0101011010110100110; end
-            9'b111011101: begin segment = 6'd29; b = 19'b0101011010110100111; end
-            9'b111011110: begin segment = 6'd29; b = 19'b0101011010110101000; end
-            9'b111011111: begin segment = 6'd29; b = 19'b0101011010110101011; end
-            9'b111100000: begin segment = 6'd29; b = 19'b0101011010110101111; end
-            9'b111100001: begin segment = 6'd29; b = 19'b0101011010110110100; end
-            9'b111100010: begin segment = 6'd29; b = 19'b0101011010110111001; end
-            9'b111100011: begin segment = 6'd29; b = 19'b0101011010111000000; end
-            9'b111100100: begin segment = 6'd30; b = 19'b0101001111100010001; end
-            9'b111100101: begin segment = 6'd30; b = 19'b0101001111100001101; end
-            9'b111100110: begin segment = 6'd30; b = 19'b0101001111100001011; end
-            9'b111100111: begin segment = 6'd30; b = 19'b0101001111100001001; end
-            9'b111101000: begin segment = 6'd30; b = 19'b0101001111100001000; end
-            9'b111101001: begin segment = 6'd30; b = 19'b0101001111100001000; end
-            9'b111101010: begin segment = 6'd30; b = 19'b0101001111100001001; end
-            9'b111101011: begin segment = 6'd30; b = 19'b0101001111100001011; end
-            9'b111101100: begin segment = 6'd30; b = 19'b0101001111100001101; end
-            9'b111101101: begin segment = 6'd30; b = 19'b0101001111100010001; end
-            9'b111101110: begin segment = 6'd30; b = 19'b0101001111100010110; end
-            9'b111101111: begin segment = 6'd30; b = 19'b0101001111100011100; end
-            9'b111110000: begin segment = 6'd30; b = 19'b0101001111100100010; end
-            9'b111110001: begin segment = 6'd30; b = 19'b0101001111100101010; end
-            9'b111110010: begin segment = 6'd31; b = 19'b0101000000111111101; end
-            9'b111110011: begin segment = 6'd31; b = 19'b0101000000111110111; end
-            9'b111110100: begin segment = 6'd31; b = 19'b0101000000111110010; end
-            9'b111110101: begin segment = 6'd31; b = 19'b0101000000111101111; end
-            9'b111110110: begin segment = 6'd31; b = 19'b0101000000111101100; end
-            9'b111110111: begin segment = 6'd31; b = 19'b0101000000111101010; end
-            9'b111111000: begin segment = 6'd31; b = 19'b0101000000111101001; end
-            9'b111111001: begin segment = 6'd31; b = 19'b0101000000111101001; end
-            9'b111111010: begin segment = 6'd31; b = 19'b0101000000111101010; end
-            9'b111111011: begin segment = 6'd31; b = 19'b0101000000111101100; end
-            9'b111111100: begin segment = 6'd31; b = 19'b0101000000111101111; end
-            9'b111111101: begin segment = 6'd31; b = 19'b0101000000111110011; end
-            9'b111111110: begin segment = 6'd31; b = 19'b0101000000111111000; end
-            9'b111111111: begin segment = 6'd31; b = 19'b0101000000111111110; end
-      endcase
-    end
-
-// Auto-generated neg assignments for WIDTH=22
-    wire neg_1;
-    assign neg_1 = ~f[21];
-    wire [1:0] neg_2;
-    assign neg_2 = ~f[21:20];
-    wire [2:0] neg_3;
-    assign neg_3 = ~f[21:19];
-    wire [3:0] neg_4;
-    assign neg_4 = ~f[21:18];
-    wire [4:0] neg_5;
-    assign neg_5 = ~f[21:17];
-    wire [5:0] neg_6;
-    assign neg_6 = ~f[21:16];
-    wire [6:0] neg_7;
-    assign neg_7 = ~f[21:15];
-    wire [7:0] neg_8;
-    assign neg_8 = ~f[21:14];
-    wire [8:0] neg_9;
-    assign neg_9 = ~f[21:13];
-    wire [9:0] neg_10;
-    assign neg_10 = ~f[21:12];
-    wire [10:0] neg_11;
-    assign neg_11 = ~f[21:11];
-    wire [11:0] neg_12;
-    assign neg_12 = ~f[21:10];
-    wire [12:0] neg_13;
-    assign neg_13 = ~f[21:9];
-    wire [13:0] neg_14;
-    assign neg_14 = ~f[21:8];
-    wire [14:0] neg_15;
-    assign neg_15 = ~f[21:7];
-    wire [15:0] neg_16;
-    assign neg_16 = ~f[21:6];
-    wire [16:0] neg_17;
-    assign neg_17 = ~f[21:5];
-    wire [17:0] neg_18;
-    assign neg_18 = ~f[21:4];
-    wire [18:0] neg_19;
-    assign neg_19 = ~f[21:3];
-    wire [19:0] neg_20;
-    assign neg_20 = ~f[21:2];
-    wire [20:0] neg_21;
-    assign neg_21 = ~f[21:1];
-// End of auto-generated section
-
-
-// Auto-generated register declarations for 4 registers
-    reg [18:0] A1;
-    reg [18:0] A2;
-    reg [18:0] A3;
-    reg [18:0] A4;
-// End of auto-generated section
-
-    always @(*) begin
-        case(segment)
-            6'd0: begin A1 = {3'b111, neg_16}; A2 = {5'b11111, neg_14}; A3 = {7'b0000000, f[21:10]}; end
-            6'd1: begin A1 = {3'b111, neg_16}; A2 = {6'b111111, neg_13}; A3 = {11'b11111111111, neg_8}; end
-            6'd2: begin A1 = {3'b111, neg_16}; A2 = {7'b1111111, neg_12}; A3 = {10'b0000000000, f[21:13]}; end
-            6'd3: begin A1 = {3'b111, neg_16}; A2 = {9'b000000000, f[21:12]}; A3 = {11'b00000000000, f[21:14]}; end
-            6'd4: begin A1 = {3'b111, neg_16}; A2 = {6'b000000, f[21:9]}; A3 = {8'b11111111, neg_11}; end
-            6'd5: begin A1 = {3'b111, neg_16}; A2 = {5'b00000, f[21:8]}; A3 = {7'b1111111, neg_12}; end
-            6'd6: begin A1 = {3'b111, neg_16}; A2 = {5'b00000, f[21:8]}; A3 = {12'b111111111111, neg_7}; end
-            6'd7: begin A1 = {3'b111, neg_16}; A2 = {5'b00000, f[21:8]}; A3 = {7'b0000000, f[21:10]}; end
-            6'd8: begin A1 = {4'b1111, neg_15}; A2 = {6'b111111, neg_13}; A3 = {8'b00000000, f[21:11]}; end
-            6'd9: begin A1 = {4'b1111, neg_15}; A2 = {9'b111111111, neg_10}; A3 = {11'b00000000000, f[21:14]}; end
-            6'd10: begin A1 = {4'b1111, neg_15}; A2 = {7'b0000000, f[21:10]}; A3 = {10'b0000000000, f[21:13]}; end
-            6'd11: begin A1 = {4'b1111, neg_15}; A2 = {6'b000000, f[21:9]}; A3 = {8'b00000000, f[21:11]}; end
-            6'd12: begin A1 = {5'b11111, neg_14}; A2 = {9'b111111111, neg_10}; A3 = {11'b00000000000, f[21:14]}; end
-            6'd13: begin A1 = {5'b11111, neg_14}; A2 = {7'b0000000, f[21:10]}; A3 = {10'b0000000000, f[21:13]}; end
-            6'd14: begin A1 = {6'b111111, neg_13}; A2 = {8'b00000000, f[21:11]}; A3 = {13'b1111111111111, neg_6}; end
-            6'd15: begin A1 = {10'b1111111111, neg_9}; A2 = {12'b111111111111, neg_7}; A3 = {14'b00000000000000, f[21:17]}; end
-            6'd16: begin A1 = {7'b0000000, f[21:10]}; A2 = {9'b000000000, f[21:12]}; A3 = {19'b0000000000000000000};end
-            6'd17: begin A1 = {5'b00000, f[21:8]}; A2 = {7'b1111111, neg_12}; A3 = {9'b111111111, neg_10}; end
-            6'd18: begin A1 = {5'b00000, f[21:8]}; A2 = {10'b0000000000, f[21:13]}; A3 = {12'b111111111111, neg_7}; end
-            6'd19: begin A1 = {4'b0000, f[21:7]}; A2 = {6'b111111, neg_13}; A3 = {8'b11111111, neg_11}; end
-            6'd20: begin A1 = {4'b0000, f[21:7]}; A2 = {7'b1111111, neg_12}; A3 = {10'b1111111111, neg_9}; end
-            6'd21: begin A1 = {4'b0000, f[21:7]}; A2 = {8'b00000000, f[21:11]}; A3 = {10'b1111111111, neg_9}; end
-            6'd22: begin A1 = {4'b0000, f[21:7]}; A2 = {6'b000000, f[21:9]}; A3 = {10'b1111111111, neg_9}; end
-            6'd23: begin A1 = {3'b000, f[21:6]}; A2 = {5'b11111, neg_14}; A3 = {8'b11111111, neg_11}; end
-            6'd24: begin A1 = {3'b000, f[21:6]}; A2 = {5'b11111, neg_14}; A3 = {7'b0000000, f[21:10]}; end
-            6'd25: begin A1 = {3'b000, f[21:6]}; A2 = {6'b111111, neg_13}; A3 = {8'b00000000, f[21:11]}; end
-            6'd26: begin A1 = {3'b000, f[21:6]}; A2 = {11'b11111111111, neg_8}; A3 = {15'b000000000000000, f[21:18]}; end
-            6'd27: begin A1 = {3'b000, f[21:6]}; A2 = {6'b000000, f[21:9]}; A3 = {8'b11111111, neg_11}; end
-            6'd28: begin A1 = {3'b000, f[21:6]}; A2 = {5'b00000, f[21:8]}; A3 = {7'b1111111, neg_12}; end
-            6'd29: begin A1 = {3'b000, f[21:6]}; A2 = {5'b00000, f[21:8]}; A3 = {8'b00000000, f[21:11]}; end
-            6'd30: begin A1 = {2'b00, f[21:5]}; A2 = {4'b1111, neg_15}; A3 = {6'b111111, neg_13}; end
-            6'd31: begin A1 = {2'b00, f[21:5]}; A2 = {4'b1111, neg_15}; A3 = {10'b1111111111, neg_9}; end
-            default: begin A1 = 19'b0; A2 = 19'b0; A3 = 19'b0; end //fixed default case to avoid latches
-      endcase
-    end
-
-// Auto-generated CSA tree for final_N=4, final_M=22, final_add_M=18
-    wire [18:0] csa1_carry, csa1_sum;
-    wire [18:0] csa2_carry, csa2_sum;
-    wire [18:0] csa3_carry, csa3_sum;
-    wire [18:0] final_sum;
-
-    CSA_anticonv2 csa1 (
-        .a({1'b0, f[21:4]}),  // f的高18位
-        .b(A1),
-        .c(A2),
-        .sum(csa1_sum),
-        .carry(csa1_carry)
-    );
-
-    CSA_anticonv2 csa2 (
-        .a(csa1_sum),
-        .b(A3),
-        .c({csa1_carry[17:0], 1'b0}),  // 左移1位
-        .sum(csa2_sum),
-        .carry(csa2_carry)
-    );
-
-    CSA_anticonv2 csa3 (
-        .a(csa2_sum),
-         .b(b),
-        .c({csa2_carry[17:0], 1'b0}),
-        .sum(csa3_sum),
-        .carry(csa3_carry)
-    );
-
-    CPA_anticonv2 cpa (
-        .a(csa3_sum),
-        .b({csa3_carry[17:0], 1'b0}),  // 左移1位
-        .sum(final_sum)
-    );
-
-    assign f_e2_out = {final_sum, f[3:0]};  // 拼接高位和原始低位
-// End of auto-generated CSA tree
-
-endmodule
-module CSA_anticonv2 #(parameter ADD_WIDTH = 19
-)(
-    input [ADD_WIDTH-1:0] a,
-    input [ADD_WIDTH-1:0] b,
-    input [ADD_WIDTH-1:0] c,
-    output [ADD_WIDTH-1:0] sum,
-    output [ADD_WIDTH-1:0] carry
-);
-    assign sum = a ^ b ^ c;          // XOR for sum
-    assign carry = (a & b) | (b & c) | (c & a); // Majority logic for carry
-endmodule
-
-// Carry-Propagate Adder (CPA) module
-module CPA_anticonv2 #(parameter ADD_WIDTH = 19
-)(
-    input [ADD_WIDTH-1:0] a,
-    input [ADD_WIDTH-1:0] b,
-    output [ADD_WIDTH-1:0] sum
-);
-    assign sum = a + b;  // Simple binary addition
-endmodule
-
-module  APP_22_19_9_5_32_anticonv3(
-    input [21:0] f,               // 22-bit input
-    output [22:0] f_e2_out     // 23-bit output 
-);
-    reg [5:0] segment;
-    reg [19:0] b;
-    always @(*) begin
-        case(f[21:13])
-            9'b000000000: begin segment = 6'd0; b = 20'b01111111111111111110; end
-            9'b000000001: begin segment = 6'd0; b = 20'b01111111111111110110; end
-            9'b000000010: begin segment = 6'd0; b = 20'b01111111111111110000; end
-            9'b000000011: begin segment = 6'd0; b = 20'b01111111111111101011; end
-            9'b000000100: begin segment = 6'd0; b = 20'b01111111111111100110; end
-            9'b000000101: begin segment = 6'd0; b = 20'b01111111111111100011; end
-            9'b000000110: begin segment = 6'd0; b = 20'b01111111111111100001; end
-            9'b000000111: begin segment = 6'd0; b = 20'b01111111111111011111; end
-            9'b000001000: begin segment = 6'd0; b = 20'b01111111111111011111; end
-            9'b000001001: begin segment = 6'd0; b = 20'b01111111111111011111; end
-            9'b000001010: begin segment = 6'd0; b = 20'b01111111111111100001; end
-            9'b000001011: begin segment = 6'd0; b = 20'b01111111111111100011; end
-            9'b000001100: begin segment = 6'd0; b = 20'b01111111111111100111; end
-            9'b000001101: begin segment = 6'd0; b = 20'b01111111111111101011; end
-            9'b000001110: begin segment = 6'd0; b = 20'b01111111111111110000; end
-            9'b000001111: begin segment = 6'd0; b = 20'b01111111111111110111; end
-            9'b000010000: begin segment = 6'd1; b = 20'b01111111111011101010; end
-            9'b000010001: begin segment = 6'd1; b = 20'b01111111111011100001; end
-            9'b000010010: begin segment = 6'd1; b = 20'b01111111111011011010; end
-            9'b000010011: begin segment = 6'd1; b = 20'b01111111111011010011; end
-            9'b000010100: begin segment = 6'd1; b = 20'b01111111111011001110; end
-            9'b000010101: begin segment = 6'd1; b = 20'b01111111111011001001; end
-            9'b000010110: begin segment = 6'd1; b = 20'b01111111111011000110; end
-            9'b000010111: begin segment = 6'd1; b = 20'b01111111111011000011; end
-            9'b000011000: begin segment = 6'd1; b = 20'b01111111111011000010; end
-            9'b000011001: begin segment = 6'd1; b = 20'b01111111111011000001; end
-            9'b000011010: begin segment = 6'd1; b = 20'b01111111111011000010; end
-            9'b000011011: begin segment = 6'd1; b = 20'b01111111111011000100; end
-            9'b000011100: begin segment = 6'd1; b = 20'b01111111111011000110; end
-            9'b000011101: begin segment = 6'd1; b = 20'b01111111111011001010; end
-            9'b000011110: begin segment = 6'd1; b = 20'b01111111111011001110; end
-            9'b000011111: begin segment = 6'd1; b = 20'b01111111111011010011; end
-            9'b000100000: begin segment = 6'd1; b = 20'b01111111111011011010; end
-            9'b000100001: begin segment = 6'd1; b = 20'b01111111111011100001; end
-            9'b000100010: begin segment = 6'd1; b = 20'b01111111111011101010; end
-            9'b000100011: begin segment = 6'd2; b = 20'b01111111110001001100; end
-            9'b000100100: begin segment = 6'd2; b = 20'b01111111110001000011; end
-            9'b000100101: begin segment = 6'd2; b = 20'b01111111110000111011; end
-            9'b000100110: begin segment = 6'd2; b = 20'b01111111110000110101; end
-            9'b000100111: begin segment = 6'd2; b = 20'b01111111110000101111; end
-            9'b000101000: begin segment = 6'd2; b = 20'b01111111110000101011; end
-            9'b000101001: begin segment = 6'd2; b = 20'b01111111110000100111; end
-            9'b000101010: begin segment = 6'd2; b = 20'b01111111110000100101; end
-            9'b000101011: begin segment = 6'd2; b = 20'b01111111110000100011; end
-            9'b000101100: begin segment = 6'd2; b = 20'b01111111110000100010; end
-            9'b000101101: begin segment = 6'd2; b = 20'b01111111110000100011; end
-            9'b000101110: begin segment = 6'd2; b = 20'b01111111110000100100; end
-            9'b000101111: begin segment = 6'd2; b = 20'b01111111110000100111; end
-            9'b000110000: begin segment = 6'd2; b = 20'b01111111110000101011; end
-            9'b000110001: begin segment = 6'd2; b = 20'b01111111110000101111; end
-            9'b000110010: begin segment = 6'd2; b = 20'b01111111110000110101; end
-            9'b000110011: begin segment = 6'd2; b = 20'b01111111110000111011; end
-            9'b000110100: begin segment = 6'd2; b = 20'b01111111110001000011; end
-            9'b000110101: begin segment = 6'd2; b = 20'b01111111110001001100; end
-            9'b000110110: begin segment = 6'd3; b = 20'b01111111100001000011; end
-            9'b000110111: begin segment = 6'd3; b = 20'b01111111100000111011; end
-            9'b000111000: begin segment = 6'd3; b = 20'b01111111100000110011; end
-            9'b000111001: begin segment = 6'd3; b = 20'b01111111100000101101; end
-            9'b000111010: begin segment = 6'd3; b = 20'b01111111100000101000; end
-            9'b000111011: begin segment = 6'd3; b = 20'b01111111100000100100; end
-            9'b000111100: begin segment = 6'd3; b = 20'b01111111100000100001; end
-            9'b000111101: begin segment = 6'd3; b = 20'b01111111100000011111; end
-            9'b000111110: begin segment = 6'd3; b = 20'b01111111100000011110; end
-            9'b000111111: begin segment = 6'd3; b = 20'b01111111100000011110; end
-            9'b001000000: begin segment = 6'd3; b = 20'b01111111100000011111; end
-            9'b001000001: begin segment = 6'd3; b = 20'b01111111100000100001; end
-            9'b001000010: begin segment = 6'd3; b = 20'b01111111100000100100; end
-            9'b001000011: begin segment = 6'd3; b = 20'b01111111100000101000; end
-            9'b001000100: begin segment = 6'd3; b = 20'b01111111100000101110; end
-            9'b001000101: begin segment = 6'd3; b = 20'b01111111100000110100; end
-            9'b001000110: begin segment = 6'd3; b = 20'b01111111100000111011; end
-            9'b001000111: begin segment = 6'd3; b = 20'b01111111100001000100; end
-            9'b001001000: begin segment = 6'd4; b = 20'b01111111001011100110; end
-            9'b001001001: begin segment = 6'd4; b = 20'b01111111001011011110; end
-            9'b001001010: begin segment = 6'd4; b = 20'b01111111001011010111; end
-            9'b001001011: begin segment = 6'd4; b = 20'b01111111001011010000; end
-            9'b001001100: begin segment = 6'd4; b = 20'b01111111001011001011; end
-            9'b001001101: begin segment = 6'd4; b = 20'b01111111001011000111; end
-            9'b001001110: begin segment = 6'd4; b = 20'b01111111001011000100; end
-            9'b001001111: begin segment = 6'd4; b = 20'b01111111001011000001; end
-            9'b001010000: begin segment = 6'd4; b = 20'b01111111001010111111; end
-            9'b001010001: begin segment = 6'd4; b = 20'b01111111001010111111; end
-            9'b001010010: begin segment = 6'd4; b = 20'b01111111001011000001; end
-            9'b001010011: begin segment = 6'd4; b = 20'b01111111001011000011; end
-            9'b001010100: begin segment = 6'd4; b = 20'b01111111001011000110; end
-            9'b001010101: begin segment = 6'd4; b = 20'b01111111001011001010; end
-            9'b001010110: begin segment = 6'd4; b = 20'b01111111001011010000; end
-            9'b001010111: begin segment = 6'd4; b = 20'b01111111001011010110; end
-            9'b001011000: begin segment = 6'd4; b = 20'b01111111001011011110; end
-            9'b001011001: begin segment = 6'd4; b = 20'b01111111001011100111; end
-            9'b001011010: begin segment = 6'd5; b = 20'b01111110101111100100; end
-            9'b001011011: begin segment = 6'd5; b = 20'b01111110101111011011; end
-            9'b001011100: begin segment = 6'd5; b = 20'b01111110101111010011; end
-            9'b001011101: begin segment = 6'd5; b = 20'b01111110101111001100; end
-            9'b001011110: begin segment = 6'd5; b = 20'b01111110101111000110; end
-            9'b001011111: begin segment = 6'd5; b = 20'b01111110101111000001; end
-            9'b001100000: begin segment = 6'd5; b = 20'b01111110101110111101; end
-            9'b001100001: begin segment = 6'd5; b = 20'b01111110101110111011; end
-            9'b001100010: begin segment = 6'd5; b = 20'b01111110101110111001; end
-            9'b001100011: begin segment = 6'd5; b = 20'b01111110101110111001; end
-            9'b001100100: begin segment = 6'd5; b = 20'b01111110101110111001; end
-            9'b001100101: begin segment = 6'd5; b = 20'b01111110101110111011; end
-            9'b001100110: begin segment = 6'd5; b = 20'b01111110101110111110; end
-            9'b001100111: begin segment = 6'd5; b = 20'b01111110101111000010; end
-            9'b001101000: begin segment = 6'd5; b = 20'b01111110101111000111; end
-            9'b001101001: begin segment = 6'd5; b = 20'b01111110101111001110; end
-            9'b001101010: begin segment = 6'd5; b = 20'b01111110101111010101; end
-            9'b001101011: begin segment = 6'd5; b = 20'b01111110101111011101; end
-            9'b001101100: begin segment = 6'd6; b = 20'b01111110001110010110; end
-            9'b001101101: begin segment = 6'd6; b = 20'b01111110001110001100; end
-            9'b001101110: begin segment = 6'd6; b = 20'b01111110001110000101; end
-            9'b001101111: begin segment = 6'd6; b = 20'b01111110001101111110; end
-            9'b001110000: begin segment = 6'd6; b = 20'b01111110001101111000; end
-            9'b001110001: begin segment = 6'd6; b = 20'b01111110001101110011; end
-            9'b001110010: begin segment = 6'd6; b = 20'b01111110001101110000; end
-            9'b001110011: begin segment = 6'd6; b = 20'b01111110001101101101; end
-            9'b001110100: begin segment = 6'd6; b = 20'b01111110001101101101; end
-            9'b001110101: begin segment = 6'd6; b = 20'b01111110001101101101; end
-            9'b001110110: begin segment = 6'd6; b = 20'b01111110001101101110; end
-            9'b001110111: begin segment = 6'd6; b = 20'b01111110001101110000; end
-            9'b001111000: begin segment = 6'd6; b = 20'b01111110001101110011; end
-            9'b001111001: begin segment = 6'd6; b = 20'b01111110001101110111; end
-            9'b001111010: begin segment = 6'd6; b = 20'b01111110001101111110; end
-            9'b001111011: begin segment = 6'd6; b = 20'b01111110001110000100; end
-            9'b001111100: begin segment = 6'd6; b = 20'b01111110001110001100; end
-            9'b001111101: begin segment = 6'd6; b = 20'b01111110001110010101; end
-            9'b001111110: begin segment = 6'd7; b = 20'b01111101100110001110; end
-            9'b001111111: begin segment = 6'd7; b = 20'b01111101100110000100; end
-            9'b010000000: begin segment = 6'd7; b = 20'b01111101100101111101; end
-            9'b010000001: begin segment = 6'd7; b = 20'b01111101100101110110; end
-            9'b010000010: begin segment = 6'd7; b = 20'b01111101100101110000; end
-            9'b010000011: begin segment = 6'd7; b = 20'b01111101100101101100; end
-            9'b010000100: begin segment = 6'd7; b = 20'b01111101100101101001; end
-            9'b010000101: begin segment = 6'd7; b = 20'b01111101100101100110; end
-            9'b010000110: begin segment = 6'd7; b = 20'b01111101100101100101; end
-            9'b010000111: begin segment = 6'd7; b = 20'b01111101100101100110; end
-            9'b010001000: begin segment = 6'd7; b = 20'b01111101100101100111; end
-            9'b010001001: begin segment = 6'd7; b = 20'b01111101100101101001; end
-            9'b010001010: begin segment = 6'd7; b = 20'b01111101100101101101; end
-            9'b010001011: begin segment = 6'd7; b = 20'b01111101100101110010; end
-            9'b010001100: begin segment = 6'd7; b = 20'b01111101100101110111; end
-            9'b010001101: begin segment = 6'd7; b = 20'b01111101100101111111; end
-            9'b010001110: begin segment = 6'd7; b = 20'b01111101100110000111; end
-            9'b010001111: begin segment = 6'd7; b = 20'b01111101100110010000; end
-            9'b010010000: begin segment = 6'd8; b = 20'b01111100111000001000; end
-            9'b010010001: begin segment = 6'd8; b = 20'b01111100111000000000; end
-            9'b010010010: begin segment = 6'd8; b = 20'b01111100110111111000; end
-            9'b010010011: begin segment = 6'd8; b = 20'b01111100110111110010; end
-            9'b010010100: begin segment = 6'd8; b = 20'b01111100110111101100; end
-            9'b010010101: begin segment = 6'd8; b = 20'b01111100110111101001; end
-            9'b010010110: begin segment = 6'd8; b = 20'b01111100110111100101; end
-            9'b010010111: begin segment = 6'd8; b = 20'b01111100110111100100; end
-            9'b010011000: begin segment = 6'd8; b = 20'b01111100110111100011; end
-            9'b010011001: begin segment = 6'd8; b = 20'b01111100110111100100; end
-            9'b010011010: begin segment = 6'd8; b = 20'b01111100110111100101; end
-            9'b010011011: begin segment = 6'd8; b = 20'b01111100110111101001; end
-            9'b010011100: begin segment = 6'd8; b = 20'b01111100110111101101; end
-            9'b010011101: begin segment = 6'd8; b = 20'b01111100110111110010; end
-            9'b010011110: begin segment = 6'd8; b = 20'b01111100110111111001; end
-            9'b010011111: begin segment = 6'd8; b = 20'b01111100111000000001; end
-            9'b010100000: begin segment = 6'd8; b = 20'b01111100111000001001; end
-            9'b010100001: begin segment = 6'd9; b = 20'b01111100000100111001; end
-            9'b010100010: begin segment = 6'd9; b = 20'b01111100000100110000; end
-            9'b010100011: begin segment = 6'd9; b = 20'b01111100000100101000; end
-            9'b010100100: begin segment = 6'd9; b = 20'b01111100000100100001; end
-            9'b010100101: begin segment = 6'd9; b = 20'b01111100000100011100; end
-            9'b010100110: begin segment = 6'd9; b = 20'b01111100000100011000; end
-            9'b010100111: begin segment = 6'd9; b = 20'b01111100000100010100; end
-            9'b010101000: begin segment = 6'd9; b = 20'b01111100000100010011; end
-            9'b010101001: begin segment = 6'd9; b = 20'b01111100000100010011; end
-            9'b010101010: begin segment = 6'd9; b = 20'b01111100000100010011; end
-            9'b010101011: begin segment = 6'd9; b = 20'b01111100000100010101; end
-            9'b010101100: begin segment = 6'd9; b = 20'b01111100000100011000; end
-            9'b010101101: begin segment = 6'd9; b = 20'b01111100000100011100; end
-            9'b010101110: begin segment = 6'd9; b = 20'b01111100000100100001; end
-            9'b010101111: begin segment = 6'd9; b = 20'b01111100000100101000; end
-            9'b010110000: begin segment = 6'd9; b = 20'b01111100000100110000; end
-            9'b010110001: begin segment = 6'd9; b = 20'b01111100000100111001; end
-            9'b010110010: begin segment = 6'd10; b = 20'b01111011001011100010; end
-            9'b010110011: begin segment = 6'd10; b = 20'b01111011001011011000; end
-            9'b010110100: begin segment = 6'd10; b = 20'b01111011001011010001; end
-            9'b010110101: begin segment = 6'd10; b = 20'b01111011001011001010; end
-            9'b010110110: begin segment = 6'd10; b = 20'b01111011001011000101; end
-            9'b010110111: begin segment = 6'd10; b = 20'b01111011001011000000; end
-            9'b010111000: begin segment = 6'd10; b = 20'b01111011001010111110; end
-            9'b010111001: begin segment = 6'd10; b = 20'b01111011001010111100; end
-            9'b010111010: begin segment = 6'd10; b = 20'b01111011001010111100; end
-            9'b010111011: begin segment = 6'd10; b = 20'b01111011001010111100; end
-            9'b010111100: begin segment = 6'd10; b = 20'b01111011001010111111; end
-            9'b010111101: begin segment = 6'd10; b = 20'b01111011001011000001; end
-            9'b010111110: begin segment = 6'd10; b = 20'b01111011001011000110; end
-            9'b010111111: begin segment = 6'd10; b = 20'b01111011001011001100; end
-            9'b011000000: begin segment = 6'd10; b = 20'b01111011001011010011; end
-            9'b011000001: begin segment = 6'd10; b = 20'b01111011001011011011; end
-            9'b011000010: begin segment = 6'd10; b = 20'b01111011001011100101; end
-            9'b011000011: begin segment = 6'd11; b = 20'b01111010001010000100; end
-            9'b011000100: begin segment = 6'd11; b = 20'b01111010001001111010; end
-            9'b011000101: begin segment = 6'd11; b = 20'b01111010001001110010; end
-            9'b011000110: begin segment = 6'd11; b = 20'b01111010001001101011; end
-            9'b011000111: begin segment = 6'd11; b = 20'b01111010001001100101; end
-            9'b011001000: begin segment = 6'd11; b = 20'b01111010001001100001; end
-            9'b011001001: begin segment = 6'd11; b = 20'b01111010001001011110; end
-            9'b011001010: begin segment = 6'd11; b = 20'b01111010001001011100; end
-            9'b011001011: begin segment = 6'd11; b = 20'b01111010001001011011; end
-            9'b011001100: begin segment = 6'd11; b = 20'b01111010001001011011; end
-            9'b011001101: begin segment = 6'd11; b = 20'b01111010001001011101; end
-            9'b011001110: begin segment = 6'd11; b = 20'b01111010001001100000; end
-            9'b011001111: begin segment = 6'd11; b = 20'b01111010001001100101; end
-            9'b011010000: begin segment = 6'd11; b = 20'b01111010001001101010; end
-            9'b011010001: begin segment = 6'd11; b = 20'b01111010001001110001; end
-            9'b011010010: begin segment = 6'd11; b = 20'b01111010001001111001; end
-            9'b011010011: begin segment = 6'd11; b = 20'b01111010001010000011; end
-            9'b011010100: begin segment = 6'd12; b = 20'b01111001000010000000; end
-            9'b011010101: begin segment = 6'd12; b = 20'b01111001000001110110; end
-            9'b011010110: begin segment = 6'd12; b = 20'b01111001000001101101; end
-            9'b011010111: begin segment = 6'd12; b = 20'b01111001000001100110; end
-            9'b011011000: begin segment = 6'd12; b = 20'b01111001000001100001; end
-            9'b011011001: begin segment = 6'd12; b = 20'b01111001000001011100; end
-            9'b011011010: begin segment = 6'd12; b = 20'b01111001000001011001; end
-            9'b011011011: begin segment = 6'd12; b = 20'b01111001000001010110; end
-            9'b011011100: begin segment = 6'd12; b = 20'b01111001000001010110; end
-            9'b011011101: begin segment = 6'd12; b = 20'b01111001000001010111; end
-            9'b011011110: begin segment = 6'd12; b = 20'b01111001000001011000; end
-            9'b011011111: begin segment = 6'd12; b = 20'b01111001000001011100; end
-            9'b011100000: begin segment = 6'd12; b = 20'b01111001000001100000; end
-            9'b011100001: begin segment = 6'd12; b = 20'b01111001000001100110; end
-            9'b011100010: begin segment = 6'd12; b = 20'b01111001000001101101; end
-            9'b011100011: begin segment = 6'd12; b = 20'b01111001000001110101; end
-            9'b011100100: begin segment = 6'd12; b = 20'b01111001000001111111; end
-            9'b011100101: begin segment = 6'd13; b = 20'b01110111110101000011; end
-            9'b011100110: begin segment = 6'd13; b = 20'b01110111110100111010; end
-            9'b011100111: begin segment = 6'd13; b = 20'b01110111110100110010; end
-            9'b011101000: begin segment = 6'd13; b = 20'b01110111110100101100; end
-            9'b011101001: begin segment = 6'd13; b = 20'b01110111110100100111; end
-            9'b011101010: begin segment = 6'd13; b = 20'b01110111110100100011; end
-            9'b011101011: begin segment = 6'd13; b = 20'b01110111110100100000; end
-            9'b011101100: begin segment = 6'd13; b = 20'b01110111110100011111; end
-            9'b011101101: begin segment = 6'd13; b = 20'b01110111110100011111; end
-            9'b011101110: begin segment = 6'd13; b = 20'b01110111110100100001; end
-            9'b011101111: begin segment = 6'd13; b = 20'b01110111110100100100; end
-            9'b011110000: begin segment = 6'd13; b = 20'b01110111110100100111; end
-            9'b011110001: begin segment = 6'd13; b = 20'b01110111110100101100; end
-            9'b011110010: begin segment = 6'd13; b = 20'b01110111110100110011; end
-            9'b011110011: begin segment = 6'd13; b = 20'b01110111110100111100; end
-            9'b011110100: begin segment = 6'd13; b = 20'b01110111110101000100; end
-            9'b011110101: begin segment = 6'd14; b = 20'b01110110100010110101; end
-            9'b011110110: begin segment = 6'd14; b = 20'b01110110100010101011; end
-            9'b011110111: begin segment = 6'd14; b = 20'b01110110100010100011; end
-            9'b011111000: begin segment = 6'd14; b = 20'b01110110100010011101; end
-            9'b011111001: begin segment = 6'd14; b = 20'b01110110100010010111; end
-            9'b011111010: begin segment = 6'd14; b = 20'b01110110100010010011; end
-            9'b011111011: begin segment = 6'd14; b = 20'b01110110100010010000; end
-            9'b011111100: begin segment = 6'd14; b = 20'b01110110100010001111; end
-            9'b011111101: begin segment = 6'd14; b = 20'b01110110100010001111; end
-            9'b011111110: begin segment = 6'd14; b = 20'b01110110100010010000; end
-            9'b011111111: begin segment = 6'd14; b = 20'b01110110100010010011; end
-            9'b100000000: begin segment = 6'd14; b = 20'b01110110100010011000; end
-            9'b100000001: begin segment = 6'd14; b = 20'b01110110100010011101; end
-            9'b100000010: begin segment = 6'd14; b = 20'b01110110100010100100; end
-            9'b100000011: begin segment = 6'd14; b = 20'b01110110100010101100; end
-            9'b100000100: begin segment = 6'd14; b = 20'b01110110100010110110; end
-            9'b100000101: begin segment = 6'd15; b = 20'b01110101001001100011; end
-            9'b100000110: begin segment = 6'd15; b = 20'b01110101001001011010; end
-            9'b100000111: begin segment = 6'd15; b = 20'b01110101001001010001; end
-            9'b100001000: begin segment = 6'd15; b = 20'b01110101001001001010; end
-            9'b100001001: begin segment = 6'd15; b = 20'b01110101001001000100; end
-            9'b100001010: begin segment = 6'd15; b = 20'b01110101001001000000; end
-            9'b100001011: begin segment = 6'd15; b = 20'b01110101001000111101; end
-            9'b100001100: begin segment = 6'd15; b = 20'b01110101001000111101; end
-            9'b100001101: begin segment = 6'd15; b = 20'b01110101001000111101; end
-            9'b100001110: begin segment = 6'd15; b = 20'b01110101001000111110; end
-            9'b100001111: begin segment = 6'd15; b = 20'b01110101001001000001; end
-            9'b100010000: begin segment = 6'd15; b = 20'b01110101001001000101; end
-            9'b100010001: begin segment = 6'd15; b = 20'b01110101001001001010; end
-            9'b100010010: begin segment = 6'd15; b = 20'b01110101001001010001; end
-            9'b100010011: begin segment = 6'd15; b = 20'b01110101001001011010; end
-            9'b100010100: begin segment = 6'd15; b = 20'b01110101001001100100; end
-            9'b100010101: begin segment = 6'd16; b = 20'b01110011101000101110; end
-            9'b100010110: begin segment = 6'd16; b = 20'b01110011101000100100; end
-            9'b100010111: begin segment = 6'd16; b = 20'b01110011101000011011; end
-            9'b100011000: begin segment = 6'd16; b = 20'b01110011101000010100; end
-            9'b100011001: begin segment = 6'd16; b = 20'b01110011101000001111; end
-            9'b100011010: begin segment = 6'd16; b = 20'b01110011101000001011; end
-            9'b100011011: begin segment = 6'd16; b = 20'b01110011101000001000; end
-            9'b100011100: begin segment = 6'd16; b = 20'b01110011101000000111; end
-            9'b100011101: begin segment = 6'd16; b = 20'b01110011101000000111; end
-            9'b100011110: begin segment = 6'd16; b = 20'b01110011101000001000; end
-            9'b100011111: begin segment = 6'd16; b = 20'b01110011101000001011; end
-            9'b100100000: begin segment = 6'd16; b = 20'b01110011101000001111; end
-            9'b100100001: begin segment = 6'd16; b = 20'b01110011101000010101; end
-            9'b100100010: begin segment = 6'd16; b = 20'b01110011101000011100; end
-            9'b100100011: begin segment = 6'd16; b = 20'b01110011101000100100; end
-            9'b100100100: begin segment = 6'd16; b = 20'b01110011101000101110; end
-            9'b100100101: begin segment = 6'd17; b = 20'b01110001111111011010; end
-            9'b100100110: begin segment = 6'd17; b = 20'b01110001111111010000; end
-            9'b100100111: begin segment = 6'd17; b = 20'b01110001111111000111; end
-            9'b100101000: begin segment = 6'd17; b = 20'b01110001111111000000; end
-            9'b100101001: begin segment = 6'd17; b = 20'b01110001111110111010; end
-            9'b100101010: begin segment = 6'd17; b = 20'b01110001111110110101; end
-            9'b100101011: begin segment = 6'd17; b = 20'b01110001111110110010; end
-            9'b100101100: begin segment = 6'd17; b = 20'b01110001111110110001; end
-            9'b100101101: begin segment = 6'd17; b = 20'b01110001111110110001; end
-            9'b100101110: begin segment = 6'd17; b = 20'b01110001111110110010; end
-            9'b100101111: begin segment = 6'd17; b = 20'b01110001111110110101; end
-            9'b100110000: begin segment = 6'd17; b = 20'b01110001111110111001; end
-            9'b100110001: begin segment = 6'd17; b = 20'b01110001111110111111; end
-            9'b100110010: begin segment = 6'd17; b = 20'b01110001111111000110; end
-            9'b100110011: begin segment = 6'd17; b = 20'b01110001111111001111; end
-            9'b100110100: begin segment = 6'd17; b = 20'b01110001111111011001; end
-            9'b100110101: begin segment = 6'd18; b = 20'b01110000010010111001; end
-            9'b100110110: begin segment = 6'd18; b = 20'b01110000010010101111; end
-            9'b100110111: begin segment = 6'd18; b = 20'b01110000010010100111; end
-            9'b100111000: begin segment = 6'd18; b = 20'b01110000010010100001; end
-            9'b100111001: begin segment = 6'd18; b = 20'b01110000010010011011; end
-            9'b100111010: begin segment = 6'd18; b = 20'b01110000010010011000; end
-            9'b100111011: begin segment = 6'd18; b = 20'b01110000010010010101; end
-            9'b100111100: begin segment = 6'd18; b = 20'b01110000010010010101; end
-            9'b100111101: begin segment = 6'd18; b = 20'b01110000010010010101; end
-            9'b100111110: begin segment = 6'd18; b = 20'b01110000010010011000; end
-            9'b100111111: begin segment = 6'd18; b = 20'b01110000010010011011; end
-            9'b101000000: begin segment = 6'd18; b = 20'b01110000010010100010; end
-            9'b101000001: begin segment = 6'd18; b = 20'b01110000010010101000; end
-            9'b101000010: begin segment = 6'd18; b = 20'b01110000010010110001; end
-            9'b101000011: begin segment = 6'd18; b = 20'b01110000010010111010; end
-            9'b101000100: begin segment = 6'd19; b = 20'b01101110100010000111; end
-            9'b101000101: begin segment = 6'd19; b = 20'b01101110100001111101; end
-            9'b101000110: begin segment = 6'd19; b = 20'b01101110100001110100; end
-            9'b101000111: begin segment = 6'd19; b = 20'b01101110100001101101; end
-            9'b101001000: begin segment = 6'd19; b = 20'b01101110100001101001; end
-            9'b101001001: begin segment = 6'd19; b = 20'b01101110100001100101; end
-            9'b101001010: begin segment = 6'd19; b = 20'b01101110100001100011; end
-            9'b101001011: begin segment = 6'd19; b = 20'b01101110100001100010; end
-            9'b101001100: begin segment = 6'd19; b = 20'b01101110100001100011; end
-            9'b101001101: begin segment = 6'd19; b = 20'b01101110100001100101; end
-            9'b101001110: begin segment = 6'd19; b = 20'b01101110100001101001; end
-            9'b101001111: begin segment = 6'd19; b = 20'b01101110100001101110; end
-            9'b101010000: begin segment = 6'd19; b = 20'b01101110100001110110; end
-            9'b101010001: begin segment = 6'd19; b = 20'b01101110100001111110; end
-            9'b101010010: begin segment = 6'd19; b = 20'b01101110100010000111; end
-            9'b101010011: begin segment = 6'd20; b = 20'b01101100101001100111; end
-            9'b101010100: begin segment = 6'd20; b = 20'b01101100101001011101; end
-            9'b101010101: begin segment = 6'd20; b = 20'b01101100101001010101; end
-            9'b101010110: begin segment = 6'd20; b = 20'b01101100101001001110; end
-            9'b101010111: begin segment = 6'd20; b = 20'b01101100101001001001; end
-            9'b101011000: begin segment = 6'd20; b = 20'b01101100101001000101; end
-            9'b101011001: begin segment = 6'd20; b = 20'b01101100101001000011; end
-            9'b101011010: begin segment = 6'd20; b = 20'b01101100101001000010; end
-            9'b101011011: begin segment = 6'd20; b = 20'b01101100101001000100; end
-            9'b101011100: begin segment = 6'd20; b = 20'b01101100101001000110; end
-            9'b101011101: begin segment = 6'd20; b = 20'b01101100101001001010; end
-            9'b101011110: begin segment = 6'd20; b = 20'b01101100101001001111; end
-            9'b101011111: begin segment = 6'd20; b = 20'b01101100101001010111; end
-            9'b101100000: begin segment = 6'd20; b = 20'b01101100101001011111; end
-            9'b101100001: begin segment = 6'd20; b = 20'b01101100101001101001; end
-            9'b101100010: begin segment = 6'd21; b = 20'b01101010101000010110; end
-            9'b101100011: begin segment = 6'd21; b = 20'b01101010101000001100; end
-            9'b101100100: begin segment = 6'd21; b = 20'b01101010101000000100; end
-            9'b101100101: begin segment = 6'd21; b = 20'b01101010100111111100; end
-            9'b101100110: begin segment = 6'd21; b = 20'b01101010100111110111; end
-            9'b101100111: begin segment = 6'd21; b = 20'b01101010100111110011; end
-            9'b101101000: begin segment = 6'd21; b = 20'b01101010100111110001; end
-            9'b101101001: begin segment = 6'd21; b = 20'b01101010100111110000; end
-            9'b101101010: begin segment = 6'd21; b = 20'b01101010100111110001; end
-            9'b101101011: begin segment = 6'd21; b = 20'b01101010100111110011; end
-            9'b101101100: begin segment = 6'd21; b = 20'b01101010100111110111; end
-            9'b101101101: begin segment = 6'd21; b = 20'b01101010100111111101; end
-            9'b101101110: begin segment = 6'd21; b = 20'b01101010101000000100; end
-            9'b101101111: begin segment = 6'd21; b = 20'b01101010101000001100; end
-            9'b101110000: begin segment = 6'd21; b = 20'b01101010101000010111; end
-            9'b101110001: begin segment = 6'd22; b = 20'b01101000011110101101; end
-            9'b101110010: begin segment = 6'd22; b = 20'b01101000011110100010; end
-            9'b101110011: begin segment = 6'd22; b = 20'b01101000011110011001; end
-            9'b101110100: begin segment = 6'd22; b = 20'b01101000011110010011; end
-            9'b101110101: begin segment = 6'd22; b = 20'b01101000011110001101; end
-            9'b101110110: begin segment = 6'd22; b = 20'b01101000011110001000; end
-            9'b101110111: begin segment = 6'd22; b = 20'b01101000011110000110; end
-            9'b101111000: begin segment = 6'd22; b = 20'b01101000011110000110; end
-            9'b101111001: begin segment = 6'd22; b = 20'b01101000011110000110; end
-            9'b101111010: begin segment = 6'd22; b = 20'b01101000011110001000; end
-            9'b101111011: begin segment = 6'd22; b = 20'b01101000011110001100; end
-            9'b101111100: begin segment = 6'd22; b = 20'b01101000011110010010; end
-            9'b101111101: begin segment = 6'd22; b = 20'b01101000011110011001; end
-            9'b101111110: begin segment = 6'd22; b = 20'b01101000011110100001; end
-            9'b101111111: begin segment = 6'd22; b = 20'b01101000011110101011; end
-            9'b110000000: begin segment = 6'd23; b = 20'b01100110001101001100; end
-            9'b110000001: begin segment = 6'd23; b = 20'b01100110001101000001; end
-            9'b110000010: begin segment = 6'd23; b = 20'b01100110001100111000; end
-            9'b110000011: begin segment = 6'd23; b = 20'b01100110001100110000; end
-            9'b110000100: begin segment = 6'd23; b = 20'b01100110001100101011; end
-            9'b110000101: begin segment = 6'd23; b = 20'b01100110001100100110; end
-            9'b110000110: begin segment = 6'd23; b = 20'b01100110001100100100; end
-            9'b110000111: begin segment = 6'd23; b = 20'b01100110001100100011; end
-            9'b110001000: begin segment = 6'd23; b = 20'b01100110001100100100; end
-            9'b110001001: begin segment = 6'd23; b = 20'b01100110001100100110; end
-            9'b110001010: begin segment = 6'd23; b = 20'b01100110001100101010; end
-            9'b110001011: begin segment = 6'd23; b = 20'b01100110001100110000; end
-            9'b110001100: begin segment = 6'd23; b = 20'b01100110001100110111; end
-            9'b110001101: begin segment = 6'd23; b = 20'b01100110001101000000; end
-            9'b110001110: begin segment = 6'd23; b = 20'b01100110001101001011; end
-            9'b110001111: begin segment = 6'd24; b = 20'b01100011110111100010; end
-            9'b110010000: begin segment = 6'd24; b = 20'b01100011110111011000; end
-            9'b110010001: begin segment = 6'd24; b = 20'b01100011110111010000; end
-            9'b110010010: begin segment = 6'd24; b = 20'b01100011110111001001; end
-            9'b110010011: begin segment = 6'd24; b = 20'b01100011110111000100; end
-            9'b110010100: begin segment = 6'd24; b = 20'b01100011110111000000; end
-            9'b110010101: begin segment = 6'd24; b = 20'b01100011110110111110; end
-            9'b110010110: begin segment = 6'd24; b = 20'b01100011110110111110; end
-            9'b110010111: begin segment = 6'd24; b = 20'b01100011110111000000; end
-            9'b110011000: begin segment = 6'd24; b = 20'b01100011110111000011; end
-            9'b110011001: begin segment = 6'd24; b = 20'b01100011110111001000; end
-            9'b110011010: begin segment = 6'd24; b = 20'b01100011110111001110; end
-            9'b110011011: begin segment = 6'd24; b = 20'b01100011110111010110; end
-            9'b110011100: begin segment = 6'd24; b = 20'b01100011110111100000; end
-            9'b110011101: begin segment = 6'd24; b = 20'b01100011110111101100; end
-            9'b110011110: begin segment = 6'd25; b = 20'b01100001010101111110; end
-            9'b110011111: begin segment = 6'd25; b = 20'b01100001010101110100; end
-            9'b110100000: begin segment = 6'd25; b = 20'b01100001010101101100; end
-            9'b110100001: begin segment = 6'd25; b = 20'b01100001010101100101; end
-            9'b110100010: begin segment = 6'd25; b = 20'b01100001010101100000; end
-            9'b110100011: begin segment = 6'd25; b = 20'b01100001010101011100; end
-            9'b110100100: begin segment = 6'd25; b = 20'b01100001010101011011; end
-            9'b110100101: begin segment = 6'd25; b = 20'b01100001010101011011; end
-            9'b110100110: begin segment = 6'd25; b = 20'b01100001010101011101; end
-            9'b110100111: begin segment = 6'd25; b = 20'b01100001010101100000; end
-            9'b110101000: begin segment = 6'd25; b = 20'b01100001010101100101; end
-            9'b110101001: begin segment = 6'd25; b = 20'b01100001010101101100; end
-            9'b110101010: begin segment = 6'd25; b = 20'b01100001010101110101; end
-            9'b110101011: begin segment = 6'd25; b = 20'b01100001010101111111; end
-            9'b110101100: begin segment = 6'd26; b = 20'b01011110110101001000; end
-            9'b110101101: begin segment = 6'd26; b = 20'b01011110110100111101; end
-            9'b110101110: begin segment = 6'd26; b = 20'b01011110110100110101; end
-            9'b110101111: begin segment = 6'd26; b = 20'b01011110110100101110; end
-            9'b110110000: begin segment = 6'd26; b = 20'b01011110110100101000; end
-            9'b110110001: begin segment = 6'd26; b = 20'b01011110110100100100; end
-            9'b110110010: begin segment = 6'd26; b = 20'b01011110110100100011; end
-            9'b110110011: begin segment = 6'd26; b = 20'b01011110110100100011; end
-            9'b110110100: begin segment = 6'd26; b = 20'b01011110110100100100; end
-            9'b110110101: begin segment = 6'd26; b = 20'b01011110110100101000; end
-            9'b110110110: begin segment = 6'd26; b = 20'b01011110110100101101; end
-            9'b110110111: begin segment = 6'd26; b = 20'b01011110110100110100; end
-            9'b110111000: begin segment = 6'd26; b = 20'b01011110110100111101; end
-            9'b110111001: begin segment = 6'd26; b = 20'b01011110110101000111; end
-            9'b110111010: begin segment = 6'd27; b = 20'b01011100001100010011; end
-            9'b110111011: begin segment = 6'd27; b = 20'b01011100001100001000; end
-            9'b110111100: begin segment = 6'd27; b = 20'b01011100001011111111; end
-            9'b110111101: begin segment = 6'd27; b = 20'b01011100001011111000; end
-            9'b110111110: begin segment = 6'd27; b = 20'b01011100001011110011; end
-            9'b110111111: begin segment = 6'd27; b = 20'b01011100001011101111; end
-            9'b111000000: begin segment = 6'd27; b = 20'b01011100001011101110; end
-            9'b111000001: begin segment = 6'd27; b = 20'b01011100001011101101; end
-            9'b111000010: begin segment = 6'd27; b = 20'b01011100001011110000; end
-            9'b111000011: begin segment = 6'd27; b = 20'b01011100001011110011; end
-            9'b111000100: begin segment = 6'd27; b = 20'b01011100001011111000; end
-            9'b111000101: begin segment = 6'd27; b = 20'b01011100001011111111; end
-            9'b111000110: begin segment = 6'd27; b = 20'b01011100001100001000; end
-            9'b111000111: begin segment = 6'd27; b = 20'b01011100001100010010; end
-            9'b111001000: begin segment = 6'd28; b = 20'b01011001011010001010; end
-            9'b111001001: begin segment = 6'd28; b = 20'b01011001011010000000; end
-            9'b111001010: begin segment = 6'd28; b = 20'b01011001011001110111; end
-            9'b111001011: begin segment = 6'd28; b = 20'b01011001011001110000; end
-            9'b111001100: begin segment = 6'd28; b = 20'b01011001011001101010; end
-            9'b111001101: begin segment = 6'd28; b = 20'b01011001011001100111; end
-            9'b111001110: begin segment = 6'd28; b = 20'b01011001011001100100; end
-            9'b111001111: begin segment = 6'd28; b = 20'b01011001011001100101; end
-            9'b111010000: begin segment = 6'd28; b = 20'b01011001011001100110; end
-            9'b111010001: begin segment = 6'd28; b = 20'b01011001011001101010; end
-            9'b111010010: begin segment = 6'd28; b = 20'b01011001011001101111; end
-            9'b111010011: begin segment = 6'd28; b = 20'b01011001011001110111; end
-            9'b111010100: begin segment = 6'd28; b = 20'b01011001011001111111; end
-            9'b111010101: begin segment = 6'd28; b = 20'b01011001011010001011; end
-            9'b111010110: begin segment = 6'd29; b = 20'b01010110011110111000; end
-            9'b111010111: begin segment = 6'd29; b = 20'b01010110011110101101; end
-            9'b111011000: begin segment = 6'd29; b = 20'b01010110011110100100; end
-            9'b111011001: begin segment = 6'd29; b = 20'b01010110011110011100; end
-            9'b111011010: begin segment = 6'd29; b = 20'b01010110011110010111; end
-            9'b111011011: begin segment = 6'd29; b = 20'b01010110011110010011; end
-            9'b111011100: begin segment = 6'd29; b = 20'b01010110011110010010; end
-            9'b111011101: begin segment = 6'd29; b = 20'b01010110011110010010; end
-            9'b111011110: begin segment = 6'd29; b = 20'b01010110011110010011; end
-            9'b111011111: begin segment = 6'd29; b = 20'b01010110011110010111; end
-            9'b111100000: begin segment = 6'd29; b = 20'b01010110011110011100; end
-            9'b111100001: begin segment = 6'd29; b = 20'b01010110011110100100; end
-            9'b111100010: begin segment = 6'd29; b = 20'b01010110011110101101; end
-            9'b111100011: begin segment = 6'd29; b = 20'b01010110011110111000; end
-            9'b111100100: begin segment = 6'd30; b = 20'b01010011011010001111; end
-            9'b111100101: begin segment = 6'd30; b = 20'b01010011011010000100; end
-            9'b111100110: begin segment = 6'd30; b = 20'b01010011011001111011; end
-            9'b111100111: begin segment = 6'd30; b = 20'b01010011011001110011; end
-            9'b111101000: begin segment = 6'd30; b = 20'b01010011011001101101; end
-            9'b111101001: begin segment = 6'd30; b = 20'b01010011011001101001; end
-            9'b111101010: begin segment = 6'd30; b = 20'b01010011011001100111; end
-            9'b111101011: begin segment = 6'd30; b = 20'b01010011011001100111; end
-            9'b111101100: begin segment = 6'd30; b = 20'b01010011011001101000; end
-            9'b111101101: begin segment = 6'd30; b = 20'b01010011011001101100; end
-            9'b111101110: begin segment = 6'd30; b = 20'b01010011011001110001; end
-            9'b111101111: begin segment = 6'd30; b = 20'b01010011011001111001; end
-            9'b111110000: begin segment = 6'd30; b = 20'b01010011011010000010; end
-            9'b111110001: begin segment = 6'd30; b = 20'b01010011011010001101; end
-            9'b111110010: begin segment = 6'd31; b = 20'b01010000001101111100; end
-            9'b111110011: begin segment = 6'd31; b = 20'b01010000001101110001; end
-            9'b111110100: begin segment = 6'd31; b = 20'b01010000001101100111; end
-            9'b111110101: begin segment = 6'd31; b = 20'b01010000001101011111; end
-            9'b111110110: begin segment = 6'd31; b = 20'b01010000001101011010; end
-            9'b111110111: begin segment = 6'd31; b = 20'b01010000001101010110; end
-            9'b111111000: begin segment = 6'd31; b = 20'b01010000001101010011; end
-            9'b111111001: begin segment = 6'd31; b = 20'b01010000001101010011; end
-            9'b111111010: begin segment = 6'd31; b = 20'b01010000001101010110; end
-            9'b111111011: begin segment = 6'd31; b = 20'b01010000001101011010; end
-            9'b111111100: begin segment = 6'd31; b = 20'b01010000001101011111; end
-            9'b111111101: begin segment = 6'd31; b = 20'b01010000001101100111; end
-            9'b111111110: begin segment = 6'd31; b = 20'b01010000001101110000; end
-            9'b111111111: begin segment = 6'd31; b = 20'b01010000001101111100; end
-      endcase
-    end
-
-// Auto-generated neg assignments for WIDTH=22
-    wire neg_1;
-    assign neg_1 = ~f[21];
-    wire [1:0] neg_2;
-    assign neg_2 = ~f[21:20];
-    wire [2:0] neg_3;
-    assign neg_3 = ~f[21:19];
-    wire [3:0] neg_4;
-    assign neg_4 = ~f[21:18];
-    wire [4:0] neg_5;
-    assign neg_5 = ~f[21:17];
-    wire [5:0] neg_6;
-    assign neg_6 = ~f[21:16];
-    wire [6:0] neg_7;
-    assign neg_7 = ~f[21:15];
-    wire [7:0] neg_8;
-    assign neg_8 = ~f[21:14];
-    wire [8:0] neg_9;
-    assign neg_9 = ~f[21:13];
-    wire [9:0] neg_10;
-    assign neg_10 = ~f[21:12];
-    wire [10:0] neg_11;
-    assign neg_11 = ~f[21:11];
-    wire [11:0] neg_12;
-    assign neg_12 = ~f[21:10];
-    wire [12:0] neg_13;
-    assign neg_13 = ~f[21:9];
-    wire [13:0] neg_14;
-    assign neg_14 = ~f[21:8];
-    wire [14:0] neg_15;
-    assign neg_15 = ~f[21:7];
-    wire [15:0] neg_16;
-    assign neg_16 = ~f[21:6];
-    wire [16:0] neg_17;
-    assign neg_17 = ~f[21:5];
-    wire [17:0] neg_18;
-    assign neg_18 = ~f[21:4];
-    wire [18:0] neg_19;
-    assign neg_19 = ~f[21:3];
-    wire [19:0] neg_20;
-    assign neg_20 = ~f[21:2];
-    wire [20:0] neg_21;
-    assign neg_21 = ~f[21:1];
-// End of auto-generated section
-
-
-// Auto-generated register declarations for 5 registers
-    reg [19:0] A1;
-    reg [19:0] A2;
-    reg [19:0] A3;
-    reg [19:0] A4;
-    reg [19:0] A5;
-// End of auto-generated section
-
-    always @(*) begin
-        case(segment)
-            6'd0: begin A1 = {3'b111, neg_17}; A2 = {5'b11111, neg_15}; A3 = {7'b0000000, f[21:9]}; A4 = {10'b1111111111, neg_10}; end
-            6'd1: begin A1 = {3'b111, neg_17}; A2 = {6'b111111, neg_14}; A3 = {11'b11111111111, neg_9}; A4 = {13'b1111111111111, neg_7}; end
-            6'd2: begin A1 = {3'b111, neg_17}; A2 = {7'b1111111, neg_13}; A3 = {10'b0000000000, f[21:12]}; A4 = {14'b11111111111111, neg_6}; end
-            6'd3: begin A1 = {3'b111, neg_17}; A2 = {9'b000000000, f[21:11]}; A3 = {11'b00000000000, f[21:13]}; A4 = {19'b1111111111111111111, neg_1}; end
-            6'd4: begin A1 = {3'b111, neg_17}; A2 = {6'b000000, f[21:8]}; A3 = {8'b11111111, neg_12}; A4 = {15'b000000000000000, f[21:17]}; end
-            6'd5: begin A1 = {3'b111, neg_17}; A2 = {5'b00000, f[21:7]}; A3 = {7'b1111111, neg_13}; A4 = {9'b111111111, neg_11}; end
-            6'd6: begin A1 = {3'b111, neg_17}; A2 = {5'b00000, f[21:7]}; A3 = {12'b111111111111, neg_8}; A4 = {14'b00000000000000, f[21:16]}; end
-            6'd7: begin A1 = {3'b111, neg_17}; A2 = {5'b00000, f[21:7]}; A3 = {7'b0000000, f[21:9]}; A4 = {9'b000000000, f[21:11]}; end
-            6'd8: begin A1 = {4'b1111, neg_16}; A2 = {6'b111111, neg_14}; A3 = {8'b00000000, f[21:10]}; A4 = {12'b000000000000, f[21:14]}; end
-            6'd9: begin A1 = {4'b1111, neg_16}; A2 = {9'b111111111, neg_11}; A3 = {11'b00000000000, f[21:13]}; A4 = {14'b11111111111111, neg_6}; end
-            6'd10: begin A1 = {4'b1111, neg_16}; A2 = {7'b0000000, f[21:9]}; A3 = {10'b0000000000, f[21:12]}; A4 = {12'b111111111111, neg_8}; end
-            6'd11: begin A1 = {4'b1111, neg_16}; A2 = {6'b000000, f[21:8]}; A3 = {8'b00000000, f[21:10]}; A4 = {11'b11111111111, neg_9}; end
-            6'd12: begin A1 = {5'b11111, neg_15}; A2 = {9'b111111111, neg_11}; A3 = {11'b00000000000, f[21:13]}; A4 = {13'b1111111111111, neg_7}; end
-            6'd13: begin A1 = {5'b11111, neg_15}; A2 = {7'b0000000, f[21:9]}; A3 = {10'b0000000000, f[21:12]}; A4 = {13'b0000000000000, f[21:15]}; end
-            6'd14: begin A1 = {6'b111111, neg_14}; A2 = {8'b00000000, f[21:10]}; A3 = {13'b1111111111111, neg_7}; A4 = {17'b11111111111111111, neg_3}; end
-            6'd15: begin A1 = {10'b1111111111, neg_10}; A2 = {12'b111111111111, neg_8}; A3 = {14'b00000000000000, f[21:16]}; A4 = {20'b00000000000000000000};end
-            6'd16: begin A1 = {7'b0000000, f[21:9]}; A2 = {9'b000000000, f[21:11]}; A3 = {20'b00000000000000000000};A4 = {20'b00000000000000000000};end
-            6'd17: begin A1 = {5'b00000, f[21:7]}; A2 = {7'b1111111, neg_13}; A3 = {9'b111111111, neg_11}; A4 = {11'b11111111111, neg_9}; end
-            6'd18: begin A1 = {5'b00000, f[21:7]}; A2 = {10'b0000000000, f[21:12]}; A3 = {12'b111111111111, neg_8}; A4 = {16'b1111111111111111, neg_4}; end
-            6'd19: begin A1 = {4'b0000, f[21:6]}; A2 = {6'b111111, neg_14}; A3 = {8'b11111111, neg_12}; A4 = {13'b1111111111111, neg_7}; end
-            6'd20: begin A1 = {4'b0000, f[21:6]}; A2 = {7'b1111111, neg_13}; A3 = {10'b1111111111, neg_10}; A4 = {12'b000000000000, f[21:14]}; end
-            6'd21: begin A1 = {4'b0000, f[21:6]}; A2 = {8'b00000000, f[21:10]}; A3 = {10'b1111111111, neg_10}; A4 = {14'b11111111111111, neg_6}; end
-            6'd22: begin A1 = {4'b0000, f[21:6]}; A2 = {6'b000000, f[21:8]}; A3 = {10'b1111111111, neg_10}; A4 = {13'b1111111111111, neg_7}; end
-            6'd23: begin A1 = {3'b000, f[21:5]}; A2 = {5'b11111, neg_15}; A3 = {8'b11111111, neg_12}; A4 = {10'b1111111111, neg_10}; end
-            6'd24: begin A1 = {3'b000, f[21:5]}; A2 = {5'b11111, neg_15}; A3 = {7'b0000000, f[21:9]}; A4 = {10'b1111111111, neg_10}; end
-            6'd25: begin A1 = {3'b000, f[21:5]}; A2 = {6'b111111, neg_14}; A3 = {8'b00000000, f[21:10]}; A4 = {11'b11111111111, neg_9}; end
-            6'd26: begin A1 = {3'b000, f[21:5]}; A2 = {11'b11111111111, neg_9}; A3 = {15'b000000000000000, f[21:17]}; A4 = {18'b111111111111111111, neg_2}; end
-            6'd27: begin A1 = {3'b000, f[21:5]}; A2 = {6'b000000, f[21:8]}; A3 = {8'b11111111, neg_12}; A4 = {12'b111111111111, neg_8}; end
-            6'd28: begin A1 = {3'b000, f[21:5]}; A2 = {5'b00000, f[21:7]}; A3 = {7'b1111111, neg_13}; A4 = {12'b000000000000, f[21:14]}; end
-            6'd29: begin A1 = {3'b000, f[21:5]}; A2 = {5'b00000, f[21:7]}; A3 = {8'b00000000, f[21:10]}; A4 = {10'b0000000000, f[21:12]}; end
-            6'd30: begin A1 = {2'b00, f[21:4]}; A2 = {4'b1111, neg_16}; A3 = {6'b111111, neg_14}; A4 = {9'b000000000, f[21:11]}; end
-            6'd31: begin A1 = {2'b00, f[21:4]}; A2 = {4'b1111, neg_16}; A3 = {10'b1111111111, neg_10}; A4 = {13'b0000000000000, f[21:15]}; end
-            default begin A1 = 20'b0; A2 = 20'b0; A3 = 20'b0; A4 = 20'b0; end  //fixed: default case to avoid latches
-      endcase
-    end
-
-// Auto-generated CSA tree for final_N=5, final_M=22, final_add_M=19
-    wire [19:0] csa1_carry, csa1_sum;
-    wire [19:0] csa2_carry, csa2_sum;
-    wire [19:0] csa3_carry, csa3_sum;
-    wire [19:0] csa4_carry, csa4_sum;
-    wire [19:0] final_sum;
-
-    CSA_anticonv3 csa1 (
-        .a({1'b0, f[21:3]}),  // f的高19位
-        .b(A1),
-        .c(A2),
-        .sum(csa1_sum),
-        .carry(csa1_carry)
-    );
-
-    CSA_anticonv3 csa2 (
-        .a(csa1_sum),
-        .b(A3),
-        .c({csa1_carry[18:0], 1'b0}),  // 左移1位
-        .sum(csa2_sum),
-        .carry(csa2_carry)
-    );
-
-    CSA_anticonv3 csa3 (
-        .a(csa2_sum),
-        .b(A4),
-        .c({csa2_carry[18:0], 1'b0}),  // 左移1位
-        .sum(csa3_sum),
-        .carry(csa3_carry)
-    );
-
-    CSA_anticonv3 csa4 (
-        .a(csa3_sum),
-         .b(b),
-        .c({csa3_carry[18:0], 1'b0}),
-        .sum(csa4_sum),
-        .carry(csa4_carry)
-    );
-
-    CPA_anticonv3 cpa (
-        .a(csa4_sum),
-        .b({csa4_carry[18:0], 1'b0}),  // 左移1位
-        .sum(final_sum)
-    );
-
-    assign f_e2_out = {final_sum, f[2:0]};  // 拼接高位和原始低位
-// End of auto-generated CSA tree
-
-endmodule
-module CSA_anticonv3 #(parameter ADD_WIDTH = 20
-)(
-    input [ADD_WIDTH-1:0] a,
-    input [ADD_WIDTH-1:0] b,
-    input [ADD_WIDTH-1:0] c,
-    output [ADD_WIDTH-1:0] sum,
-    output [ADD_WIDTH-1:0] carry
-);
-    assign sum = a ^ b ^ c;          // XOR for sum
-    assign carry = (a & b) | (b & c) | (c & a); // Majority logic for carry
-endmodule
-
-// Carry-Propagate Adder (CPA) module
-module CPA_anticonv3 #(parameter ADD_WIDTH = 20
-)(
-    input [ADD_WIDTH-1:0] a,
-    input [ADD_WIDTH-1:0] b,
-    output [ADD_WIDTH-1:0] sum
-);
-    assign sum = a + b;  // Simple binary addition
-endmodule
-
-
 
 
 module converter #(parameter WIDTH = 32,
@@ -68801,62 +64830,4042 @@ module CPA_conv3 #(parameter ADD_WIDTH = 19
     assign sum = a + b;  // Simple binary addition
 endmodule
 
-// `timescale 1ns / 1ps
-//@yuan: adding support for float-point number
-//TODO: adding support for NaN, Inf
-module segSel #(parameter WIDTH32 = 32  
+module anticonverter#(parameter WIDTH = 32,
+                          parameter WIDTH32 = 32  
 )(
-    input [WIDTH32 - 1:0] x_in,
-    input is_fp,
-    input [5*WIDTH32 - 1:0] break_points_in,
-    output [4:0] log2_out
+    input [WIDTH-1:0] x,
+    input float_flag,
+    input Tri_overflow_one,
+    input [4:0] n,
+    output [WIDTH32-1:0] x_output
 );
-    reg [WIDTH32 - 1:0] break_point [4:0];
-    reg break_point_sign [4:0];
-    integer i;
-    always@(*)begin
-        for(i = 0; i < 5; i = i + 1)begin
-            if(is_fp)begin
-                break_point[i] = {1'b0, break_points_in[(i+1)*WIDTH32 - 2 -: (WIDTH32 - 1)]} ; //@yuan: for float-point, we only need the significand/fraction field
-            end 
-            else begin
-                break_point[i] = break_points_in[(i+1)*WIDTH32 - 1 -: WIDTH32];
-            end 
-            break_point_sign[i] = break_points_in[(i+1)*WIDTH32 - 1];
-        end //fixed <=
+
+    wire [22:0] f_e2_out;
+    APP_22_20_10_4_32_anticonv4 app_anti(
+        .f(x[21:0]),
+        .f_e2_out(f_e2_out)
+    );
+    wire [7:0] shift;
+    wire [WIDTH32-1:0] result;
+    //相当于f_e2_out还是24位，只是后面位全部为0
+    // assign  shift = {3'b0, n} + 8'b11101001 + x[29:22];
+    assign  shift = {3'b0, n} + x[29:22];
+    // assign  shift = x[21:16] + 1'b1;
+    wire [22:0] app_result;
+    assign app_result = (f_e2_out[22]==1'b1) ? f_e2_out : {1'b1, 22'b0};
+    new_Shift_operation32 shift_op(
+        .shift(shift),
+        .e({app_result, 1'b0}),  // 24-bit signed input signal
+        .result(result)
+    );
+    wire [7:0] float_e_temp;
+    assign float_e_temp = 8'b01111111 + x[29:22];
+    wire [7:0] float_e;
+    assign float_e = (float_e_temp == 8'b11111111) ? 8'b00000000 : float_e_temp;
+    wire [WIDTH32-1:0] final_result_fix;
+    assign  final_result_fix = (x[30]== 1'b1) ? (~result + 1'b1) : result;
+    wire [WIDTH32-1:0] final_result_float;
+    assign final_result_float = {x[30], float_e, app_result[21:0], 1'b0};
+    wire [WIDTH32-1:0] final_result;
+    assign final_result = (float_flag == 1'b1) ? final_result_float: final_result_fix;
+    assign  x_output = (x[31] == 1'b1 || Tri_overflow_one == 1'b1) ? 32'd0 : final_result;
+endmodule
+
+
+module  APP_22_20_10_4_32_anticonv4(
+    input [21:0] f,               // 22-bit input
+    output [22:0] f_e2_out     // 23-bit output 
+);
+    reg [5:0] segment;
+    reg [20:0] b;
+    always @(*) begin
+        case(f[21:12])
+            10'b0000000000: begin segment = 6'd0; b = 21'b011111111111111111100; end
+            10'b0000000001: begin segment = 6'd0; b = 21'b011111111111111110010; end
+            10'b0000000010: begin segment = 6'd0; b = 21'b011111111111111101001; end
+            10'b0000000011: begin segment = 6'd0; b = 21'b011111111111111100000; end
+            10'b0000000100: begin segment = 6'd0; b = 21'b011111111111111011000; end
+            10'b0000000101: begin segment = 6'd0; b = 21'b011111111111111010000; end
+            10'b0000000110: begin segment = 6'd0; b = 21'b011111111111111001001; end
+            10'b0000000111: begin segment = 6'd0; b = 21'b011111111111111000010; end
+            10'b0000001000: begin segment = 6'd0; b = 21'b011111111111110111100; end
+            10'b0000001001: begin segment = 6'd0; b = 21'b011111111111110110110; end
+            10'b0000001010: begin segment = 6'd0; b = 21'b011111111111110110000; end
+            10'b0000001011: begin segment = 6'd0; b = 21'b011111111111110101100; end
+            10'b0000001100: begin segment = 6'd0; b = 21'b011111111111110100111; end
+            10'b0000001101: begin segment = 6'd0; b = 21'b011111111111110100011; end
+            10'b0000001110: begin segment = 6'd0; b = 21'b011111111111110100000; end
+            10'b0000001111: begin segment = 6'd0; b = 21'b011111111111110011101; end
+            10'b0000010000: begin segment = 6'd0; b = 21'b011111111111110011010; end
+            10'b0000010001: begin segment = 6'd0; b = 21'b011111111111110011000; end
+            10'b0000010010: begin segment = 6'd0; b = 21'b011111111111110010111; end
+            10'b0000010011: begin segment = 6'd0; b = 21'b011111111111110010110; end
+            10'b0000010100: begin segment = 6'd0; b = 21'b011111111111110010101; end
+            10'b0000010101: begin segment = 6'd0; b = 21'b011111111111110010101; end
+            10'b0000010110: begin segment = 6'd0; b = 21'b011111111111110010110; end
+            10'b0000010111: begin segment = 6'd0; b = 21'b011111111111110010110; end
+            10'b0000011000: begin segment = 6'd0; b = 21'b011111111111110011000; end
+            10'b0000011001: begin segment = 6'd0; b = 21'b011111111111110011010; end
+            10'b0000011010: begin segment = 6'd0; b = 21'b011111111111110011100; end
+            10'b0000011011: begin segment = 6'd0; b = 21'b011111111111110011111; end
+            10'b0000011100: begin segment = 6'd0; b = 21'b011111111111110100010; end
+            10'b0000011101: begin segment = 6'd0; b = 21'b011111111111110100110; end
+            10'b0000011110: begin segment = 6'd0; b = 21'b011111111111110101011; end
+            10'b0000011111: begin segment = 6'd0; b = 21'b011111111111110101111; end
+            10'b0000100000: begin segment = 6'd0; b = 21'b011111111111110110101; end
+            10'b0000100001: begin segment = 6'd0; b = 21'b011111111111110111011; end
+            10'b0000100010: begin segment = 6'd0; b = 21'b011111111111111000001; end
+            10'b0000100011: begin segment = 6'd1; b = 21'b011111111110110000111; end
+            10'b0000100100: begin segment = 6'd1; b = 21'b011111111110101111101; end
+            10'b0000100101: begin segment = 6'd1; b = 21'b011111111110101110101; end
+            10'b0000100110: begin segment = 6'd1; b = 21'b011111111110101101110; end
+            10'b0000100111: begin segment = 6'd1; b = 21'b011111111110101100110; end
+            10'b0000101000: begin segment = 6'd1; b = 21'b011111111110101011111; end
+            10'b0000101001: begin segment = 6'd1; b = 21'b011111111110101011000; end
+            10'b0000101010: begin segment = 6'd1; b = 21'b011111111110101010011; end
+            10'b0000101011: begin segment = 6'd1; b = 21'b011111111110101001101; end
+            10'b0000101100: begin segment = 6'd1; b = 21'b011111111110101001000; end
+            10'b0000101101: begin segment = 6'd1; b = 21'b011111111110101000011; end
+            10'b0000101110: begin segment = 6'd1; b = 21'b011111111110101000000; end
+            10'b0000101111: begin segment = 6'd1; b = 21'b011111111110100111100; end
+            10'b0000110000: begin segment = 6'd1; b = 21'b011111111110100111000; end
+            10'b0000110001: begin segment = 6'd1; b = 21'b011111111110100110110; end
+            10'b0000110010: begin segment = 6'd1; b = 21'b011111111110100110100; end
+            10'b0000110011: begin segment = 6'd1; b = 21'b011111111110100110011; end
+            10'b0000110100: begin segment = 6'd1; b = 21'b011111111110100110001; end
+            10'b0000110101: begin segment = 6'd1; b = 21'b011111111110100110001; end
+            10'b0000110110: begin segment = 6'd1; b = 21'b011111111110100110001; end
+            10'b0000110111: begin segment = 6'd1; b = 21'b011111111110100110010; end
+            10'b0000111000: begin segment = 6'd1; b = 21'b011111111110100110010; end
+            10'b0000111001: begin segment = 6'd1; b = 21'b011111111110100110100; end
+            10'b0000111010: begin segment = 6'd1; b = 21'b011111111110100110110; end
+            10'b0000111011: begin segment = 6'd1; b = 21'b011111111110100111001; end
+            10'b0000111100: begin segment = 6'd1; b = 21'b011111111110100111011; end
+            10'b0000111101: begin segment = 6'd1; b = 21'b011111111110100111111; end
+            10'b0000111110: begin segment = 6'd1; b = 21'b011111111110101000011; end
+            10'b0000111111: begin segment = 6'd1; b = 21'b011111111110101001000; end
+            10'b0001000000: begin segment = 6'd1; b = 21'b011111111110101001100; end
+            10'b0001000001: begin segment = 6'd1; b = 21'b011111111110101010001; end
+            10'b0001000010: begin segment = 6'd1; b = 21'b011111111110101011000; end
+            10'b0001000011: begin segment = 6'd1; b = 21'b011111111110101011110; end
+            10'b0001000100: begin segment = 6'd1; b = 21'b011111111110101100101; end
+            10'b0001000101: begin segment = 6'd1; b = 21'b011111111110101101100; end
+            10'b0001000110: begin segment = 6'd1; b = 21'b011111111110101110101; end
+            10'b0001000111: begin segment = 6'd1; b = 21'b011111111110101111101; end
+            10'b0001001000: begin segment = 6'd1; b = 21'b011111111110110000110; end
+            10'b0001001001: begin segment = 6'd2; b = 21'b011111111011111100100; end
+            10'b0001001010: begin segment = 6'd2; b = 21'b011111111011111011010; end
+            10'b0001001011: begin segment = 6'd2; b = 21'b011111111011111010001; end
+            10'b0001001100: begin segment = 6'd2; b = 21'b011111111011111001000; end
+            10'b0001001101: begin segment = 6'd2; b = 21'b011111111011111000000; end
+            10'b0001001110: begin segment = 6'd2; b = 21'b011111111011110111000; end
+            10'b0001001111: begin segment = 6'd2; b = 21'b011111111011110110001; end
+            10'b0001010000: begin segment = 6'd2; b = 21'b011111111011110101010; end
+            10'b0001010001: begin segment = 6'd2; b = 21'b011111111011110100100; end
+            10'b0001010010: begin segment = 6'd2; b = 21'b011111111011110011110; end
+            10'b0001010011: begin segment = 6'd2; b = 21'b011111111011110011001; end
+            10'b0001010100: begin segment = 6'd2; b = 21'b011111111011110010100; end
+            10'b0001010101: begin segment = 6'd2; b = 21'b011111111011110010000; end
+            10'b0001010110: begin segment = 6'd2; b = 21'b011111111011110001100; end
+            10'b0001010111: begin segment = 6'd2; b = 21'b011111111011110001001; end
+            10'b0001011000: begin segment = 6'd2; b = 21'b011111111011110000111; end
+            10'b0001011001: begin segment = 6'd2; b = 21'b011111111011110000100; end
+            10'b0001011010: begin segment = 6'd2; b = 21'b011111111011110000011; end
+            10'b0001011011: begin segment = 6'd2; b = 21'b011111111011110000010; end
+            10'b0001011100: begin segment = 6'd2; b = 21'b011111111011110000001; end
+            10'b0001011101: begin segment = 6'd2; b = 21'b011111111011110000001; end
+            10'b0001011110: begin segment = 6'd2; b = 21'b011111111011110000001; end
+            10'b0001011111: begin segment = 6'd2; b = 21'b011111111011110000010; end
+            10'b0001100000: begin segment = 6'd2; b = 21'b011111111011110000100; end
+            10'b0001100001: begin segment = 6'd2; b = 21'b011111111011110000110; end
+            10'b0001100010: begin segment = 6'd2; b = 21'b011111111011110001000; end
+            10'b0001100011: begin segment = 6'd2; b = 21'b011111111011110001011; end
+            10'b0001100100: begin segment = 6'd2; b = 21'b011111111011110001111; end
+            10'b0001100101: begin segment = 6'd2; b = 21'b011111111011110010011; end
+            10'b0001100110: begin segment = 6'd2; b = 21'b011111111011110010111; end
+            10'b0001100111: begin segment = 6'd2; b = 21'b011111111011110011100; end
+            10'b0001101000: begin segment = 6'd2; b = 21'b011111111011110100010; end
+            10'b0001101001: begin segment = 6'd2; b = 21'b011111111011110101000; end
+            10'b0001101010: begin segment = 6'd2; b = 21'b011111111011110101110; end
+            10'b0001101011: begin segment = 6'd2; b = 21'b011111111011110110110; end
+            10'b0001101100: begin segment = 6'd2; b = 21'b011111111011110111101; end
+            10'b0001101101: begin segment = 6'd2; b = 21'b011111111011111000101; end
+            10'b0001101110: begin segment = 6'd3; b = 21'b011111111000000001001; end
+            10'b0001101111: begin segment = 6'd3; b = 21'b011111111000000000000; end
+            10'b0001110000: begin segment = 6'd3; b = 21'b011111110111111111000; end
+            10'b0001110001: begin segment = 6'd3; b = 21'b011111110111111110000; end
+            10'b0001110010: begin segment = 6'd3; b = 21'b011111110111111101001; end
+            10'b0001110011: begin segment = 6'd3; b = 21'b011111110111111100010; end
+            10'b0001110100: begin segment = 6'd3; b = 21'b011111110111111011100; end
+            10'b0001110101: begin segment = 6'd3; b = 21'b011111110111111010110; end
+            10'b0001110110: begin segment = 6'd3; b = 21'b011111110111111010001; end
+            10'b0001110111: begin segment = 6'd3; b = 21'b011111110111111001100; end
+            10'b0001111000: begin segment = 6'd3; b = 21'b011111110111111001000; end
+            10'b0001111001: begin segment = 6'd3; b = 21'b011111110111111000100; end
+            10'b0001111010: begin segment = 6'd3; b = 21'b011111110111111000001; end
+            10'b0001111011: begin segment = 6'd3; b = 21'b011111110111110111111; end
+            10'b0001111100: begin segment = 6'd3; b = 21'b011111110111110111101; end
+            10'b0001111101: begin segment = 6'd3; b = 21'b011111110111110111011; end
+            10'b0001111110: begin segment = 6'd3; b = 21'b011111110111110111010; end
+            10'b0001111111: begin segment = 6'd3; b = 21'b011111110111110111001; end
+            10'b0010000000: begin segment = 6'd3; b = 21'b011111110111110111001; end
+            10'b0010000001: begin segment = 6'd3; b = 21'b011111110111110111010; end
+            10'b0010000010: begin segment = 6'd3; b = 21'b011111110111110111011; end
+            10'b0010000011: begin segment = 6'd3; b = 21'b011111110111110111101; end
+            10'b0010000100: begin segment = 6'd3; b = 21'b011111110111110111111; end
+            10'b0010000101: begin segment = 6'd3; b = 21'b011111110111111000010; end
+            10'b0010000110: begin segment = 6'd3; b = 21'b011111110111111000101; end
+            10'b0010000111: begin segment = 6'd3; b = 21'b011111110111111001000; end
+            10'b0010001000: begin segment = 6'd3; b = 21'b011111110111111001101; end
+            10'b0010001001: begin segment = 6'd3; b = 21'b011111110111111010001; end
+            10'b0010001010: begin segment = 6'd3; b = 21'b011111110111111010111; end
+            10'b0010001011: begin segment = 6'd3; b = 21'b011111110111111011100; end
+            10'b0010001100: begin segment = 6'd3; b = 21'b011111110111111100011; end
+            10'b0010001101: begin segment = 6'd3; b = 21'b011111110111111101010; end
+            10'b0010001110: begin segment = 6'd3; b = 21'b011111110111111110001; end
+            10'b0010001111: begin segment = 6'd3; b = 21'b011111110111111111001; end
+            10'b0010010000: begin segment = 6'd3; b = 21'b011111111000000000001; end
+            10'b0010010001: begin segment = 6'd3; b = 21'b011111111000000001010; end
+            10'b0010010010: begin segment = 6'd3; b = 21'b011111111000000010100; end
+            10'b0010010011: begin segment = 6'd4; b = 21'b011111110010110111111; end
+            10'b0010010100: begin segment = 6'd4; b = 21'b011111110010110111000; end
+            10'b0010010101: begin segment = 6'd4; b = 21'b011111110010110110001; end
+            10'b0010010110: begin segment = 6'd4; b = 21'b011111110010110101010; end
+            10'b0010010111: begin segment = 6'd4; b = 21'b011111110010110100100; end
+            10'b0010011000: begin segment = 6'd4; b = 21'b011111110010110011111; end
+            10'b0010011001: begin segment = 6'd4; b = 21'b011111110010110011010; end
+            10'b0010011010: begin segment = 6'd4; b = 21'b011111110010110010110; end
+            10'b0010011011: begin segment = 6'd4; b = 21'b011111110010110010010; end
+            10'b0010011100: begin segment = 6'd4; b = 21'b011111110010110001111; end
+            10'b0010011101: begin segment = 6'd4; b = 21'b011111110010110001101; end
+            10'b0010011110: begin segment = 6'd4; b = 21'b011111110010110001011; end
+            10'b0010011111: begin segment = 6'd4; b = 21'b011111110010110001001; end
+            10'b0010100000: begin segment = 6'd4; b = 21'b011111110010110001000; end
+            10'b0010100001: begin segment = 6'd4; b = 21'b011111110010110000111; end
+            10'b0010100010: begin segment = 6'd4; b = 21'b011111110010110000111; end
+            10'b0010100011: begin segment = 6'd4; b = 21'b011111110010110001000; end
+            10'b0010100100: begin segment = 6'd4; b = 21'b011111110010110001001; end
+            10'b0010100101: begin segment = 6'd4; b = 21'b011111110010110001011; end
+            10'b0010100110: begin segment = 6'd4; b = 21'b011111110010110001101; end
+            10'b0010100111: begin segment = 6'd4; b = 21'b011111110010110010000; end
+            10'b0010101000: begin segment = 6'd4; b = 21'b011111110010110010011; end
+            10'b0010101001: begin segment = 6'd4; b = 21'b011111110010110010111; end
+            10'b0010101010: begin segment = 6'd4; b = 21'b011111110010110011011; end
+            10'b0010101011: begin segment = 6'd4; b = 21'b011111110010110100000; end
+            10'b0010101100: begin segment = 6'd4; b = 21'b011111110010110100101; end
+            10'b0010101101: begin segment = 6'd4; b = 21'b011111110010110101011; end
+            10'b0010101110: begin segment = 6'd4; b = 21'b011111110010110110010; end
+            10'b0010101111: begin segment = 6'd4; b = 21'b011111110010110111001; end
+            10'b0010110000: begin segment = 6'd4; b = 21'b011111110010111000001; end
+            10'b0010110001: begin segment = 6'd4; b = 21'b011111110010111001001; end
+            10'b0010110010: begin segment = 6'd4; b = 21'b011111110010111010001; end
+            10'b0010110011: begin segment = 6'd4; b = 21'b011111110010111011011; end
+            10'b0010110100: begin segment = 6'd4; b = 21'b011111110010111100100; end
+            10'b0010110101: begin segment = 6'd4; b = 21'b011111110010111101111; end
+            10'b0010110110: begin segment = 6'd4; b = 21'b011111110010111111010; end
+            10'b0010110111: begin segment = 6'd5; b = 21'b011111101010011010001; end
+            10'b0010111000: begin segment = 6'd5; b = 21'b011111101010011000101; end
+            10'b0010111001: begin segment = 6'd5; b = 21'b011111101010010111001; end
+            10'b0010111010: begin segment = 6'd5; b = 21'b011111101010010101110; end
+            10'b0010111011: begin segment = 6'd5; b = 21'b011111101010010100100; end
+            10'b0010111100: begin segment = 6'd5; b = 21'b011111101010010011010; end
+            10'b0010111101: begin segment = 6'd5; b = 21'b011111101010010010001; end
+            10'b0010111110: begin segment = 6'd5; b = 21'b011111101010010001000; end
+            10'b0010111111: begin segment = 6'd5; b = 21'b011111101010010000000; end
+            10'b0011000000: begin segment = 6'd5; b = 21'b011111101010001111000; end
+            10'b0011000001: begin segment = 6'd5; b = 21'b011111101010001110001; end
+            10'b0011000010: begin segment = 6'd5; b = 21'b011111101010001101010; end
+            10'b0011000011: begin segment = 6'd5; b = 21'b011111101010001100100; end
+            10'b0011000100: begin segment = 6'd5; b = 21'b011111101010001011110; end
+            10'b0011000101: begin segment = 6'd5; b = 21'b011111101010001011010; end
+            10'b0011000110: begin segment = 6'd5; b = 21'b011111101010001010101; end
+            10'b0011000111: begin segment = 6'd5; b = 21'b011111101010001010001; end
+            10'b0011001000: begin segment = 6'd5; b = 21'b011111101010001001110; end
+            10'b0011001001: begin segment = 6'd5; b = 21'b011111101010001001011; end
+            10'b0011001010: begin segment = 6'd5; b = 21'b011111101010001001001; end
+            10'b0011001011: begin segment = 6'd5; b = 21'b011111101010001000111; end
+            10'b0011001100: begin segment = 6'd5; b = 21'b011111101010001000110; end
+            10'b0011001101: begin segment = 6'd5; b = 21'b011111101010001000110; end
+            10'b0011001110: begin segment = 6'd5; b = 21'b011111101010001000110; end
+            10'b0011001111: begin segment = 6'd5; b = 21'b011111101010001000110; end
+            10'b0011010000: begin segment = 6'd5; b = 21'b011111101010001000111; end
+            10'b0011010001: begin segment = 6'd5; b = 21'b011111101010001001001; end
+            10'b0011010010: begin segment = 6'd5; b = 21'b011111101010001001011; end
+            10'b0011010011: begin segment = 6'd5; b = 21'b011111101010001001110; end
+            10'b0011010100: begin segment = 6'd5; b = 21'b011111101010001010001; end
+            10'b0011010101: begin segment = 6'd5; b = 21'b011111101010001010101; end
+            10'b0011010110: begin segment = 6'd5; b = 21'b011111101010001011001; end
+            10'b0011010111: begin segment = 6'd5; b = 21'b011111101010001011110; end
+            10'b0011011000: begin segment = 6'd5; b = 21'b011111101010001100100; end
+            10'b0011011001: begin segment = 6'd5; b = 21'b011111101010001101010; end
+            10'b0011011010: begin segment = 6'd5; b = 21'b011111101010001110001; end
+            10'b0011011011: begin segment = 6'd6; b = 21'b011111100010111100100; end
+            10'b0011011100: begin segment = 6'd6; b = 21'b011111100010111011011; end
+            10'b0011011101: begin segment = 6'd6; b = 21'b011111100010111010010; end
+            10'b0011011110: begin segment = 6'd6; b = 21'b011111100010111001010; end
+            10'b0011011111: begin segment = 6'd6; b = 21'b011111100010111000010; end
+            10'b0011100000: begin segment = 6'd6; b = 21'b011111100010110111011; end
+            10'b0011100001: begin segment = 6'd6; b = 21'b011111100010110110101; end
+            10'b0011100010: begin segment = 6'd6; b = 21'b011111100010110101111; end
+            10'b0011100011: begin segment = 6'd6; b = 21'b011111100010110101010; end
+            10'b0011100100: begin segment = 6'd6; b = 21'b011111100010110100101; end
+            10'b0011100101: begin segment = 6'd6; b = 21'b011111100010110100001; end
+            10'b0011100110: begin segment = 6'd6; b = 21'b011111100010110011101; end
+            10'b0011100111: begin segment = 6'd6; b = 21'b011111100010110011010; end
+            10'b0011101000: begin segment = 6'd6; b = 21'b011111100010110011000; end
+            10'b0011101001: begin segment = 6'd6; b = 21'b011111100010110010110; end
+            10'b0011101010: begin segment = 6'd6; b = 21'b011111100010110010100; end
+            10'b0011101011: begin segment = 6'd6; b = 21'b011111100010110010100; end
+            10'b0011101100: begin segment = 6'd6; b = 21'b011111100010110010011; end
+            10'b0011101101: begin segment = 6'd6; b = 21'b011111100010110010100; end
+            10'b0011101110: begin segment = 6'd6; b = 21'b011111100010110010100; end
+            10'b0011101111: begin segment = 6'd6; b = 21'b011111100010110010110; end
+            10'b0011110000: begin segment = 6'd6; b = 21'b011111100010110011000; end
+            10'b0011110001: begin segment = 6'd6; b = 21'b011111100010110011010; end
+            10'b0011110010: begin segment = 6'd6; b = 21'b011111100010110011110; end
+            10'b0011110011: begin segment = 6'd6; b = 21'b011111100010110100001; end
+            10'b0011110100: begin segment = 6'd6; b = 21'b011111100010110100110; end
+            10'b0011110101: begin segment = 6'd6; b = 21'b011111100010110101010; end
+            10'b0011110110: begin segment = 6'd6; b = 21'b011111100010110110000; end
+            10'b0011110111: begin segment = 6'd6; b = 21'b011111100010110110110; end
+            10'b0011111000: begin segment = 6'd6; b = 21'b011111100010110111100; end
+            10'b0011111001: begin segment = 6'd6; b = 21'b011111100010111000011; end
+            10'b0011111010: begin segment = 6'd6; b = 21'b011111100010111001011; end
+            10'b0011111011: begin segment = 6'd6; b = 21'b011111100010111010011; end
+            10'b0011111100: begin segment = 6'd6; b = 21'b011111100010111011100; end
+            10'b0011111101: begin segment = 6'd6; b = 21'b011111100010111100101; end
+            10'b0011111110: begin segment = 6'd7; b = 21'b011111011011100000110; end
+            10'b0011111111: begin segment = 6'd7; b = 21'b011111011011100000001; end
+            10'b0100000000: begin segment = 6'd7; b = 21'b011111011011011111101; end
+            10'b0100000001: begin segment = 6'd7; b = 21'b011111011011011111010; end
+            10'b0100000010: begin segment = 6'd7; b = 21'b011111011011011110111; end
+            10'b0100000011: begin segment = 6'd7; b = 21'b011111011011011110101; end
+            10'b0100000100: begin segment = 6'd7; b = 21'b011111011011011110011; end
+            10'b0100000101: begin segment = 6'd7; b = 21'b011111011011011110010; end
+            10'b0100000110: begin segment = 6'd7; b = 21'b011111011011011110010; end
+            10'b0100000111: begin segment = 6'd7; b = 21'b011111011011011110010; end
+            10'b0100001000: begin segment = 6'd7; b = 21'b011111011011011110011; end
+            10'b0100001001: begin segment = 6'd7; b = 21'b011111011011011110100; end
+            10'b0100001010: begin segment = 6'd7; b = 21'b011111011011011110110; end
+            10'b0100001011: begin segment = 6'd7; b = 21'b011111011011011111000; end
+            10'b0100001100: begin segment = 6'd7; b = 21'b011111011011011111011; end
+            10'b0100001101: begin segment = 6'd7; b = 21'b011111011011011111111; end
+            10'b0100001110: begin segment = 6'd7; b = 21'b011111011011100000011; end
+            10'b0100001111: begin segment = 6'd7; b = 21'b011111011011100000111; end
+            10'b0100010000: begin segment = 6'd7; b = 21'b011111011011100001101; end
+            10'b0100010001: begin segment = 6'd7; b = 21'b011111011011100010010; end
+            10'b0100010010: begin segment = 6'd7; b = 21'b011111011011100011001; end
+            10'b0100010011: begin segment = 6'd7; b = 21'b011111011011100100000; end
+            10'b0100010100: begin segment = 6'd7; b = 21'b011111011011100100111; end
+            10'b0100010101: begin segment = 6'd7; b = 21'b011111011011100110000; end
+            10'b0100010110: begin segment = 6'd7; b = 21'b011111011011100111000; end
+            10'b0100010111: begin segment = 6'd7; b = 21'b011111011011101000010; end
+            10'b0100011000: begin segment = 6'd7; b = 21'b011111011011101001100; end
+            10'b0100011001: begin segment = 6'd7; b = 21'b011111011011101010110; end
+            10'b0100011010: begin segment = 6'd7; b = 21'b011111011011101100001; end
+            10'b0100011011: begin segment = 6'd7; b = 21'b011111011011101101101; end
+            10'b0100011100: begin segment = 6'd7; b = 21'b011111011011101111001; end
+            10'b0100011101: begin segment = 6'd7; b = 21'b011111011011110000110; end
+            10'b0100011110: begin segment = 6'd7; b = 21'b011111011011110010011; end
+            10'b0100011111: begin segment = 6'd7; b = 21'b011111011011110100001; end
+            10'b0100100000: begin segment = 6'd7; b = 21'b011111011011110110000; end
+            10'b0100100001: begin segment = 6'd8; b = 21'b011111001110010011011; end
+            10'b0100100010: begin segment = 6'd8; b = 21'b011111001110010010011; end
+            10'b0100100011: begin segment = 6'd8; b = 21'b011111001110010001011; end
+            10'b0100100100: begin segment = 6'd8; b = 21'b011111001110010000100; end
+            10'b0100100101: begin segment = 6'd8; b = 21'b011111001110001111101; end
+            10'b0100100110: begin segment = 6'd8; b = 21'b011111001110001110111; end
+            10'b0100100111: begin segment = 6'd8; b = 21'b011111001110001110010; end
+            10'b0100101000: begin segment = 6'd8; b = 21'b011111001110001101101; end
+            10'b0100101001: begin segment = 6'd8; b = 21'b011111001110001101001; end
+            10'b0100101010: begin segment = 6'd8; b = 21'b011111001110001100110; end
+            10'b0100101011: begin segment = 6'd8; b = 21'b011111001110001100011; end
+            10'b0100101100: begin segment = 6'd8; b = 21'b011111001110001100000; end
+            10'b0100101101: begin segment = 6'd8; b = 21'b011111001110001011110; end
+            10'b0100101110: begin segment = 6'd8; b = 21'b011111001110001011101; end
+            10'b0100101111: begin segment = 6'd8; b = 21'b011111001110001011100; end
+            10'b0100110000: begin segment = 6'd8; b = 21'b011111001110001011100; end
+            10'b0100110001: begin segment = 6'd8; b = 21'b011111001110001011101; end
+            10'b0100110010: begin segment = 6'd8; b = 21'b011111001110001011110; end
+            10'b0100110011: begin segment = 6'd8; b = 21'b011111001110001100000; end
+            10'b0100110100: begin segment = 6'd8; b = 21'b011111001110001100010; end
+            10'b0100110101: begin segment = 6'd8; b = 21'b011111001110001100101; end
+            10'b0100110110: begin segment = 6'd8; b = 21'b011111001110001101001; end
+            10'b0100110111: begin segment = 6'd8; b = 21'b011111001110001101101; end
+            10'b0100111000: begin segment = 6'd8; b = 21'b011111001110001110001; end
+            10'b0100111001: begin segment = 6'd8; b = 21'b011111001110001110111; end
+            10'b0100111010: begin segment = 6'd8; b = 21'b011111001110001111101; end
+            10'b0100111011: begin segment = 6'd8; b = 21'b011111001110010000011; end
+            10'b0100111100: begin segment = 6'd8; b = 21'b011111001110010001010; end
+            10'b0100111101: begin segment = 6'd8; b = 21'b011111001110010010010; end
+            10'b0100111110: begin segment = 6'd8; b = 21'b011111001110010011010; end
+            10'b0100111111: begin segment = 6'd8; b = 21'b011111001110010100011; end
+            10'b0101000000: begin segment = 6'd8; b = 21'b011111001110010101100; end
+            10'b0101000001: begin segment = 6'd8; b = 21'b011111001110010110110; end
+            10'b0101000010: begin segment = 6'd8; b = 21'b011111001110011000001; end
+            10'b0101000011: begin segment = 6'd8; b = 21'b011111001110011001100; end
+            10'b0101000100: begin segment = 6'd9; b = 21'b011111000000011001101; end
+            10'b0101000101: begin segment = 6'd9; b = 21'b011111000000011000011; end
+            10'b0101000110: begin segment = 6'd9; b = 21'b011111000000010111010; end
+            10'b0101000111: begin segment = 6'd9; b = 21'b011111000000010110010; end
+            10'b0101001000: begin segment = 6'd9; b = 21'b011111000000010101001; end
+            10'b0101001001: begin segment = 6'd9; b = 21'b011111000000010100010; end
+            10'b0101001010: begin segment = 6'd9; b = 21'b011111000000010011011; end
+            10'b0101001011: begin segment = 6'd9; b = 21'b011111000000010010101; end
+            10'b0101001100: begin segment = 6'd9; b = 21'b011111000000010010000; end
+            10'b0101001101: begin segment = 6'd9; b = 21'b011111000000010001011; end
+            10'b0101001110: begin segment = 6'd9; b = 21'b011111000000010000111; end
+            10'b0101001111: begin segment = 6'd9; b = 21'b011111000000010000011; end
+            10'b0101010000: begin segment = 6'd9; b = 21'b011111000000001111111; end
+            10'b0101010001: begin segment = 6'd9; b = 21'b011111000000001111101; end
+            10'b0101010010: begin segment = 6'd9; b = 21'b011111000000001111011; end
+            10'b0101010011: begin segment = 6'd9; b = 21'b011111000000001111010; end
+            10'b0101010100: begin segment = 6'd9; b = 21'b011111000000001111010; end
+            10'b0101010101: begin segment = 6'd9; b = 21'b011111000000001111010; end
+            10'b0101010110: begin segment = 6'd9; b = 21'b011111000000001111011; end
+            10'b0101010111: begin segment = 6'd9; b = 21'b011111000000001111100; end
+            10'b0101011000: begin segment = 6'd9; b = 21'b011111000000001111101; end
+            10'b0101011001: begin segment = 6'd9; b = 21'b011111000000001111111; end
+            10'b0101011010: begin segment = 6'd9; b = 21'b011111000000010000011; end
+            10'b0101011011: begin segment = 6'd9; b = 21'b011111000000010000110; end
+            10'b0101011100: begin segment = 6'd9; b = 21'b011111000000010001011; end
+            10'b0101011101: begin segment = 6'd9; b = 21'b011111000000010010000; end
+            10'b0101011110: begin segment = 6'd9; b = 21'b011111000000010010101; end
+            10'b0101011111: begin segment = 6'd9; b = 21'b011111000000010011011; end
+            10'b0101100000: begin segment = 6'd9; b = 21'b011111000000010100001; end
+            10'b0101100001: begin segment = 6'd9; b = 21'b011111000000010101000; end
+            10'b0101100010: begin segment = 6'd9; b = 21'b011111000000010110000; end
+            10'b0101100011: begin segment = 6'd9; b = 21'b011111000000010111001; end
+            10'b0101100100: begin segment = 6'd9; b = 21'b011111000000011000010; end
+            10'b0101100101: begin segment = 6'd9; b = 21'b011111000000011001100; end
+            10'b0101100110: begin segment = 6'd10; b = 21'b011110110001000110011; end
+            10'b0101100111: begin segment = 6'd10; b = 21'b011110110001000101000; end
+            10'b0101101000: begin segment = 6'd10; b = 21'b011110110001000011110; end
+            10'b0101101001: begin segment = 6'd10; b = 21'b011110110001000010100; end
+            10'b0101101010: begin segment = 6'd10; b = 21'b011110110001000001011; end
+            10'b0101101011: begin segment = 6'd10; b = 21'b011110110001000000010; end
+            10'b0101101100: begin segment = 6'd10; b = 21'b011110110000111111010; end
+            10'b0101101101: begin segment = 6'd10; b = 21'b011110110000111110011; end
+            10'b0101101110: begin segment = 6'd10; b = 21'b011110110000111101101; end
+            10'b0101101111: begin segment = 6'd10; b = 21'b011110110000111100111; end
+            10'b0101110000: begin segment = 6'd10; b = 21'b011110110000111100001; end
+            10'b0101110001: begin segment = 6'd10; b = 21'b011110110000111011100; end
+            10'b0101110010: begin segment = 6'd10; b = 21'b011110110000111011000; end
+            10'b0101110011: begin segment = 6'd10; b = 21'b011110110000111010101; end
+            10'b0101110100: begin segment = 6'd10; b = 21'b011110110000111010010; end
+            10'b0101110101: begin segment = 6'd10; b = 21'b011110110000111001111; end
+            10'b0101110110: begin segment = 6'd10; b = 21'b011110110000111001110; end
+            10'b0101110111: begin segment = 6'd10; b = 21'b011110110000111001100; end
+            10'b0101111000: begin segment = 6'd10; b = 21'b011110110000111001100; end
+            10'b0101111001: begin segment = 6'd10; b = 21'b011110110000111001100; end
+            10'b0101111010: begin segment = 6'd10; b = 21'b011110110000111001101; end
+            10'b0101111011: begin segment = 6'd10; b = 21'b011110110000111001110; end
+            10'b0101111100: begin segment = 6'd10; b = 21'b011110110000111010000; end
+            10'b0101111101: begin segment = 6'd10; b = 21'b011110110000111010011; end
+            10'b0101111110: begin segment = 6'd10; b = 21'b011110110000111010110; end
+            10'b0101111111: begin segment = 6'd10; b = 21'b011110110000111011010; end
+            10'b0110000000: begin segment = 6'd10; b = 21'b011110110000111011110; end
+            10'b0110000001: begin segment = 6'd10; b = 21'b011110110000111100011; end
+            10'b0110000010: begin segment = 6'd10; b = 21'b011110110000111101001; end
+            10'b0110000011: begin segment = 6'd10; b = 21'b011110110000111110000; end
+            10'b0110000100: begin segment = 6'd10; b = 21'b011110110000111110110; end
+            10'b0110000101: begin segment = 6'd10; b = 21'b011110110000111111110; end
+            10'b0110000110: begin segment = 6'd10; b = 21'b011110110001000000110; end
+            10'b0110000111: begin segment = 6'd10; b = 21'b011110110001000001111; end
+            10'b0110001000: begin segment = 6'd11; b = 21'b011110100001101101110; end
+            10'b0110001001: begin segment = 6'd11; b = 21'b011110100001101100100; end
+            10'b0110001010: begin segment = 6'd11; b = 21'b011110100001101011011; end
+            10'b0110001011: begin segment = 6'd11; b = 21'b011110100001101010011; end
+            10'b0110001100: begin segment = 6'd11; b = 21'b011110100001101001011; end
+            10'b0110001101: begin segment = 6'd11; b = 21'b011110100001101000011; end
+            10'b0110001110: begin segment = 6'd11; b = 21'b011110100001100111101; end
+            10'b0110001111: begin segment = 6'd11; b = 21'b011110100001100110110; end
+            10'b0110010000: begin segment = 6'd11; b = 21'b011110100001100110001; end
+            10'b0110010001: begin segment = 6'd11; b = 21'b011110100001100101100; end
+            10'b0110010010: begin segment = 6'd11; b = 21'b011110100001100101000; end
+            10'b0110010011: begin segment = 6'd11; b = 21'b011110100001100100100; end
+            10'b0110010100: begin segment = 6'd11; b = 21'b011110100001100100001; end
+            10'b0110010101: begin segment = 6'd11; b = 21'b011110100001100011111; end
+            10'b0110010110: begin segment = 6'd11; b = 21'b011110100001100011101; end
+            10'b0110010111: begin segment = 6'd11; b = 21'b011110100001100011100; end
+            10'b0110011000: begin segment = 6'd11; b = 21'b011110100001100011100; end
+            10'b0110011001: begin segment = 6'd11; b = 21'b011110100001100011100; end
+            10'b0110011010: begin segment = 6'd11; b = 21'b011110100001100011101; end
+            10'b0110011011: begin segment = 6'd11; b = 21'b011110100001100011110; end
+            10'b0110011100: begin segment = 6'd11; b = 21'b011110100001100100000; end
+            10'b0110011101: begin segment = 6'd11; b = 21'b011110100001100100011; end
+            10'b0110011110: begin segment = 6'd11; b = 21'b011110100001100100110; end
+            10'b0110011111: begin segment = 6'd11; b = 21'b011110100001100101010; end
+            10'b0110100000: begin segment = 6'd11; b = 21'b011110100001100101111; end
+            10'b0110100001: begin segment = 6'd11; b = 21'b011110100001100110100; end
+            10'b0110100010: begin segment = 6'd11; b = 21'b011110100001100111010; end
+            10'b0110100011: begin segment = 6'd11; b = 21'b011110100001101000001; end
+            10'b0110100100: begin segment = 6'd11; b = 21'b011110100001101001000; end
+            10'b0110100101: begin segment = 6'd11; b = 21'b011110100001101010000; end
+            10'b0110100110: begin segment = 6'd11; b = 21'b011110100001101011000; end
+            10'b0110100111: begin segment = 6'd11; b = 21'b011110100001101100001; end
+            10'b0110101000: begin segment = 6'd11; b = 21'b011110100001101101011; end
+            10'b0110101001: begin segment = 6'd12; b = 21'b011110010000010001110; end
+            10'b0110101010: begin segment = 6'd12; b = 21'b011110010000010000100; end
+            10'b0110101011: begin segment = 6'd12; b = 21'b011110010000001111011; end
+            10'b0110101100: begin segment = 6'd12; b = 21'b011110010000001110010; end
+            10'b0110101101: begin segment = 6'd12; b = 21'b011110010000001101010; end
+            10'b0110101110: begin segment = 6'd12; b = 21'b011110010000001100010; end
+            10'b0110101111: begin segment = 6'd12; b = 21'b011110010000001011100; end
+            10'b0110110000: begin segment = 6'd12; b = 21'b011110010000001010101; end
+            10'b0110110001: begin segment = 6'd12; b = 21'b011110010000001010000; end
+            10'b0110110010: begin segment = 6'd12; b = 21'b011110010000001001011; end
+            10'b0110110011: begin segment = 6'd12; b = 21'b011110010000001000111; end
+            10'b0110110100: begin segment = 6'd12; b = 21'b011110010000001000011; end
+            10'b0110110101: begin segment = 6'd12; b = 21'b011110010000001000000; end
+            10'b0110110110: begin segment = 6'd12; b = 21'b011110010000000111110; end
+            10'b0110110111: begin segment = 6'd12; b = 21'b011110010000000111101; end
+            10'b0110111000: begin segment = 6'd12; b = 21'b011110010000000111100; end
+            10'b0110111001: begin segment = 6'd12; b = 21'b011110010000000111011; end
+            10'b0110111010: begin segment = 6'd12; b = 21'b011110010000000111100; end
+            10'b0110111011: begin segment = 6'd12; b = 21'b011110010000000111101; end
+            10'b0110111100: begin segment = 6'd12; b = 21'b011110010000000111110; end
+            10'b0110111101: begin segment = 6'd12; b = 21'b011110010000001000000; end
+            10'b0110111110: begin segment = 6'd12; b = 21'b011110010000001000011; end
+            10'b0110111111: begin segment = 6'd12; b = 21'b011110010000001000111; end
+            10'b0111000000: begin segment = 6'd12; b = 21'b011110010000001001011; end
+            10'b0111000001: begin segment = 6'd12; b = 21'b011110010000001010000; end
+            10'b0111000010: begin segment = 6'd12; b = 21'b011110010000001010110; end
+            10'b0111000011: begin segment = 6'd12; b = 21'b011110010000001011100; end
+            10'b0111000100: begin segment = 6'd12; b = 21'b011110010000001100011; end
+            10'b0111000101: begin segment = 6'd12; b = 21'b011110010000001101010; end
+            10'b0111000110: begin segment = 6'd12; b = 21'b011110010000001110010; end
+            10'b0111000111: begin segment = 6'd12; b = 21'b011110010000001111011; end
+            10'b0111001000: begin segment = 6'd12; b = 21'b011110010000010000101; end
+            10'b0111001001: begin segment = 6'd12; b = 21'b011110010000010001111; end
+            10'b0111001010: begin segment = 6'd13; b = 21'b011101111101011111101; end
+            10'b0111001011: begin segment = 6'd13; b = 21'b011101111101011110011; end
+            10'b0111001100: begin segment = 6'd13; b = 21'b011101111101011101010; end
+            10'b0111001101: begin segment = 6'd13; b = 21'b011101111101011100010; end
+            10'b0111001110: begin segment = 6'd13; b = 21'b011101111101011011010; end
+            10'b0111001111: begin segment = 6'd13; b = 21'b011101111101011010011; end
+            10'b0111010000: begin segment = 6'd13; b = 21'b011101111101011001101; end
+            10'b0111010001: begin segment = 6'd13; b = 21'b011101111101011000111; end
+            10'b0111010010: begin segment = 6'd13; b = 21'b011101111101011000010; end
+            10'b0111010011: begin segment = 6'd13; b = 21'b011101111101010111110; end
+            10'b0111010100: begin segment = 6'd13; b = 21'b011101111101010111010; end
+            10'b0111010101: begin segment = 6'd13; b = 21'b011101111101010110111; end
+            10'b0111010110: begin segment = 6'd13; b = 21'b011101111101010110101; end
+            10'b0111010111: begin segment = 6'd13; b = 21'b011101111101010110011; end
+            10'b0111011000: begin segment = 6'd13; b = 21'b011101111101010110010; end
+            10'b0111011001: begin segment = 6'd13; b = 21'b011101111101010110010; end
+            10'b0111011010: begin segment = 6'd13; b = 21'b011101111101010110010; end
+            10'b0111011011: begin segment = 6'd13; b = 21'b011101111101010110011; end
+            10'b0111011100: begin segment = 6'd13; b = 21'b011101111101010110101; end
+            10'b0111011101: begin segment = 6'd13; b = 21'b011101111101010110111; end
+            10'b0111011110: begin segment = 6'd13; b = 21'b011101111101010111010; end
+            10'b0111011111: begin segment = 6'd13; b = 21'b011101111101010111110; end
+            10'b0111100000: begin segment = 6'd13; b = 21'b011101111101011000010; end
+            10'b0111100001: begin segment = 6'd13; b = 21'b011101111101011000111; end
+            10'b0111100010: begin segment = 6'd13; b = 21'b011101111101011001101; end
+            10'b0111100011: begin segment = 6'd13; b = 21'b011101111101011010011; end
+            10'b0111100100: begin segment = 6'd13; b = 21'b011101111101011011010; end
+            10'b0111100101: begin segment = 6'd13; b = 21'b011101111101011100001; end
+            10'b0111100110: begin segment = 6'd13; b = 21'b011101111101011101010; end
+            10'b0111100111: begin segment = 6'd13; b = 21'b011101111101011110011; end
+            10'b0111101000: begin segment = 6'd13; b = 21'b011101111101011111100; end
+            10'b0111101001: begin segment = 6'd13; b = 21'b011101111101100000111; end
+            10'b0111101010: begin segment = 6'd13; b = 21'b011101111101100010010; end
+            10'b0111101011: begin segment = 6'd14; b = 21'b011101100111111101010; end
+            10'b0111101100: begin segment = 6'd14; b = 21'b011101100111111100000; end
+            10'b0111101101: begin segment = 6'd14; b = 21'b011101100111111010110; end
+            10'b0111101110: begin segment = 6'd14; b = 21'b011101100111111001101; end
+            10'b0111101111: begin segment = 6'd14; b = 21'b011101100111111000101; end
+            10'b0111110000: begin segment = 6'd14; b = 21'b011101100111110111110; end
+            10'b0111110001: begin segment = 6'd14; b = 21'b011101100111110110111; end
+            10'b0111110010: begin segment = 6'd14; b = 21'b011101100111110110001; end
+            10'b0111110011: begin segment = 6'd14; b = 21'b011101100111110101011; end
+            10'b0111110100: begin segment = 6'd14; b = 21'b011101100111110100110; end
+            10'b0111110101: begin segment = 6'd14; b = 21'b011101100111110100010; end
+            10'b0111110110: begin segment = 6'd14; b = 21'b011101100111110011111; end
+            10'b0111110111: begin segment = 6'd14; b = 21'b011101100111110011100; end
+            10'b0111111000: begin segment = 6'd14; b = 21'b011101100111110011010; end
+            10'b0111111001: begin segment = 6'd14; b = 21'b011101100111110011001; end
+            10'b0111111010: begin segment = 6'd14; b = 21'b011101100111110011000; end
+            10'b0111111011: begin segment = 6'd14; b = 21'b011101100111110011000; end
+            10'b0111111100: begin segment = 6'd14; b = 21'b011101100111110011000; end
+            10'b0111111101: begin segment = 6'd14; b = 21'b011101100111110011010; end
+            10'b0111111110: begin segment = 6'd14; b = 21'b011101100111110011011; end
+            10'b0111111111: begin segment = 6'd14; b = 21'b011101100111110011110; end
+            10'b1000000000: begin segment = 6'd14; b = 21'b011101100111110100001; end
+            10'b1000000001: begin segment = 6'd14; b = 21'b011101100111110100110; end
+            10'b1000000010: begin segment = 6'd14; b = 21'b011101100111110101010; end
+            10'b1000000011: begin segment = 6'd14; b = 21'b011101100111110110000; end
+            10'b1000000100: begin segment = 6'd14; b = 21'b011101100111110110101; end
+            10'b1000000101: begin segment = 6'd14; b = 21'b011101100111110111100; end
+            10'b1000000110: begin segment = 6'd14; b = 21'b011101100111111000011; end
+            10'b1000000111: begin segment = 6'd14; b = 21'b011101100111111001100; end
+            10'b1000001000: begin segment = 6'd14; b = 21'b011101100111111010100; end
+            10'b1000001001: begin segment = 6'd14; b = 21'b011101100111111011110; end
+            10'b1000001010: begin segment = 6'd14; b = 21'b011101100111111100111; end
+            10'b1000001011: begin segment = 6'd15; b = 21'b011101010001101011000; end
+            10'b1000001100: begin segment = 6'd15; b = 21'b011101010001101001101; end
+            10'b1000001101: begin segment = 6'd15; b = 21'b011101010001101000100; end
+            10'b1000001110: begin segment = 6'd15; b = 21'b011101010001100111011; end
+            10'b1000001111: begin segment = 6'd15; b = 21'b011101010001100110011; end
+            10'b1000010000: begin segment = 6'd15; b = 21'b011101010001100101010; end
+            10'b1000010001: begin segment = 6'd15; b = 21'b011101010001100100011; end
+            10'b1000010010: begin segment = 6'd15; b = 21'b011101010001100011101; end
+            10'b1000010011: begin segment = 6'd15; b = 21'b011101010001100011000; end
+            10'b1000010100: begin segment = 6'd15; b = 21'b011101010001100010011; end
+            10'b1000010101: begin segment = 6'd15; b = 21'b011101010001100001111; end
+            10'b1000010110: begin segment = 6'd15; b = 21'b011101010001100001100; end
+            10'b1000010111: begin segment = 6'd15; b = 21'b011101010001100001001; end
+            10'b1000011000: begin segment = 6'd15; b = 21'b011101010001100000110; end
+            10'b1000011001: begin segment = 6'd15; b = 21'b011101010001100000101; end
+            10'b1000011010: begin segment = 6'd15; b = 21'b011101010001100000101; end
+            10'b1000011011: begin segment = 6'd15; b = 21'b011101010001100000101; end
+            10'b1000011100: begin segment = 6'd15; b = 21'b011101010001100000101; end
+            10'b1000011101: begin segment = 6'd15; b = 21'b011101010001100000111; end
+            10'b1000011110: begin segment = 6'd15; b = 21'b011101010001100001010; end
+            10'b1000011111: begin segment = 6'd15; b = 21'b011101010001100001100; end
+            10'b1000100000: begin segment = 6'd15; b = 21'b011101010001100001110; end
+            10'b1000100001: begin segment = 6'd15; b = 21'b011101010001100010011; end
+            10'b1000100010: begin segment = 6'd15; b = 21'b011101010001100011000; end
+            10'b1000100011: begin segment = 6'd15; b = 21'b011101010001100011110; end
+            10'b1000100100: begin segment = 6'd15; b = 21'b011101010001100100011; end
+            10'b1000100101: begin segment = 6'd15; b = 21'b011101010001100101011; end
+            10'b1000100110: begin segment = 6'd15; b = 21'b011101010001100110011; end
+            10'b1000100111: begin segment = 6'd15; b = 21'b011101010001100111011; end
+            10'b1000101000: begin segment = 6'd15; b = 21'b011101010001101000100; end
+            10'b1000101001: begin segment = 6'd15; b = 21'b011101010001101001110; end
+            10'b1000101010: begin segment = 6'd15; b = 21'b011101010001101011000; end
+            10'b1000101011: begin segment = 6'd16; b = 21'b011100111001000100111; end
+            10'b1000101100: begin segment = 6'd16; b = 21'b011100111001000011100; end
+            10'b1000101101: begin segment = 6'd16; b = 21'b011100111001000010010; end
+            10'b1000101110: begin segment = 6'd16; b = 21'b011100111001000001000; end
+            10'b1000101111: begin segment = 6'd16; b = 21'b011100111001000000000; end
+            10'b1000110000: begin segment = 6'd16; b = 21'b011100111000111110111; end
+            10'b1000110001: begin segment = 6'd16; b = 21'b011100111000111110000; end
+            10'b1000110010: begin segment = 6'd16; b = 21'b011100111000111101001; end
+            10'b1000110011: begin segment = 6'd16; b = 21'b011100111000111100100; end
+            10'b1000110100: begin segment = 6'd16; b = 21'b011100111000111011110; end
+            10'b1000110101: begin segment = 6'd16; b = 21'b011100111000111011010; end
+            10'b1000110110: begin segment = 6'd16; b = 21'b011100111000111010110; end
+            10'b1000110111: begin segment = 6'd16; b = 21'b011100111000111010011; end
+            10'b1000111000: begin segment = 6'd16; b = 21'b011100111000111010001; end
+            10'b1000111001: begin segment = 6'd16; b = 21'b011100111000111001111; end
+            10'b1000111010: begin segment = 6'd16; b = 21'b011100111000111001110; end
+            10'b1000111011: begin segment = 6'd16; b = 21'b011100111000111001110; end
+            10'b1000111100: begin segment = 6'd16; b = 21'b011100111000111001111; end
+            10'b1000111101: begin segment = 6'd16; b = 21'b011100111000111010000; end
+            10'b1000111110: begin segment = 6'd16; b = 21'b011100111000111010010; end
+            10'b1000111111: begin segment = 6'd16; b = 21'b011100111000111010100; end
+            10'b1001000000: begin segment = 6'd16; b = 21'b011100111000111010111; end
+            10'b1001000001: begin segment = 6'd16; b = 21'b011100111000111011011; end
+            10'b1001000010: begin segment = 6'd16; b = 21'b011100111000111100000; end
+            10'b1001000011: begin segment = 6'd16; b = 21'b011100111000111100101; end
+            10'b1001000100: begin segment = 6'd16; b = 21'b011100111000111101011; end
+            10'b1001000101: begin segment = 6'd16; b = 21'b011100111000111110010; end
+            10'b1001000110: begin segment = 6'd16; b = 21'b011100111000111111010; end
+            10'b1001000111: begin segment = 6'd16; b = 21'b011100111001000000010; end
+            10'b1001001000: begin segment = 6'd16; b = 21'b011100111001000001011; end
+            10'b1001001001: begin segment = 6'd16; b = 21'b011100111001000010100; end
+            10'b1001001010: begin segment = 6'd16; b = 21'b011100111001000011111; end
+            10'b1001001011: begin segment = 6'd17; b = 21'b011100011110101100001; end
+            10'b1001001100: begin segment = 6'd17; b = 21'b011100011110101010110; end
+            10'b1001001101: begin segment = 6'd17; b = 21'b011100011110101001100; end
+            10'b1001001110: begin segment = 6'd17; b = 21'b011100011110101000010; end
+            10'b1001001111: begin segment = 6'd17; b = 21'b011100011110100111001; end
+            10'b1001010000: begin segment = 6'd17; b = 21'b011100011110100110000; end
+            10'b1001010001: begin segment = 6'd17; b = 21'b011100011110100101001; end
+            10'b1001010010: begin segment = 6'd17; b = 21'b011100011110100100010; end
+            10'b1001010011: begin segment = 6'd17; b = 21'b011100011110100011100; end
+            10'b1001010100: begin segment = 6'd17; b = 21'b011100011110100010110; end
+            10'b1001010101: begin segment = 6'd17; b = 21'b011100011110100010001; end
+            10'b1001010110: begin segment = 6'd17; b = 21'b011100011110100001101; end
+            10'b1001010111: begin segment = 6'd17; b = 21'b011100011110100001010; end
+            10'b1001011000: begin segment = 6'd17; b = 21'b011100011110100000111; end
+            10'b1001011001: begin segment = 6'd17; b = 21'b011100011110100000101; end
+            10'b1001011010: begin segment = 6'd17; b = 21'b011100011110100000100; end
+            10'b1001011011: begin segment = 6'd17; b = 21'b011100011110100000100; end
+            10'b1001011100: begin segment = 6'd17; b = 21'b011100011110100000100; end
+            10'b1001011101: begin segment = 6'd17; b = 21'b011100011110100000101; end
+            10'b1001011110: begin segment = 6'd17; b = 21'b011100011110100000111; end
+            10'b1001011111: begin segment = 6'd17; b = 21'b011100011110100001001; end
+            10'b1001100000: begin segment = 6'd17; b = 21'b011100011110100001100; end
+            10'b1001100001: begin segment = 6'd17; b = 21'b011100011110100010000; end
+            10'b1001100010: begin segment = 6'd17; b = 21'b011100011110100010101; end
+            10'b1001100011: begin segment = 6'd17; b = 21'b011100011110100011010; end
+            10'b1001100100: begin segment = 6'd17; b = 21'b011100011110100100001; end
+            10'b1001100101: begin segment = 6'd17; b = 21'b011100011110100100111; end
+            10'b1001100110: begin segment = 6'd17; b = 21'b011100011110100101111; end
+            10'b1001100111: begin segment = 6'd17; b = 21'b011100011110100110111; end
+            10'b1001101000: begin segment = 6'd17; b = 21'b011100011110101000000; end
+            10'b1001101001: begin segment = 6'd17; b = 21'b011100011110101001010; end
+            10'b1001101010: begin segment = 6'd18; b = 21'b011100000100001111010; end
+            10'b1001101011: begin segment = 6'd18; b = 21'b011100000100001101111; end
+            10'b1001101100: begin segment = 6'd18; b = 21'b011100000100001100101; end
+            10'b1001101101: begin segment = 6'd18; b = 21'b011100000100001011100; end
+            10'b1001101110: begin segment = 6'd18; b = 21'b011100000100001010011; end
+            10'b1001101111: begin segment = 6'd18; b = 21'b011100000100001001100; end
+            10'b1001110000: begin segment = 6'd18; b = 21'b011100000100001000101; end
+            10'b1001110001: begin segment = 6'd18; b = 21'b011100000100000111111; end
+            10'b1001110010: begin segment = 6'd18; b = 21'b011100000100000111001; end
+            10'b1001110011: begin segment = 6'd18; b = 21'b011100000100000110100; end
+            10'b1001110100: begin segment = 6'd18; b = 21'b011100000100000110000; end
+            10'b1001110101: begin segment = 6'd18; b = 21'b011100000100000101100; end
+            10'b1001110110: begin segment = 6'd18; b = 21'b011100000100000101010; end
+            10'b1001110111: begin segment = 6'd18; b = 21'b011100000100000101000; end
+            10'b1001111000: begin segment = 6'd18; b = 21'b011100000100000101000; end
+            10'b1001111001: begin segment = 6'd18; b = 21'b011100000100000100111; end
+            10'b1001111010: begin segment = 6'd18; b = 21'b011100000100000101000; end
+            10'b1001111011: begin segment = 6'd18; b = 21'b011100000100000101001; end
+            10'b1001111100: begin segment = 6'd18; b = 21'b011100000100000101010; end
+            10'b1001111101: begin segment = 6'd18; b = 21'b011100000100000101101; end
+            10'b1001111110: begin segment = 6'd18; b = 21'b011100000100000110000; end
+            10'b1001111111: begin segment = 6'd18; b = 21'b011100000100000110100; end
+            10'b1010000000: begin segment = 6'd18; b = 21'b011100000100000111001; end
+            10'b1010000001: begin segment = 6'd18; b = 21'b011100000100000111111; end
+            10'b1010000010: begin segment = 6'd18; b = 21'b011100000100001000101; end
+            10'b1010000011: begin segment = 6'd18; b = 21'b011100000100001001100; end
+            10'b1010000100: begin segment = 6'd18; b = 21'b011100000100001010011; end
+            10'b1010000101: begin segment = 6'd18; b = 21'b011100000100001011100; end
+            10'b1010000110: begin segment = 6'd18; b = 21'b011100000100001100101; end
+            10'b1010000111: begin segment = 6'd18; b = 21'b011100000100001101111; end
+            10'b1010001000: begin segment = 6'd18; b = 21'b011100000100001111010; end
+            10'b1010001001: begin segment = 6'd19; b = 21'b011011101000001100011; end
+            10'b1010001010: begin segment = 6'd19; b = 21'b011011101000001011001; end
+            10'b1010001011: begin segment = 6'd19; b = 21'b011011101000001010000; end
+            10'b1010001100: begin segment = 6'd19; b = 21'b011011101000001000111; end
+            10'b1010001101: begin segment = 6'd19; b = 21'b011011101000001000000; end
+            10'b1010001110: begin segment = 6'd19; b = 21'b011011101000000111001; end
+            10'b1010001111: begin segment = 6'd19; b = 21'b011011101000000110011; end
+            10'b1010010000: begin segment = 6'd19; b = 21'b011011101000000101101; end
+            10'b1010010001: begin segment = 6'd19; b = 21'b011011101000000101000; end
+            10'b1010010010: begin segment = 6'd19; b = 21'b011011101000000100101; end
+            10'b1010010011: begin segment = 6'd19; b = 21'b011011101000000100001; end
+            10'b1010010100: begin segment = 6'd19; b = 21'b011011101000000011111; end
+            10'b1010010101: begin segment = 6'd19; b = 21'b011011101000000011101; end
+            10'b1010010110: begin segment = 6'd19; b = 21'b011011101000000011100; end
+            10'b1010010111: begin segment = 6'd19; b = 21'b011011101000000011100; end
+            10'b1010011000: begin segment = 6'd19; b = 21'b011011101000000011101; end
+            10'b1010011001: begin segment = 6'd19; b = 21'b011011101000000011110; end
+            10'b1010011010: begin segment = 6'd19; b = 21'b011011101000000100000; end
+            10'b1010011011: begin segment = 6'd19; b = 21'b011011101000000100011; end
+            10'b1010011100: begin segment = 6'd19; b = 21'b011011101000000100110; end
+            10'b1010011101: begin segment = 6'd19; b = 21'b011011101000000101011; end
+            10'b1010011110: begin segment = 6'd19; b = 21'b011011101000000110000; end
+            10'b1010011111: begin segment = 6'd19; b = 21'b011011101000000110110; end
+            10'b1010100000: begin segment = 6'd19; b = 21'b011011101000000111100; end
+            10'b1010100001: begin segment = 6'd19; b = 21'b011011101000001000100; end
+            10'b1010100010: begin segment = 6'd19; b = 21'b011011101000001001100; end
+            10'b1010100011: begin segment = 6'd19; b = 21'b011011101000001010101; end
+            10'b1010100100: begin segment = 6'd19; b = 21'b011011101000001011110; end
+            10'b1010100101: begin segment = 6'd19; b = 21'b011011101000001101001; end
+            10'b1010100110: begin segment = 6'd19; b = 21'b011011101000001110100; end
+            10'b1010100111: begin segment = 6'd19; b = 21'b011011101000010000000; end
+            10'b1010101000: begin segment = 6'd20; b = 21'b011011001000000010110; end
+            10'b1010101001: begin segment = 6'd20; b = 21'b011011001000000001011; end
+            10'b1010101010: begin segment = 6'd20; b = 21'b011011001000000000010; end
+            10'b1010101011: begin segment = 6'd20; b = 21'b011011000111111111000; end
+            10'b1010101100: begin segment = 6'd20; b = 21'b011011000111111101111; end
+            10'b1010101101: begin segment = 6'd20; b = 21'b011011000111111101000; end
+            10'b1010101110: begin segment = 6'd20; b = 21'b011011000111111100001; end
+            10'b1010101111: begin segment = 6'd20; b = 21'b011011000111111011011; end
+            10'b1010110000: begin segment = 6'd20; b = 21'b011011000111111010101; end
+            10'b1010110001: begin segment = 6'd20; b = 21'b011011000111111010000; end
+            10'b1010110010: begin segment = 6'd20; b = 21'b011011000111111001101; end
+            10'b1010110011: begin segment = 6'd20; b = 21'b011011000111111001010; end
+            10'b1010110100: begin segment = 6'd20; b = 21'b011011000111111000111; end
+            10'b1010110101: begin segment = 6'd20; b = 21'b011011000111111000101; end
+            10'b1010110110: begin segment = 6'd20; b = 21'b011011000111111000101; end
+            10'b1010110111: begin segment = 6'd20; b = 21'b011011000111111000101; end
+            10'b1010111000: begin segment = 6'd20; b = 21'b011011000111111000101; end
+            10'b1010111001: begin segment = 6'd20; b = 21'b011011000111111000110; end
+            10'b1010111010: begin segment = 6'd20; b = 21'b011011000111111001001; end
+            10'b1010111011: begin segment = 6'd20; b = 21'b011011000111111001100; end
+            10'b1010111100: begin segment = 6'd20; b = 21'b011011000111111001111; end
+            10'b1010111101: begin segment = 6'd20; b = 21'b011011000111111010100; end
+            10'b1010111110: begin segment = 6'd20; b = 21'b011011000111111011001; end
+            10'b1010111111: begin segment = 6'd20; b = 21'b011011000111111100000; end
+            10'b1011000000: begin segment = 6'd20; b = 21'b011011000111111100110; end
+            10'b1011000001: begin segment = 6'd20; b = 21'b011011000111111101110; end
+            10'b1011000010: begin segment = 6'd20; b = 21'b011011000111111110110; end
+            10'b1011000011: begin segment = 6'd20; b = 21'b011011001000000000000; end
+            10'b1011000100: begin segment = 6'd20; b = 21'b011011001000000001001; end
+            10'b1011000101: begin segment = 6'd20; b = 21'b011011001000000010100; end
+            10'b1011000110: begin segment = 6'd21; b = 21'b011010100111110011000; end
+            10'b1011000111: begin segment = 6'd21; b = 21'b011010100111110001101; end
+            10'b1011001000: begin segment = 6'd21; b = 21'b011010100111110000011; end
+            10'b1011001001: begin segment = 6'd21; b = 21'b011010100111101111010; end
+            10'b1011001010: begin segment = 6'd21; b = 21'b011010100111101110001; end
+            10'b1011001011: begin segment = 6'd21; b = 21'b011010100111101101001; end
+            10'b1011001100: begin segment = 6'd21; b = 21'b011010100111101100010; end
+            10'b1011001101: begin segment = 6'd21; b = 21'b011010100111101011100; end
+            10'b1011001110: begin segment = 6'd21; b = 21'b011010100111101010110; end
+            10'b1011001111: begin segment = 6'd21; b = 21'b011010100111101010001; end
+            10'b1011010000: begin segment = 6'd21; b = 21'b011010100111101001110; end
+            10'b1011010001: begin segment = 6'd21; b = 21'b011010100111101001010; end
+            10'b1011010010: begin segment = 6'd21; b = 21'b011010100111101001000; end
+            10'b1011010011: begin segment = 6'd21; b = 21'b011010100111101000110; end
+            10'b1011010100: begin segment = 6'd21; b = 21'b011010100111101000110; end
+            10'b1011010101: begin segment = 6'd21; b = 21'b011010100111101000101; end
+            10'b1011010110: begin segment = 6'd21; b = 21'b011010100111101000111; end
+            10'b1011010111: begin segment = 6'd21; b = 21'b011010100111101001000; end
+            10'b1011011000: begin segment = 6'd21; b = 21'b011010100111101001011; end
+            10'b1011011001: begin segment = 6'd21; b = 21'b011010100111101001101; end
+            10'b1011011010: begin segment = 6'd21; b = 21'b011010100111101010010; end
+            10'b1011011011: begin segment = 6'd21; b = 21'b011010100111101010110; end
+            10'b1011011100: begin segment = 6'd21; b = 21'b011010100111101011100; end
+            10'b1011011101: begin segment = 6'd21; b = 21'b011010100111101100001; end
+            10'b1011011110: begin segment = 6'd21; b = 21'b011010100111101101001; end
+            10'b1011011111: begin segment = 6'd21; b = 21'b011010100111101110000; end
+            10'b1011100000: begin segment = 6'd21; b = 21'b011010100111101111001; end
+            10'b1011100001: begin segment = 6'd21; b = 21'b011010100111110000010; end
+            10'b1011100010: begin segment = 6'd21; b = 21'b011010100111110001101; end
+            10'b1011100011: begin segment = 6'd21; b = 21'b011010100111110011000; end
+            10'b1011100100: begin segment = 6'd22; b = 21'b011010000101110101010; end
+            10'b1011100101: begin segment = 6'd22; b = 21'b011010000101110011111; end
+            10'b1011100110: begin segment = 6'd22; b = 21'b011010000101110010101; end
+            10'b1011100111: begin segment = 6'd22; b = 21'b011010000101110001100; end
+            10'b1011101000: begin segment = 6'd22; b = 21'b011010000101110000011; end
+            10'b1011101001: begin segment = 6'd22; b = 21'b011010000101101111011; end
+            10'b1011101010: begin segment = 6'd22; b = 21'b011010000101101110100; end
+            10'b1011101011: begin segment = 6'd22; b = 21'b011010000101101101110; end
+            10'b1011101100: begin segment = 6'd22; b = 21'b011010000101101101001; end
+            10'b1011101101: begin segment = 6'd22; b = 21'b011010000101101100100; end
+            10'b1011101110: begin segment = 6'd22; b = 21'b011010000101101100001; end
+            10'b1011101111: begin segment = 6'd22; b = 21'b011010000101101011110; end
+            10'b1011110000: begin segment = 6'd22; b = 21'b011010000101101011100; end
+            10'b1011110001: begin segment = 6'd22; b = 21'b011010000101101011010; end
+            10'b1011110010: begin segment = 6'd22; b = 21'b011010000101101011010; end
+            10'b1011110011: begin segment = 6'd22; b = 21'b011010000101101011010; end
+            10'b1011110100: begin segment = 6'd22; b = 21'b011010000101101011011; end
+            10'b1011110101: begin segment = 6'd22; b = 21'b011010000101101011101; end
+            10'b1011110110: begin segment = 6'd22; b = 21'b011010000101101011111; end
+            10'b1011110111: begin segment = 6'd22; b = 21'b011010000101101100011; end
+            10'b1011111000: begin segment = 6'd22; b = 21'b011010000101101100111; end
+            10'b1011111001: begin segment = 6'd22; b = 21'b011010000101101101100; end
+            10'b1011111010: begin segment = 6'd22; b = 21'b011010000101101110010; end
+            10'b1011111011: begin segment = 6'd22; b = 21'b011010000101101111001; end
+            10'b1011111100: begin segment = 6'd22; b = 21'b011010000101110000000; end
+            10'b1011111101: begin segment = 6'd22; b = 21'b011010000101110001000; end
+            10'b1011111110: begin segment = 6'd22; b = 21'b011010000101110010010; end
+            10'b1011111111: begin segment = 6'd22; b = 21'b011010000101110011011; end
+            10'b1100000000: begin segment = 6'd22; b = 21'b011010000101110100110; end
+            10'b1100000001: begin segment = 6'd22; b = 21'b011010000101110110010; end
+            10'b1100000010: begin segment = 6'd23; b = 21'b011001100000010000000; end
+            10'b1100000011: begin segment = 6'd23; b = 21'b011001100000001110100; end
+            10'b1100000100: begin segment = 6'd23; b = 21'b011001100000001101001; end
+            10'b1100000101: begin segment = 6'd23; b = 21'b011001100000001011110; end
+            10'b1100000110: begin segment = 6'd23; b = 21'b011001100000001010101; end
+            10'b1100000111: begin segment = 6'd23; b = 21'b011001100000001001100; end
+            10'b1100001000: begin segment = 6'd23; b = 21'b011001100000001000101; end
+            10'b1100001001: begin segment = 6'd23; b = 21'b011001100000000111110; end
+            10'b1100001010: begin segment = 6'd23; b = 21'b011001100000000110111; end
+            10'b1100001011: begin segment = 6'd23; b = 21'b011001100000000110010; end
+            10'b1100001100: begin segment = 6'd23; b = 21'b011001100000000101101; end
+            10'b1100001101: begin segment = 6'd23; b = 21'b011001100000000101010; end
+            10'b1100001110: begin segment = 6'd23; b = 21'b011001100000000100111; end
+            10'b1100001111: begin segment = 6'd23; b = 21'b011001100000000100101; end
+            10'b1100010000: begin segment = 6'd23; b = 21'b011001100000000100011; end
+            10'b1100010001: begin segment = 6'd23; b = 21'b011001100000000100011; end
+            10'b1100010010: begin segment = 6'd23; b = 21'b011001100000000100011; end
+            10'b1100010011: begin segment = 6'd23; b = 21'b011001100000000100100; end
+            10'b1100010100: begin segment = 6'd23; b = 21'b011001100000000100110; end
+            10'b1100010101: begin segment = 6'd23; b = 21'b011001100000000101001; end
+            10'b1100010110: begin segment = 6'd23; b = 21'b011001100000000101101; end
+            10'b1100010111: begin segment = 6'd23; b = 21'b011001100000000110001; end
+            10'b1100011000: begin segment = 6'd23; b = 21'b011001100000000110110; end
+            10'b1100011001: begin segment = 6'd23; b = 21'b011001100000000111101; end
+            10'b1100011010: begin segment = 6'd23; b = 21'b011001100000001000011; end
+            10'b1100011011: begin segment = 6'd23; b = 21'b011001100000001001011; end
+            10'b1100011100: begin segment = 6'd23; b = 21'b011001100000001010100; end
+            10'b1100011101: begin segment = 6'd23; b = 21'b011001100000001011101; end
+            10'b1100011110: begin segment = 6'd23; b = 21'b011001100000001100111; end
+            10'b1100011111: begin segment = 6'd24; b = 21'b011000111010101111110; end
+            10'b1100100000: begin segment = 6'd24; b = 21'b011000111010101110010; end
+            10'b1100100001: begin segment = 6'd24; b = 21'b011000111010101100111; end
+            10'b1100100010: begin segment = 6'd24; b = 21'b011000111010101011100; end
+            10'b1100100011: begin segment = 6'd24; b = 21'b011000111010101010011; end
+            10'b1100100100: begin segment = 6'd24; b = 21'b011000111010101001010; end
+            10'b1100100101: begin segment = 6'd24; b = 21'b011000111010101000010; end
+            10'b1100100110: begin segment = 6'd24; b = 21'b011000111010100111011; end
+            10'b1100100111: begin segment = 6'd24; b = 21'b011000111010100110100; end
+            10'b1100101000: begin segment = 6'd24; b = 21'b011000111010100101111; end
+            10'b1100101001: begin segment = 6'd24; b = 21'b011000111010100101010; end
+            10'b1100101010: begin segment = 6'd24; b = 21'b011000111010100100110; end
+            10'b1100101011: begin segment = 6'd24; b = 21'b011000111010100100011; end
+            10'b1100101100: begin segment = 6'd24; b = 21'b011000111010100100001; end
+            10'b1100101101: begin segment = 6'd24; b = 21'b011000111010100100000; end
+            10'b1100101110: begin segment = 6'd24; b = 21'b011000111010100011111; end
+            10'b1100101111: begin segment = 6'd24; b = 21'b011000111010100011111; end
+            10'b1100110000: begin segment = 6'd24; b = 21'b011000111010100100000; end
+            10'b1100110001: begin segment = 6'd24; b = 21'b011000111010100100010; end
+            10'b1100110010: begin segment = 6'd24; b = 21'b011000111010100100101; end
+            10'b1100110011: begin segment = 6'd24; b = 21'b011000111010100101001; end
+            10'b1100110100: begin segment = 6'd24; b = 21'b011000111010100101101; end
+            10'b1100110101: begin segment = 6'd24; b = 21'b011000111010100110011; end
+            10'b1100110110: begin segment = 6'd24; b = 21'b011000111010100111001; end
+            10'b1100110111: begin segment = 6'd24; b = 21'b011000111010101000000; end
+            10'b1100111000: begin segment = 6'd24; b = 21'b011000111010101001000; end
+            10'b1100111001: begin segment = 6'd24; b = 21'b011000111010101010000; end
+            10'b1100111010: begin segment = 6'd24; b = 21'b011000111010101011010; end
+            10'b1100111011: begin segment = 6'd24; b = 21'b011000111010101100100; end
+            10'b1100111100: begin segment = 6'd25; b = 21'b011000010011111000011; end
+            10'b1100111101: begin segment = 6'd25; b = 21'b011000010011110110111; end
+            10'b1100111110: begin segment = 6'd25; b = 21'b011000010011110101100; end
+            10'b1100111111: begin segment = 6'd25; b = 21'b011000010011110100010; end
+            10'b1101000000: begin segment = 6'd25; b = 21'b011000010011110011000; end
+            10'b1101000001: begin segment = 6'd25; b = 21'b011000010011110010000; end
+            10'b1101000010: begin segment = 6'd25; b = 21'b011000010011110001000; end
+            10'b1101000011: begin segment = 6'd25; b = 21'b011000010011110000001; end
+            10'b1101000100: begin segment = 6'd25; b = 21'b011000010011101111011; end
+            10'b1101000101: begin segment = 6'd25; b = 21'b011000010011101110110; end
+            10'b1101000110: begin segment = 6'd25; b = 21'b011000010011101110010; end
+            10'b1101000111: begin segment = 6'd25; b = 21'b011000010011101101110; end
+            10'b1101001000: begin segment = 6'd25; b = 21'b011000010011101101011; end
+            10'b1101001001: begin segment = 6'd25; b = 21'b011000010011101101010; end
+            10'b1101001010: begin segment = 6'd25; b = 21'b011000010011101101001; end
+            10'b1101001011: begin segment = 6'd25; b = 21'b011000010011101101000; end
+            10'b1101001100: begin segment = 6'd25; b = 21'b011000010011101101001; end
+            10'b1101001101: begin segment = 6'd25; b = 21'b011000010011101101011; end
+            10'b1101001110: begin segment = 6'd25; b = 21'b011000010011101101101; end
+            10'b1101001111: begin segment = 6'd25; b = 21'b011000010011101110000; end
+            10'b1101010000: begin segment = 6'd25; b = 21'b011000010011101110101; end
+            10'b1101010001: begin segment = 6'd25; b = 21'b011000010011101111010; end
+            10'b1101010010: begin segment = 6'd25; b = 21'b011000010011101111111; end
+            10'b1101010011: begin segment = 6'd25; b = 21'b011000010011110000110; end
+            10'b1101010100: begin segment = 6'd25; b = 21'b011000010011110001110; end
+            10'b1101010101: begin segment = 6'd25; b = 21'b011000010011110010110; end
+            10'b1101010110: begin segment = 6'd25; b = 21'b011000010011110011111; end
+            10'b1101010111: begin segment = 6'd25; b = 21'b011000010011110101001; end
+            10'b1101011000: begin segment = 6'd25; b = 21'b011000010011110110100; end
+            10'b1101011001: begin segment = 6'd26; b = 21'b010111101011000011011; end
+            10'b1101011010: begin segment = 6'd26; b = 21'b010111101011000001111; end
+            10'b1101011011: begin segment = 6'd26; b = 21'b010111101011000000100; end
+            10'b1101011100: begin segment = 6'd26; b = 21'b010111101010111111010; end
+            10'b1101011101: begin segment = 6'd26; b = 21'b010111101010111110000; end
+            10'b1101011110: begin segment = 6'd26; b = 21'b010111101010111101000; end
+            10'b1101011111: begin segment = 6'd26; b = 21'b010111101010111100001; end
+            10'b1101100000: begin segment = 6'd26; b = 21'b010111101010111011011; end
+            10'b1101100001: begin segment = 6'd26; b = 21'b010111101010111010101; end
+            10'b1101100010: begin segment = 6'd26; b = 21'b010111101010111010000; end
+            10'b1101100011: begin segment = 6'd26; b = 21'b010111101010111001100; end
+            10'b1101100100: begin segment = 6'd26; b = 21'b010111101010111001001; end
+            10'b1101100101: begin segment = 6'd26; b = 21'b010111101010111000111; end
+            10'b1101100110: begin segment = 6'd26; b = 21'b010111101010111000101; end
+            10'b1101100111: begin segment = 6'd26; b = 21'b010111101010111000101; end
+            10'b1101101000: begin segment = 6'd26; b = 21'b010111101010111000110; end
+            10'b1101101001: begin segment = 6'd26; b = 21'b010111101010111001000; end
+            10'b1101101010: begin segment = 6'd26; b = 21'b010111101010111001001; end
+            10'b1101101011: begin segment = 6'd26; b = 21'b010111101010111001101; end
+            10'b1101101100: begin segment = 6'd26; b = 21'b010111101010111010000; end
+            10'b1101101101: begin segment = 6'd26; b = 21'b010111101010111010101; end
+            10'b1101101110: begin segment = 6'd26; b = 21'b010111101010111011010; end
+            10'b1101101111: begin segment = 6'd26; b = 21'b010111101010111100001; end
+            10'b1101110000: begin segment = 6'd26; b = 21'b010111101010111101000; end
+            10'b1101110001: begin segment = 6'd26; b = 21'b010111101010111110001; end
+            10'b1101110010: begin segment = 6'd26; b = 21'b010111101010111111001; end
+            10'b1101110011: begin segment = 6'd26; b = 21'b010111101011000000100; end
+            10'b1101110100: begin segment = 6'd26; b = 21'b010111101011000001110; end
+            10'b1101110101: begin segment = 6'd26; b = 21'b010111101011000011010; end
+            10'b1101110110: begin segment = 6'd27; b = 21'b010111000010001010111; end
+            10'b1101110111: begin segment = 6'd27; b = 21'b010111000010001001101; end
+            10'b1101111000: begin segment = 6'd27; b = 21'b010111000010001000100; end
+            10'b1101111001: begin segment = 6'd27; b = 21'b010111000010000111011; end
+            10'b1101111010: begin segment = 6'd27; b = 21'b010111000010000110100; end
+            10'b1101111011: begin segment = 6'd27; b = 21'b010111000010000101101; end
+            10'b1101111100: begin segment = 6'd27; b = 21'b010111000010000100111; end
+            10'b1101111101: begin segment = 6'd27; b = 21'b010111000010000100010; end
+            10'b1101111110: begin segment = 6'd27; b = 21'b010111000010000011110; end
+            10'b1101111111: begin segment = 6'd27; b = 21'b010111000010000011011; end
+            10'b1110000000: begin segment = 6'd27; b = 21'b010111000010000011001; end
+            10'b1110000001: begin segment = 6'd27; b = 21'b010111000010000011000; end
+            10'b1110000010: begin segment = 6'd27; b = 21'b010111000010000010111; end
+            10'b1110000011: begin segment = 6'd27; b = 21'b010111000010000011000; end
+            10'b1110000100: begin segment = 6'd27; b = 21'b010111000010000011001; end
+            10'b1110000101: begin segment = 6'd27; b = 21'b010111000010000011011; end
+            10'b1110000110: begin segment = 6'd27; b = 21'b010111000010000011110; end
+            10'b1110000111: begin segment = 6'd27; b = 21'b010111000010000100010; end
+            10'b1110001000: begin segment = 6'd27; b = 21'b010111000010000100111; end
+            10'b1110001001: begin segment = 6'd27; b = 21'b010111000010000101101; end
+            10'b1110001010: begin segment = 6'd27; b = 21'b010111000010000110011; end
+            10'b1110001011: begin segment = 6'd27; b = 21'b010111000010000111010; end
+            10'b1110001100: begin segment = 6'd27; b = 21'b010111000010001000011; end
+            10'b1110001101: begin segment = 6'd27; b = 21'b010111000010001001100; end
+            10'b1110001110: begin segment = 6'd27; b = 21'b010111000010001010110; end
+            10'b1110001111: begin segment = 6'd27; b = 21'b010111000010001100001; end
+            10'b1110010000: begin segment = 6'd27; b = 21'b010111000010001101101; end
+            10'b1110010001: begin segment = 6'd27; b = 21'b010111000010001111010; end
+            10'b1110010010: begin segment = 6'd28; b = 21'b010110010111011001100; end
+            10'b1110010011: begin segment = 6'd28; b = 21'b010110010111011000010; end
+            10'b1110010100: begin segment = 6'd28; b = 21'b010110010111010111010; end
+            10'b1110010101: begin segment = 6'd28; b = 21'b010110010111010110010; end
+            10'b1110010110: begin segment = 6'd28; b = 21'b010110010111010101100; end
+            10'b1110010111: begin segment = 6'd28; b = 21'b010110010111010100110; end
+            10'b1110011000: begin segment = 6'd28; b = 21'b010110010111010100001; end
+            10'b1110011001: begin segment = 6'd28; b = 21'b010110010111010011101; end
+            10'b1110011010: begin segment = 6'd28; b = 21'b010110010111010011010; end
+            10'b1110011011: begin segment = 6'd28; b = 21'b010110010111010010111; end
+            10'b1110011100: begin segment = 6'd28; b = 21'b010110010111010010110; end
+            10'b1110011101: begin segment = 6'd28; b = 21'b010110010111010010110; end
+            10'b1110011110: begin segment = 6'd28; b = 21'b010110010111010010110; end
+            10'b1110011111: begin segment = 6'd28; b = 21'b010110010111010010111; end
+            10'b1110100000: begin segment = 6'd28; b = 21'b010110010111010011010; end
+            10'b1110100001: begin segment = 6'd28; b = 21'b010110010111010011101; end
+            10'b1110100010: begin segment = 6'd28; b = 21'b010110010111010100001; end
+            10'b1110100011: begin segment = 6'd28; b = 21'b010110010111010100110; end
+            10'b1110100100: begin segment = 6'd28; b = 21'b010110010111010101100; end
+            10'b1110100101: begin segment = 6'd28; b = 21'b010110010111010110010; end
+            10'b1110100110: begin segment = 6'd28; b = 21'b010110010111010111010; end
+            10'b1110100111: begin segment = 6'd28; b = 21'b010110010111011000011; end
+            10'b1110101000: begin segment = 6'd28; b = 21'b010110010111011001100; end
+            10'b1110101001: begin segment = 6'd28; b = 21'b010110010111011010111; end
+            10'b1110101010: begin segment = 6'd28; b = 21'b010110010111011100010; end
+            10'b1110101011: begin segment = 6'd28; b = 21'b010110010111011101110; end
+            10'b1110101100: begin segment = 6'd28; b = 21'b010110010111011111011; end
+            10'b1110101101: begin segment = 6'd28; b = 21'b010110010111100001001; end
+            10'b1110101110: begin segment = 6'd29; b = 21'b010101011100101000111; end
+            10'b1110101111: begin segment = 6'd29; b = 21'b010101011100100110111; end
+            10'b1110110000: begin segment = 6'd29; b = 21'b010101011100100101000; end
+            10'b1110110001: begin segment = 6'd29; b = 21'b010101011100100011010; end
+            10'b1110110010: begin segment = 6'd29; b = 21'b010101011100100001100; end
+            10'b1110110011: begin segment = 6'd29; b = 21'b010101011100100000000; end
+            10'b1110110100: begin segment = 6'd29; b = 21'b010101011100011110100; end
+            10'b1110110101: begin segment = 6'd29; b = 21'b010101011100011101001; end
+            10'b1110110110: begin segment = 6'd29; b = 21'b010101011100011100000; end
+            10'b1110110111: begin segment = 6'd29; b = 21'b010101011100011010111; end
+            10'b1110111000: begin segment = 6'd29; b = 21'b010101011100011001111; end
+            10'b1110111001: begin segment = 6'd29; b = 21'b010101011100011001000; end
+            10'b1110111010: begin segment = 6'd29; b = 21'b010101011100011000010; end
+            10'b1110111011: begin segment = 6'd29; b = 21'b010101011100010111101; end
+            10'b1110111100: begin segment = 6'd29; b = 21'b010101011100010111000; end
+            10'b1110111101: begin segment = 6'd29; b = 21'b010101011100010110101; end
+            10'b1110111110: begin segment = 6'd29; b = 21'b010101011100010110011; end
+            10'b1110111111: begin segment = 6'd29; b = 21'b010101011100010110001; end
+            10'b1111000000: begin segment = 6'd29; b = 21'b010101011100010110001; end
+            10'b1111000001: begin segment = 6'd29; b = 21'b010101011100010110001; end
+            10'b1111000010: begin segment = 6'd29; b = 21'b010101011100010110010; end
+            10'b1111000011: begin segment = 6'd29; b = 21'b010101011100010110100; end
+            10'b1111000100: begin segment = 6'd29; b = 21'b010101011100010110111; end
+            10'b1111000101: begin segment = 6'd29; b = 21'b010101011100010111011; end
+            10'b1111000110: begin segment = 6'd29; b = 21'b010101011100011000000; end
+            10'b1111000111: begin segment = 6'd29; b = 21'b010101011100011000110; end
+            10'b1111001000: begin segment = 6'd29; b = 21'b010101011100011001101; end
+            10'b1111001001: begin segment = 6'd29; b = 21'b010101011100011010100; end
+            10'b1111001010: begin segment = 6'd30; b = 21'b010100111110000110101; end
+            10'b1111001011: begin segment = 6'd30; b = 21'b010100111110000101111; end
+            10'b1111001100: begin segment = 6'd30; b = 21'b010100111110000101001; end
+            10'b1111001101: begin segment = 6'd30; b = 21'b010100111110000100101; end
+            10'b1111001110: begin segment = 6'd30; b = 21'b010100111110000100001; end
+            10'b1111001111: begin segment = 6'd30; b = 21'b010100111110000011110; end
+            10'b1111010000: begin segment = 6'd30; b = 21'b010100111110000011100; end
+            10'b1111010001: begin segment = 6'd30; b = 21'b010100111110000011011; end
+            10'b1111010010: begin segment = 6'd30; b = 21'b010100111110000011011; end
+            10'b1111010011: begin segment = 6'd30; b = 21'b010100111110000011100; end
+            10'b1111010100: begin segment = 6'd30; b = 21'b010100111110000011110; end
+            10'b1111010101: begin segment = 6'd30; b = 21'b010100111110000100001; end
+            10'b1111010110: begin segment = 6'd30; b = 21'b010100111110000100101; end
+            10'b1111010111: begin segment = 6'd30; b = 21'b010100111110000101010; end
+            10'b1111011000: begin segment = 6'd30; b = 21'b010100111110000101111; end
+            10'b1111011001: begin segment = 6'd30; b = 21'b010100111110000110110; end
+            10'b1111011010: begin segment = 6'd30; b = 21'b010100111110000111101; end
+            10'b1111011011: begin segment = 6'd30; b = 21'b010100111110001000110; end
+            10'b1111011100: begin segment = 6'd30; b = 21'b010100111110001001111; end
+            10'b1111011101: begin segment = 6'd30; b = 21'b010100111110001011010; end
+            10'b1111011110: begin segment = 6'd30; b = 21'b010100111110001100101; end
+            10'b1111011111: begin segment = 6'd30; b = 21'b010100111110001110001; end
+            10'b1111100000: begin segment = 6'd30; b = 21'b010100111110001111110; end
+            10'b1111100001: begin segment = 6'd30; b = 21'b010100111110010001100; end
+            10'b1111100010: begin segment = 6'd30; b = 21'b010100111110010011011; end
+            10'b1111100011: begin segment = 6'd30; b = 21'b010100111110010101011; end
+            10'b1111100100: begin segment = 6'd30; b = 21'b010100111110010111100; end
+            10'b1111100101: begin segment = 6'd31; b = 21'b010100000010000000100; end
+            10'b1111100110: begin segment = 6'd31; b = 21'b010100000001111110111; end
+            10'b1111100111: begin segment = 6'd31; b = 21'b010100000001111101100; end
+            10'b1111101000: begin segment = 6'd31; b = 21'b010100000001111100010; end
+            10'b1111101001: begin segment = 6'd31; b = 21'b010100000001111011001; end
+            10'b1111101010: begin segment = 6'd31; b = 21'b010100000001111010000; end
+            10'b1111101011: begin segment = 6'd31; b = 21'b010100000001111001001; end
+            10'b1111101100: begin segment = 6'd31; b = 21'b010100000001111000010; end
+            10'b1111101101: begin segment = 6'd31; b = 21'b010100000001110111101; end
+            10'b1111101110: begin segment = 6'd31; b = 21'b010100000001110111000; end
+            10'b1111101111: begin segment = 6'd31; b = 21'b010100000001110110100; end
+            10'b1111110000: begin segment = 6'd31; b = 21'b010100000001110110001; end
+            10'b1111110001: begin segment = 6'd31; b = 21'b010100000001110110000; end
+            10'b1111110010: begin segment = 6'd31; b = 21'b010100000001110101111; end
+            10'b1111110011: begin segment = 6'd31; b = 21'b010100000001110101111; end
+            10'b1111110100: begin segment = 6'd31; b = 21'b010100000001110110000; end
+            10'b1111110101: begin segment = 6'd31; b = 21'b010100000001110110010; end
+            10'b1111110110: begin segment = 6'd31; b = 21'b010100000001110110101; end
+            10'b1111110111: begin segment = 6'd31; b = 21'b010100000001110111001; end
+            10'b1111111000: begin segment = 6'd31; b = 21'b010100000001110111110; end
+            10'b1111111001: begin segment = 6'd31; b = 21'b010100000001111000100; end
+            10'b1111111010: begin segment = 6'd31; b = 21'b010100000001111001011; end
+            10'b1111111011: begin segment = 6'd31; b = 21'b010100000001111010011; end
+            10'b1111111100: begin segment = 6'd31; b = 21'b010100000001111011011; end
+            10'b1111111101: begin segment = 6'd31; b = 21'b010100000001111100101; end
+            10'b1111111110: begin segment = 6'd31; b = 21'b010100000001111110000; end
+            10'b1111111111: begin segment = 6'd31; b = 21'b010100000001111111011; end
+      endcase
     end
 
-    wire [WIDTH32 - 1:0] x_op;
-    assign x_op = is_fp ? {1'b0, x_in[WIDTH32 - 2 : 0]} : x_in;
+// Auto-generated neg assignments for WIDTH=22
+    wire neg_1;
+    assign neg_1 = ~f[21];
+    wire [1:0] neg_2;
+    assign neg_2 = ~f[21:20];
+    wire [2:0] neg_3;
+    assign neg_3 = ~f[21:19];
+    wire [3:0] neg_4;
+    assign neg_4 = ~f[21:18];
+    wire [4:0] neg_5;
+    assign neg_5 = ~f[21:17];
+    wire [5:0] neg_6;
+    assign neg_6 = ~f[21:16];
+    wire [6:0] neg_7;
+    assign neg_7 = ~f[21:15];
+    wire [7:0] neg_8;
+    assign neg_8 = ~f[21:14];
+    wire [8:0] neg_9;
+    assign neg_9 = ~f[21:13];
+    wire [9:0] neg_10;
+    assign neg_10 = ~f[21:12];
+    wire [10:0] neg_11;
+    assign neg_11 = ~f[21:11];
+    wire [11:0] neg_12;
+    assign neg_12 = ~f[21:10];
+    wire [12:0] neg_13;
+    assign neg_13 = ~f[21:9];
+    wire [13:0] neg_14;
+    assign neg_14 = ~f[21:8];
+    wire [14:0] neg_15;
+    assign neg_15 = ~f[21:7];
+    wire [15:0] neg_16;
+    assign neg_16 = ~f[21:6];
+    wire [16:0] neg_17;
+    assign neg_17 = ~f[21:5];
+    wire [17:0] neg_18;
+    assign neg_18 = ~f[21:4];
+    wire [18:0] neg_19;
+    assign neg_19 = ~f[21:3];
+    wire [19:0] neg_20;
+    assign neg_20 = ~f[21:2];
+    wire [20:0] neg_21;
+    assign neg_21 = ~f[21:1];
+// End of auto-generated section
+
+
+// Auto-generated register declarations for 4 registers
+    reg [20:0] A1;
+    reg [20:0] A2;
+    reg [20:0] A3;
+    reg [20:0] A4;
+// End of auto-generated section
+
+    always @(*) begin
+        case(segment[4:0])//fixed
+            5'd0: begin A1 = {3'b111, neg_18}; A2 = {5'b11111, neg_16}; A3 = {7'b0000000, f[21:8]}; end
+            5'd1: begin A1 = {3'b111, neg_18}; A2 = {6'b111111, neg_15}; A3 = {13'b0000000000000, f[21:14]}; end
+            5'd2: begin A1 = {3'b111, neg_18}; A2 = {7'b1111111, neg_14}; A3 = {9'b000000000, f[21:10]}; end
+            5'd3: begin A1 = {3'b111, neg_18}; A2 = {8'b00000000, f[21:9]}; A3 = {10'b1111111111, neg_11}; end
+            5'd4: begin A1 = {3'b111, neg_18}; A2 = {6'b000000, f[21:7]}; A3 = {8'b11111111, neg_13}; end
+            5'd5: begin A1 = {3'b111, neg_18}; A2 = {5'b00000, f[21:6]}; A3 = {7'b1111111, neg_14}; end
+            5'd6: begin A1 = {3'b111, neg_18}; A2 = {5'b00000, f[21:6]}; A3 = {11'b00000000000, f[21:12]}; end
+            5'd7: begin A1 = {3'b111, neg_18}; A2 = {5'b00000, f[21:6]}; A3 = {7'b0000000, f[21:8]}; end
+            5'd8: begin A1 = {4'b1111, neg_17}; A2 = {6'b111111, neg_15}; A3 = {8'b00000000, f[21:9]}; end
+            5'd9: begin A1 = {4'b1111, neg_17}; A2 = {10'b1111111111, neg_11}; A3 = {14'b00000000000000, f[21:15]}; end
+            5'd10: begin A1 = {4'b1111, neg_17}; A2 = {7'b0000000, f[21:8]}; A3 = {9'b000000000, f[21:10]}; end
+            5'd11: begin A1 = {4'b1111, neg_17}; A2 = {6'b000000, f[21:7]}; A3 = {8'b00000000, f[21:9]}; end
+            5'd12: begin A1 = {5'b11111, neg_16}; A2 = {9'b111111111, neg_12}; A3 = {11'b00000000000, f[21:12]}; end
+            5'd13: begin A1 = {5'b11111, neg_16}; A2 = {7'b0000000, f[21:8]}; A3 = {10'b0000000000, f[21:11]}; end
+            5'd14: begin A1 = {6'b111111, neg_15}; A2 = {8'b00000000, f[21:9]}; A3 = {12'b000000000000, f[21:13]}; end
+            5'd15: begin A1 = {10'b1111111111, neg_11}; A2 = {13'b0000000000000, f[21:14]}; A3 = {15'b000000000000000, f[21:16]}; end
+            5'd16: begin A1 = {7'b0000000, f[21:8]}; A2 = {9'b000000000, f[21:10]}; A3 = {11'b00000000000, f[21:12]}; end
+            5'd17: begin A1 = {5'b00000, f[21:6]}; A2 = {7'b1111111, neg_14}; A3 = {9'b111111111, neg_12}; end
+            5'd18: begin A1 = {5'b00000, f[21:6]}; A2 = {10'b0000000000, f[21:11]}; A3 = {14'b11111111111111, neg_7}; end
+            5'd19: begin A1 = {4'b0000, f[21:5]}; A2 = {6'b111111, neg_15}; A3 = {8'b11111111, neg_13}; end
+            5'd20: begin A1 = {4'b0000, f[21:5]}; A2 = {7'b1111111, neg_14}; A3 = {13'b0000000000000, f[21:14]}; end
+            5'd21: begin A1 = {4'b0000, f[21:5]}; A2 = {8'b00000000, f[21:9]}; A3 = {12'b111111111111, neg_9}; end
+            5'd22: begin A1 = {4'b0000, f[21:5]}; A2 = {6'b000000, f[21:7]}; A3 = {11'b11111111111, neg_10}; end
+            5'd23: begin A1 = {3'b000, f[21:4]}; A2 = {5'b11111, neg_16}; A3 = {8'b11111111, neg_13}; end
+            5'd24: begin A1 = {3'b000, f[21:4]}; A2 = {5'b11111, neg_16}; A3 = {7'b0000000, f[21:8]}; end
+            5'd25: begin A1 = {3'b000, f[21:4]}; A2 = {6'b111111, neg_15}; A3 = {8'b00000000, f[21:9]}; end
+            5'd26: begin A1 = {3'b000, f[21:4]}; A2 = {12'b000000000000, f[21:13]}; A3 = {14'b11111111111111, neg_7}; end
+            5'd27: begin A1 = {3'b000, f[21:4]}; A2 = {6'b000000, f[21:7]}; A3 = {8'b11111111, neg_13}; end
+            5'd28: begin A1 = {3'b000, f[21:4]}; A2 = {5'b00000, f[21:6]}; A3 = {7'b1111111, neg_14}; end
+            5'd29: begin A1 = {3'b000, f[21:4]}; A2 = {5'b00000, f[21:6]}; A3 = {7'b0000000, f[21:8]}; end
+            5'd30: begin A1 = {2'b00, f[21:3]}; A2 = {4'b1111, neg_17}; A3 = {6'b111111, neg_15}; end
+            5'd31: begin A1 = {2'b00, f[21:3]}; A2 = {4'b1111, neg_17}; A3 = {11'b11111111111, neg_10}; end
+            default: begin A1 = 21'b0; A2 = 21'b0; A3 = 21'b0; end //fixed default
+      endcase
+    end
+
+// Auto-generated CSA tree for final_N=4, final_M=22, final_add_M=20
+    wire [20:0] csa1_carry, csa1_sum;
+    wire [20:0] csa2_carry, csa2_sum;
+    wire [20:0] csa3_carry, csa3_sum;
+    wire [20:0] final_sum;
+
+    CSA_anticonv4 csa1 (
+        .a({1'b0, f[21:2]}),  // f的高20位
+        .b(A1),
+        .c(A2),
+        .sum(csa1_sum),
+        .carry(csa1_carry)
+    );
+
+    CSA_anticonv4 csa2 (
+        .a(csa1_sum),
+        .b(A3),
+        .c({csa1_carry[19:0], 1'b0}),  // 左移1位
+        .sum(csa2_sum),
+        .carry(csa2_carry)
+    );
+
+    CSA_anticonv4 csa3 (
+        .a(csa2_sum),
+         .b(b),
+        .c({csa2_carry[19:0], 1'b0}),
+        .sum(csa3_sum),
+        .carry(csa3_carry)
+    );
+
+    CPA_anticonv4 cpa (
+        .a(csa3_sum),
+        .b({csa3_carry[19:0], 1'b0}),  // 左移1位
+        .sum(final_sum)
+    );
+
+    assign f_e2_out = {final_sum, f[1:0]};  // 拼接高位和原始低位
+// End of auto-generated CSA tree
+
+endmodule
+module CSA_anticonv4 #(parameter ADD_WIDTH = 21
+)(
+    input [ADD_WIDTH-1:0] a,
+    input [ADD_WIDTH-1:0] b,
+    input [ADD_WIDTH-1:0] c,
+    output [ADD_WIDTH-1:0] sum,
+    output [ADD_WIDTH-1:0] carry
+);
+    assign sum = a ^ b ^ c;          // XOR for sum
+    assign carry = (a & b) | (b & c) | (c & a); // Majority logic for carry
+endmodule
+
+// Carry-Propagate Adder (CPA) module
+module CPA_anticonv4 #(parameter ADD_WIDTH = 21
+)(
+    input [ADD_WIDTH-1:0] a,
+    input [ADD_WIDTH-1:0] b,
+    output [ADD_WIDTH-1:0] sum
+);
+    assign sum = a + b;  // Simple binary addition
+endmodule
+
+module Shift_operation32(
+    input [7:0] shift,    // 6-bit signed shift signal
+    input [23:0] e,       // 24-bit signed input signal
+    output [31:0] result     // 32-bit output result
+);
+    reg [31:0] result0;
+    reg sel;
+    always @(*) begin
+        case(shift)
+            8'b00000000: begin result0 = {8'b00000000, e}; sel = 1'b0; end
+            8'b00000001: begin result0 = {7'b0000000, e, 1'b0}; sel = 1'b0; end
+            8'b00000010: begin result0 = {6'b000000, e, 2'b00};sel = 1'b0; end
+            8'b00000011: begin result0 = {5'b00000, e, 3'b000};sel = 1'b0; end
+            8'b00000100: begin result0 = {4'b0000, e, 4'b0000};sel = 1'b0; end
+            8'b00000101: begin result0 = {3'b000, e, 5'b00000};sel = 1'b0; end
+            8'b00000110: begin result0 = {2'b00, e, 6'b000000};sel = 1'b0; end
+            8'b00000111: begin result0 = {1'b0, e, 7'b0000000};sel = 1'b0; end
+            8'b00001000: begin result0 = {e, 8'b00000000}; sel = 1'b0; end
+            8'b00001001: begin result0 = {e[22:0], 9'b000000000}; sel = 1'b0; end
+            8'b00001010: begin result0 = {e[21:0], 10'b0000000000}; sel = 1'b0; end
+            8'b00001011: begin result0 = {e[20:0], 11'b00000000000}; sel = 1'b0; end
+            8'b00001100: begin result0 = {e[19:0], 12'b000000000000}; sel = 1'b0; end
+            8'b00001101: begin result0 = {e[18:0], 13'b0000000000000}; sel = 1'b0; end
+            8'b00001110: begin result0 = {e[17:0], 14'b00000000000000}; sel = 1'b0; end
+            8'b00001111: begin result0 = {e[16:0], 15'b000000000000000}; sel = 1'b0; end
+            8'b00010000: begin result0 = {e[15:0], 16'b0000000000000000}; sel = 1'b0; end
+            8'b00010001: begin result0 = {e[14:0], 17'b00000000000000000}; sel = 1'b0; end
+            8'b00010010: begin result0 = {e[13:0], 18'b000000000000000000}; sel = 1'b0; end
+            8'b00010011: begin result0 = {e[12:0], 19'b0000000000000000000}; sel = 1'b0; end
+            8'b00010100: begin result0 = {e[11:0], 20'b00000000000000000000}; sel = 1'b0; end
+            8'b00010101: begin result0 = {e[10:0], 21'b000000000000000000000}; sel = 1'b0; end
+            8'b00010110: begin result0 = {e[9:0], 22'b0000000000000000000000}; sel = 1'b0; end
+            8'b00010111: begin result0 = {e[8:0], 23'b00000000000000000000000}; sel = 1'b0; end
+            8'b00011000: begin result0 = {e[7:0], 24'b000000000000000000000000}; sel = 1'b0; end
+            8'b00011001: begin result0 = {e[6:0], 25'b0000000000000000000000000}; sel = 1'b0; end
+            8'b00011010: begin result0 = {e[5:0], 26'b00000000000000000000000000}; sel = 1'b0; end
+            8'b00011011: begin result0 = {e[4:0], 27'b000000000000000000000000000}; sel = 1'b0; end
+            8'b00011100: begin result0 = {e[3:0], 28'b0000000000000000000000000000}; sel = 1'b0; end
+            8'b00011101: begin result0 = {e[2:0], 29'b00000000000000000000000000000}; sel = 1'b0; end
+            8'b00011110: begin result0 = {e[1:0], 30'b000000000000000000000000000000}; sel = 1'b0; end
+            8'b00011111: begin result0 = {e[0], 31'b0000000000000000000000000000000}; sel = 1'b0; end
+            8'b11111111: begin result0 = {9'b000000000, e[23:1]};  sel = e[0]; end
+            8'b11111110: begin result0 = {10'b0000000000, e[23:2]}; sel = e[1]; end
+            8'b11111101: begin result0 = {11'b00000000000, e[23:3]}; sel = e[2]; end
+            8'b11111100: begin result0 = {12'b000000000000, e[23:4]}; sel = e[3]; end
+            8'b11111011: begin result0 = {13'b0000000000000, e[23:5]}; sel = e[4]; end
+            8'b11111010: begin result0 = {14'b00000000000000, e[23:6]}; sel = e[5]; end
+            8'b11111001: begin result0 = {15'b000000000000000, e[23:7]}; sel = e[6]; end
+            8'b11111000: begin result0 = {16'b0000000000000000, e[23:8]}; sel = e[7]; end
+            8'b11110111: begin result0 = {17'b00000000000000000, e[23:9]}; sel = e[8]; end
+            8'b11110110: begin result0 = {18'b000000000000000000, e[23:10]}; sel = e[9]; end
+            8'b11110101: begin result0 = {19'b0000000000000000000, e[23:11]}; sel = e[10]; end
+            8'b11110100: begin result0 = {20'b00000000000000000000, e[23:12]}; sel = e[11]; end
+            8'b11110011: begin result0 = {21'b000000000000000000000, e[23:13]}; sel = e[12]; end
+            8'b11110010: begin result0 = {22'b0000000000000000000000, e[23:14]}; sel = e[13]; end
+            8'b11110001: begin result0 = {23'b00000000000000000000000, e[23:15]}; sel = e[14]; end
+            8'b11110000: begin result0 = {24'b000000000000000000000000, e[23:16]}; sel = e[15]; end
+            8'b11101111: begin result0 = {25'b0000000000000000000000000, e[23:17]}; sel = e[16]; end
+            8'b11101110: begin result0 = {26'b00000000000000000000000000, e[23:18]}; sel = e[17]; end
+            8'b11101101: begin result0 = {27'b000000000000000000000000000, e[23:19]}; sel = e[18]; end
+            8'b11101100: begin result0 = {28'b0000000000000000000000000000, e[23:20]}; sel = e[19]; end
+            8'b11101011: begin result0 = {29'b00000000000000000000000000000, e[23:21]}; sel = e[20]; end
+            8'b11101010: begin result0 = {30'b00000000000000000000000000000, e[23:22]}; sel = e[21]; end
+            8'b11101001: begin result0 = {31'b000000000000000000000000000000, e[23]}; sel = e[22]; end
+            default : begin result0 = 32'd0; sel = 1'b0; end //fixed latch
+        endcase
+    end
+    assign result = result0 + sel;
+endmodule
+
+module new_Shift_operation32(
+    input [7:0] shift,    // 6-bit signed shift signal
+    input [23:0] e,       // 24-bit signed input signal
+    output [31:0] result     // 32-bit output result
+);
+    reg [31:0] result0;
+    reg sel;
+    always @(*) begin
+        case(shift)
+            8'b00010111: begin result0 = {8'b00000000, e}; sel = 1'b0; end
+            8'b00011000: begin result0 = {7'b0000000, e, 1'b0}; sel = 1'b0; end
+            8'b00011001: begin result0 = {6'b000000, e, 2'b00};sel = 1'b0; end
+            8'b00011010: begin result0 = {5'b00000, e, 3'b000};sel = 1'b0; end
+            8'b00011011: begin result0 = {4'b0000, e, 4'b0000};sel = 1'b0; end
+            8'b00011100: begin result0 = {3'b000, e, 5'b00000};sel = 1'b0; end
+            8'b00011101: begin result0 = {2'b00, e, 6'b000000};sel = 1'b0; end
+            8'b00011110: begin result0 = {1'b0, e, 7'b0000000};sel = 1'b0; end
+            8'b00011111: begin result0 = {e, 8'b00000000}; sel = 1'b0; end
+            8'b00100000: begin result0 = {e[22:0], 9'b000000000}; sel = 1'b0; end
+            8'b00100001: begin result0 = {e[21:0], 10'b0000000000}; sel = 1'b0; end
+            8'b00100010: begin result0 = {e[20:0], 11'b00000000000}; sel = 1'b0; end
+            8'b00100011: begin result0 = {e[19:0], 12'b000000000000}; sel = 1'b0; end
+            8'b00100100: begin result0 = {e[18:0], 13'b0000000000000}; sel = 1'b0; end
+            8'b00100101: begin result0 = {e[17:0], 14'b00000000000000}; sel = 1'b0; end
+            8'b00100110: begin result0 = {e[16:0], 15'b000000000000000}; sel = 1'b0; end
+            8'b00100111: begin result0 = {e[15:0], 16'b0000000000000000}; sel = 1'b0; end
+            8'b00101000: begin result0 = {e[14:0], 17'b00000000000000000}; sel = 1'b0; end
+            8'b00101001: begin result0 = {e[13:0], 18'b000000000000000000}; sel = 1'b0; end
+            8'b00101010: begin result0 = {e[12:0], 19'b0000000000000000000}; sel = 1'b0; end
+            8'b00101011: begin result0 = {e[11:0], 20'b00000000000000000000}; sel = 1'b0; end
+            8'b00101100: begin result0 = {e[10:0], 21'b000000000000000000000}; sel = 1'b0; end
+            8'b00101101: begin result0 = {e[9:0], 22'b0000000000000000000000}; sel = 1'b0; end
+            8'b00101110: begin result0 = {e[8:0], 23'b00000000000000000000000}; sel = 1'b0; end
+            8'b00101111: begin result0 = {e[7:0], 24'b000000000000000000000000}; sel = 1'b0; end
+            8'b00110000: begin result0 = {e[6:0], 25'b0000000000000000000000000}; sel = 1'b0; end
+            8'b00110001: begin result0 = {e[5:0], 26'b00000000000000000000000000}; sel = 1'b0; end
+            8'b00110010: begin result0 = {e[4:0], 27'b000000000000000000000000000}; sel = 1'b0; end
+            8'b00110011: begin result0 = {e[3:0], 28'b0000000000000000000000000000}; sel = 1'b0; end
+            8'b00110100: begin result0 = {e[2:0], 29'b00000000000000000000000000000}; sel = 1'b0; end
+            8'b00110101: begin result0 = {e[1:0], 30'b000000000000000000000000000000}; sel = 1'b0; end
+            8'b00110110: begin result0 = {e[0], 31'b0000000000000000000000000000000}; sel = 1'b0; end
+            8'b00010110: begin result0 = {9'b000000000, e[23:1]};  sel = e[0]; end
+            8'b00010101: begin result0 = {10'b0000000000, e[23:2]}; sel = e[1]; end
+            8'b00010100: begin result0 = {11'b00000000000, e[23:3]}; sel = e[2]; end
+            8'b00010011: begin result0 = {12'b000000000000, e[23:4]}; sel = e[3]; end
+            8'b00010010: begin result0 = {13'b0000000000000, e[23:5]}; sel = e[4]; end
+            8'b00010001: begin result0 = {14'b00000000000000, e[23:6]}; sel = e[5]; end
+            8'b00010000: begin result0 = {15'b000000000000000, e[23:7]}; sel = e[6]; end
+            8'b00001111: begin result0 = {16'b0000000000000000, e[23:8]}; sel = e[7]; end
+            8'b00001110: begin result0 = {17'b00000000000000000, e[23:9]}; sel = e[8]; end
+            8'b00001101: begin result0 = {18'b000000000000000000, e[23:10]}; sel = e[9]; end
+            8'b00001100: begin result0 = {19'b0000000000000000000, e[23:11]}; sel = e[10]; end
+            8'b00001011: begin result0 = {20'b00000000000000000000, e[23:12]}; sel = e[11]; end
+            8'b00001010: begin result0 = {21'b000000000000000000000, e[23:13]}; sel = e[12]; end
+            8'b00001001: begin result0 = {22'b0000000000000000000000, e[23:14]}; sel = e[13]; end
+            8'b00001000: begin result0 = {23'b00000000000000000000000, e[23:15]}; sel = e[14]; end
+            8'b00000111: begin result0 = {24'b000000000000000000000000, e[23:16]}; sel = e[15]; end
+            8'b00000110: begin result0 = {25'b0000000000000000000000000, e[23:17]}; sel = e[16]; end
+            8'b00000101: begin result0 = {26'b00000000000000000000000000, e[23:18]}; sel = e[17]; end
+            8'b00000100: begin result0 = {27'b000000000000000000000000000, e[23:19]}; sel = e[18]; end
+            8'b00000011: begin result0 = {28'b0000000000000000000000000000, e[23:20]}; sel = e[19]; end
+            8'b00000010: begin result0 = {29'b00000000000000000000000000000, e[23:21]}; sel = e[20]; end
+            8'b00000001: begin result0 = {30'b00000000000000000000000000000, e[23:22]}; sel = e[21]; end
+            8'b00000000: begin result0 = {31'b000000000000000000000000000000, e[23]}; sel = e[22]; end
+            default : begin result0 = 32'd0; sel = 1'b0; end //fixed latch
+        endcase
+    end
+    assign result = result0 + sel;
+endmodule
+
+module  APP_22_17_8_4_28_anticonv1(
+    input [21:0] f,               // 22-bit input
+    output [22:0] f_e2_out     // 23-bit output 
+);
+    reg [4:0] segment;
+    reg [17:0] b;
+    always @(*) begin
+        case(f[21:14])
+            8'b00000000: begin segment = 5'd0; b = 18'b011111111111111111; end
+            8'b00000001: begin segment = 5'd0; b = 18'b011111111111111011; end
+            8'b00000010: begin segment = 5'd0; b = 18'b011111111111110111; end
+            8'b00000011: begin segment = 5'd0; b = 18'b011111111111110101; end
+            8'b00000100: begin segment = 5'd0; b = 18'b011111111111110100; end
+            8'b00000101: begin segment = 5'd0; b = 18'b011111111111110100; end
+            8'b00000110: begin segment = 5'd0; b = 18'b011111111111110100; end
+            8'b00000111: begin segment = 5'd0; b = 18'b011111111111110110; end
+            8'b00001000: begin segment = 5'd0; b = 18'b011111111111111001; end
+            8'b00001001: begin segment = 5'd0; b = 18'b011111111111111100; end
+            8'b00001010: begin segment = 5'd1; b = 18'b011111111110011000; end
+            8'b00001011: begin segment = 5'd1; b = 18'b011111111110010100; end
+            8'b00001100: begin segment = 5'd1; b = 18'b011111111110010000; end
+            8'b00001101: begin segment = 5'd1; b = 18'b011111111110001110; end
+            8'b00001110: begin segment = 5'd1; b = 18'b011111111110001100; end
+            8'b00001111: begin segment = 5'd1; b = 18'b011111111110001100; end
+            8'b00010000: begin segment = 5'd1; b = 18'b011111111110001101; end
+            8'b00010001: begin segment = 5'd1; b = 18'b011111111110001110; end
+            8'b00010010: begin segment = 5'd1; b = 18'b011111111110010001; end
+            8'b00010011: begin segment = 5'd1; b = 18'b011111111110010100; end
+            8'b00010100: begin segment = 5'd1; b = 18'b011111111110011001; end
+            8'b00010101: begin segment = 5'd2; b = 18'b011111111010110010; end
+            8'b00010110: begin segment = 5'd2; b = 18'b011111111010101110; end
+            8'b00010111: begin segment = 5'd2; b = 18'b011111111010101011; end
+            8'b00011000: begin segment = 5'd2; b = 18'b011111111010101000; end
+            8'b00011001: begin segment = 5'd2; b = 18'b011111111010100111; end
+            8'b00011010: begin segment = 5'd2; b = 18'b011111111010100111; end
+            8'b00011011: begin segment = 5'd2; b = 18'b011111111010101000; end
+            8'b00011100: begin segment = 5'd2; b = 18'b011111111010101001; end
+            8'b00011101: begin segment = 5'd2; b = 18'b011111111010101100; end
+            8'b00011110: begin segment = 5'd2; b = 18'b011111111010110000; end
+            8'b00011111: begin segment = 5'd3; b = 18'b011111110101111010; end
+            8'b00100000: begin segment = 5'd3; b = 18'b011111110101110110; end
+            8'b00100001: begin segment = 5'd3; b = 18'b011111110101110011; end
+            8'b00100010: begin segment = 5'd3; b = 18'b011111110101110001; end
+            8'b00100011: begin segment = 5'd3; b = 18'b011111110101110001; end
+            8'b00100100: begin segment = 5'd3; b = 18'b011111110101110001; end
+            8'b00100101: begin segment = 5'd3; b = 18'b011111110101110010; end
+            8'b00100110: begin segment = 5'd3; b = 18'b011111110101110101; end
+            8'b00100111: begin segment = 5'd3; b = 18'b011111110101111000; end
+            8'b00101000: begin segment = 5'd3; b = 18'b011111110101111101; end
+            8'b00101001: begin segment = 5'd4; b = 18'b011111101110111001; end
+            8'b00101010: begin segment = 5'd4; b = 18'b011111101110110101; end
+            8'b00101011: begin segment = 5'd4; b = 18'b011111101110110010; end
+            8'b00101100: begin segment = 5'd4; b = 18'b011111101110101111; end
+            8'b00101101: begin segment = 5'd4; b = 18'b011111101110101110; end
+            8'b00101110: begin segment = 5'd4; b = 18'b011111101110101110; end
+            8'b00101111: begin segment = 5'd4; b = 18'b011111101110110000; end
+            8'b00110000: begin segment = 5'd4; b = 18'b011111101110110010; end
+            8'b00110001: begin segment = 5'd4; b = 18'b011111101110110101; end
+            8'b00110010: begin segment = 5'd4; b = 18'b011111101110111001; end
+            8'b00110011: begin segment = 5'd5; b = 18'b011111100110111100; end
+            8'b00110100: begin segment = 5'd5; b = 18'b011111100110111000; end
+            8'b00110101: begin segment = 5'd5; b = 18'b011111100110110110; end
+            8'b00110110: begin segment = 5'd5; b = 18'b011111100110110101; end
+            8'b00110111: begin segment = 5'd5; b = 18'b011111100110110100; end
+            8'b00111000: begin segment = 5'd5; b = 18'b011111100110110101; end
+            8'b00111001: begin segment = 5'd5; b = 18'b011111100110111000; end
+            8'b00111010: begin segment = 5'd5; b = 18'b011111100110111011; end
+            8'b00111011: begin segment = 5'd5; b = 18'b011111100110111111; end
+            8'b00111100: begin segment = 5'd5; b = 18'b011111100111000101; end
+            8'b00111101: begin segment = 5'd6; b = 18'b011111011011101001; end
+            8'b00111110: begin segment = 5'd6; b = 18'b011111011011100101; end
+            8'b00111111: begin segment = 5'd6; b = 18'b011111011011100010; end
+            8'b01000000: begin segment = 5'd6; b = 18'b011111011011100000; end
+            8'b01000001: begin segment = 5'd6; b = 18'b011111011011011111; end
+            8'b01000010: begin segment = 5'd6; b = 18'b011111011011100000; end
+            8'b01000011: begin segment = 5'd6; b = 18'b011111011011100001; end
+            8'b01000100: begin segment = 5'd6; b = 18'b011111011011100100; end
+            8'b01000101: begin segment = 5'd6; b = 18'b011111011011100111; end
+            8'b01000110: begin segment = 5'd6; b = 18'b011111011011101100; end
+            8'b01000111: begin segment = 5'd6; b = 18'b011111011011110011; end
+            8'b01001000: begin segment = 5'd7; b = 18'b011111001110010100; end
+            8'b01001001: begin segment = 5'd7; b = 18'b011111001110010000; end
+            8'b01001010: begin segment = 5'd7; b = 18'b011111001110001110; end
+            8'b01001011: begin segment = 5'd7; b = 18'b011111001110001101; end
+            8'b01001100: begin segment = 5'd7; b = 18'b011111001110001101; end
+            8'b01001101: begin segment = 5'd7; b = 18'b011111001110001110; end
+            8'b01001110: begin segment = 5'd7; b = 18'b011111001110010000; end
+            8'b01001111: begin segment = 5'd7; b = 18'b011111001110010100; end
+            8'b01010000: begin segment = 5'd7; b = 18'b011111001110011000; end
+            8'b01010001: begin segment = 5'd7; b = 18'b011111001110011110; end
+            8'b01010010: begin segment = 5'd8; b = 18'b011110111101100000; end
+            8'b01010011: begin segment = 5'd8; b = 18'b011110111101011011; end
+            8'b01010100: begin segment = 5'd8; b = 18'b011110111101010111; end
+            8'b01010101: begin segment = 5'd8; b = 18'b011110111101010101; end
+            8'b01010110: begin segment = 5'd8; b = 18'b011110111101010100; end
+            8'b01010111: begin segment = 5'd8; b = 18'b011110111101010100; end
+            8'b01011000: begin segment = 5'd8; b = 18'b011110111101010101; end
+            8'b01011001: begin segment = 5'd8; b = 18'b011110111101010111; end
+            8'b01011010: begin segment = 5'd8; b = 18'b011110111101011011; end
+            8'b01011011: begin segment = 5'd8; b = 18'b011110111101100000; end
+            8'b01011100: begin segment = 5'd9; b = 18'b011110101110000011; end
+            8'b01011101: begin segment = 5'd9; b = 18'b011110101110000000; end
+            8'b01011110: begin segment = 5'd9; b = 18'b011110101101111110; end
+            8'b01011111: begin segment = 5'd9; b = 18'b011110101101111101; end
+            8'b01100000: begin segment = 5'd9; b = 18'b011110101101111101; end
+            8'b01100001: begin segment = 5'd9; b = 18'b011110101101111110; end
+            8'b01100010: begin segment = 5'd9; b = 18'b011110101110000001; end
+            8'b01100011: begin segment = 5'd9; b = 18'b011110101110000101; end
+            8'b01100100: begin segment = 5'd9; b = 18'b011110101110001010; end
+            8'b01100101: begin segment = 5'd10; b = 18'b011110011010110101; end
+            8'b01100110: begin segment = 5'd10; b = 18'b011110011010110001; end
+            8'b01100111: begin segment = 5'd10; b = 18'b011110011010101110; end
+            8'b01101000: begin segment = 5'd10; b = 18'b011110011010101011; end
+            8'b01101001: begin segment = 5'd10; b = 18'b011110011010101011; end
+            8'b01101010: begin segment = 5'd10; b = 18'b011110011010101100; end
+            8'b01101011: begin segment = 5'd10; b = 18'b011110011010101110; end
+            8'b01101100: begin segment = 5'd10; b = 18'b011110011010110001; end
+            8'b01101101: begin segment = 5'd10; b = 18'b011110011010110101; end
+            8'b01101110: begin segment = 5'd11; b = 18'b011110000110110110; end
+            8'b01101111: begin segment = 5'd11; b = 18'b011110000110110001; end
+            8'b01110000: begin segment = 5'd11; b = 18'b011110000110101111; end
+            8'b01110001: begin segment = 5'd11; b = 18'b011110000110101101; end
+            8'b01110010: begin segment = 5'd11; b = 18'b011110000110101100; end
+            8'b01110011: begin segment = 5'd11; b = 18'b011110000110101101; end
+            8'b01110100: begin segment = 5'd11; b = 18'b011110000110101111; end
+            8'b01110101: begin segment = 5'd11; b = 18'b011110000110110010; end
+            8'b01110110: begin segment = 5'd11; b = 18'b011110000110110110; end
+            8'b01110111: begin segment = 5'd12; b = 18'b011101110000101010; end
+            8'b01111000: begin segment = 5'd12; b = 18'b011101110000100110; end
+            8'b01111001: begin segment = 5'd12; b = 18'b011101110000100010; end
+            8'b01111010: begin segment = 5'd12; b = 18'b011101110000100000; end
+            8'b01111011: begin segment = 5'd12; b = 18'b011101110000100000; end
+            8'b01111100: begin segment = 5'd12; b = 18'b011101110000100001; end
+            8'b01111101: begin segment = 5'd12; b = 18'b011101110000100011; end
+            8'b01111110: begin segment = 5'd12; b = 18'b011101110000100110; end
+            8'b01111111: begin segment = 5'd12; b = 18'b011101110000101010; end
+            8'b10000000: begin segment = 5'd13; b = 18'b011101010110110010; end
+            8'b10000001: begin segment = 5'd13; b = 18'b011101010110101100; end
+            8'b10000010: begin segment = 5'd13; b = 18'b011101010110101000; end
+            8'b10000011: begin segment = 5'd13; b = 18'b011101010110100101; end
+            8'b10000100: begin segment = 5'd13; b = 18'b011101010110100100; end
+            8'b10000101: begin segment = 5'd13; b = 18'b011101010110100100; end
+            8'b10000110: begin segment = 5'd13; b = 18'b011101010110100101; end
+            8'b10000111: begin segment = 5'd13; b = 18'b011101010110101000; end
+            8'b10001000: begin segment = 5'd13; b = 18'b011101010110101101; end
+            8'b10001001: begin segment = 5'd13; b = 18'b011101010110110010; end
+            8'b10001010: begin segment = 5'd14; b = 18'b011100111010001100; end
+            8'b10001011: begin segment = 5'd14; b = 18'b011100111010000111; end
+            8'b10001100: begin segment = 5'd14; b = 18'b011100111010000100; end
+            8'b10001101: begin segment = 5'd14; b = 18'b011100111010000010; end
+            8'b10001110: begin segment = 5'd14; b = 18'b011100111010000010; end
+            8'b10001111: begin segment = 5'd14; b = 18'b011100111010000010; end
+            8'b10010000: begin segment = 5'd14; b = 18'b011100111010000100; end
+            8'b10010001: begin segment = 5'd14; b = 18'b011100111010001000; end
+            8'b10010010: begin segment = 5'd14; b = 18'b011100111010001101; end
+            8'b10010011: begin segment = 5'd15; b = 18'b011100011100010110; end
+            8'b10010100: begin segment = 5'd15; b = 18'b011100011100010001; end
+            8'b10010101: begin segment = 5'd15; b = 18'b011100011100001101; end
+            8'b10010110: begin segment = 5'd15; b = 18'b011100011100001011; end
+            8'b10010111: begin segment = 5'd15; b = 18'b011100011100001010; end
+            8'b10011000: begin segment = 5'd15; b = 18'b011100011100001011; end
+            8'b10011001: begin segment = 5'd15; b = 18'b011100011100001101; end
+            8'b10011010: begin segment = 5'd15; b = 18'b011100011100010001; end
+            8'b10011011: begin segment = 5'd15; b = 18'b011100011100010110; end
+            8'b10011100: begin segment = 5'd16; b = 18'b011011111100011111; end
+            8'b10011101: begin segment = 5'd16; b = 18'b011011111100011010; end
+            8'b10011110: begin segment = 5'd16; b = 18'b011011111100010111; end
+            8'b10011111: begin segment = 5'd16; b = 18'b011011111100010100; end
+            8'b10100000: begin segment = 5'd16; b = 18'b011011111100010011; end
+            8'b10100001: begin segment = 5'd16; b = 18'b011011111100010100; end
+            8'b10100010: begin segment = 5'd16; b = 18'b011011111100010110; end
+            8'b10100011: begin segment = 5'd16; b = 18'b011011111100011010; end
+            8'b10100100: begin segment = 5'd16; b = 18'b011011111100011111; end
+            8'b10100101: begin segment = 5'd17; b = 18'b011011011000100011; end
+            8'b10100110: begin segment = 5'd17; b = 18'b011011011000011110; end
+            8'b10100111: begin segment = 5'd17; b = 18'b011011011000011010; end
+            8'b10101000: begin segment = 5'd17; b = 18'b011011011000010111; end
+            8'b10101001: begin segment = 5'd17; b = 18'b011011011000010110; end
+            8'b10101010: begin segment = 5'd17; b = 18'b011011011000010110; end
+            8'b10101011: begin segment = 5'd17; b = 18'b011011011000011000; end
+            8'b10101100: begin segment = 5'd17; b = 18'b011011011000011011; end
+            8'b10101101: begin segment = 5'd17; b = 18'b011011011000100000; end
+            8'b10101110: begin segment = 5'd18; b = 18'b011010110110100001; end
+            8'b10101111: begin segment = 5'd18; b = 18'b011010110110011101; end
+            8'b10110000: begin segment = 5'd18; b = 18'b011010110110011010; end
+            8'b10110001: begin segment = 5'd18; b = 18'b011010110110011001; end
+            8'b10110010: begin segment = 5'd18; b = 18'b011010110110011000; end
+            8'b10110011: begin segment = 5'd18; b = 18'b011010110110011011; end
+            8'b10110100: begin segment = 5'd18; b = 18'b011010110110011110; end
+            8'b10110101: begin segment = 5'd18; b = 18'b011010110110100011; end
+            8'b10110110: begin segment = 5'd19; b = 18'b011010010000001001; end
+            8'b10110111: begin segment = 5'd19; b = 18'b011010010000000100; end
+            8'b10111000: begin segment = 5'd19; b = 18'b011010010000000000; end
+            8'b10111001: begin segment = 5'd19; b = 18'b011010001111111110; end
+            8'b10111010: begin segment = 5'd19; b = 18'b011010001111111101; end
+            8'b10111011: begin segment = 5'd19; b = 18'b011010001111111101; end
+            8'b10111100: begin segment = 5'd19; b = 18'b011010010000000000; end
+            8'b10111101: begin segment = 5'd19; b = 18'b011010010000000100; end
+            8'b10111110: begin segment = 5'd20; b = 18'b011001101100011100; end
+            8'b10111111: begin segment = 5'd20; b = 18'b011001101100010111; end
+            8'b11000000: begin segment = 5'd20; b = 18'b011001101100010100; end
+            8'b11000001: begin segment = 5'd20; b = 18'b011001101100010010; end
+            8'b11000010: begin segment = 5'd20; b = 18'b011001101100010010; end
+            8'b11000011: begin segment = 5'd20; b = 18'b011001101100010100; end
+            8'b11000100: begin segment = 5'd20; b = 18'b011001101100010111; end
+            8'b11000101: begin segment = 5'd20; b = 18'b011001101100011100; end
+            8'b11000110: begin segment = 5'd20; b = 18'b011001101100100011; end
+            8'b11000111: begin segment = 5'd21; b = 18'b011000111010110011; end
+            8'b11001000: begin segment = 5'd21; b = 18'b011000111010101101; end
+            8'b11001001: begin segment = 5'd21; b = 18'b011000111010101001; end
+            8'b11001010: begin segment = 5'd21; b = 18'b011000111010100110; end
+            8'b11001011: begin segment = 5'd21; b = 18'b011000111010100101; end
+            8'b11001100: begin segment = 5'd21; b = 18'b011000111010100110; end
+            8'b11001101: begin segment = 5'd21; b = 18'b011000111010101000; end
+            8'b11001110: begin segment = 5'd21; b = 18'b011000111010101100; end
+            8'b11001111: begin segment = 5'd22; b = 18'b011000010011110111; end
+            8'b11010000: begin segment = 5'd22; b = 18'b011000010011110010; end
+            8'b11010001: begin segment = 5'd22; b = 18'b011000010011101111; end
+            8'b11010010: begin segment = 5'd22; b = 18'b011000010011101110; end
+            8'b11010011: begin segment = 5'd22; b = 18'b011000010011101111; end
+            8'b11010100: begin segment = 5'd22; b = 18'b011000010011110001; end
+            8'b11010101: begin segment = 5'd22; b = 18'b011000010011110100; end
+            8'b11010110: begin segment = 5'd22; b = 18'b011000010011111010; end
+            8'b11010111: begin segment = 5'd23; b = 18'b010111100100011101; end
+            8'b11011000: begin segment = 5'd23; b = 18'b010111100100010111; end
+            8'b11011001: begin segment = 5'd23; b = 18'b010111100100010100; end
+            8'b11011010: begin segment = 5'd23; b = 18'b010111100100010010; end
+            8'b11011011: begin segment = 5'd23; b = 18'b010111100100010011; end
+            8'b11011100: begin segment = 5'd23; b = 18'b010111100100010101; end
+            8'b11011101: begin segment = 5'd23; b = 18'b010111100100011000; end
+            8'b11011110: begin segment = 5'd23; b = 18'b010111100100011101; end
+            8'b11011111: begin segment = 5'd24; b = 18'b010110110011001111; end
+            8'b11100000: begin segment = 5'd24; b = 18'b010110110011001001; end
+            8'b11100001: begin segment = 5'd24; b = 18'b010110110011000110; end
+            8'b11100010: begin segment = 5'd24; b = 18'b010110110011000100; end
+            8'b11100011: begin segment = 5'd24; b = 18'b010110110011000101; end
+            8'b11100100: begin segment = 5'd24; b = 18'b010110110011000110; end
+            8'b11100101: begin segment = 5'd24; b = 18'b010110110011001001; end
+            8'b11100110: begin segment = 5'd24; b = 18'b010110110011001111; end
+            8'b11100111: begin segment = 5'd25; b = 18'b010110000001100111; end
+            8'b11101000: begin segment = 5'd25; b = 18'b010110000001100010; end
+            8'b11101001: begin segment = 5'd25; b = 18'b010110000001011111; end
+            8'b11101010: begin segment = 5'd25; b = 18'b010110000001011110; end
+            8'b11101011: begin segment = 5'd25; b = 18'b010110000001011110; end
+            8'b11101100: begin segment = 5'd25; b = 18'b010110000001100000; end
+            8'b11101101: begin segment = 5'd25; b = 18'b010110000001100101; end
+            8'b11101110: begin segment = 5'd25; b = 18'b010110000001101011; end
+            8'b11101111: begin segment = 5'd26; b = 18'b010100111110011100; end
+            8'b11110000: begin segment = 5'd26; b = 18'b010100111110010011; end
+            8'b11110001: begin segment = 5'd26; b = 18'b010100111110001101; end
+            8'b11110010: begin segment = 5'd26; b = 18'b010100111110001000; end
+            8'b11110011: begin segment = 5'd26; b = 18'b010100111110000101; end
+            8'b11110100: begin segment = 5'd26; b = 18'b010100111110000100; end
+            8'b11110101: begin segment = 5'd26; b = 18'b010100111110000101; end
+            8'b11110110: begin segment = 5'd26; b = 18'b010100111110001000; end
+            8'b11110111: begin segment = 5'd27; b = 18'b010100001111110011; end
+            8'b11111000: begin segment = 5'd27; b = 18'b010100001111101110; end
+            8'b11111001: begin segment = 5'd27; b = 18'b010100001111101010; end
+            8'b11111010: begin segment = 5'd27; b = 18'b010100001111101000; end
+            8'b11111011: begin segment = 5'd27; b = 18'b010100001111101000; end
+            8'b11111100: begin segment = 5'd27; b = 18'b010100001111101011; end
+            8'b11111101: begin segment = 5'd27; b = 18'b010100001111101111; end
+            8'b11111110: begin segment = 5'd27; b = 18'b010100001111110101; end
+            8'b11111111: begin segment = 5'd27; b = 18'b010100001111111101; end
+      endcase
+    end
+
+// Auto-generated neg assignments for WIDTH=22
+    wire neg_1;
+    assign neg_1 = ~f[21];
+    wire [1:0] neg_2;
+    assign neg_2 = ~f[21:20];
+    wire [2:0] neg_3;
+    assign neg_3 = ~f[21:19];
+    wire [3:0] neg_4;
+    assign neg_4 = ~f[21:18];
+    wire [4:0] neg_5;
+    assign neg_5 = ~f[21:17];
+    wire [5:0] neg_6;
+    assign neg_6 = ~f[21:16];
+    wire [6:0] neg_7;
+    assign neg_7 = ~f[21:15];
+    wire [7:0] neg_8;
+    assign neg_8 = ~f[21:14];
+    wire [8:0] neg_9;
+    assign neg_9 = ~f[21:13];
+    wire [9:0] neg_10;
+    assign neg_10 = ~f[21:12];
+    wire [10:0] neg_11;
+    assign neg_11 = ~f[21:11];
+    wire [11:0] neg_12;
+    assign neg_12 = ~f[21:10];
+    wire [12:0] neg_13;
+    assign neg_13 = ~f[21:9];
+    wire [13:0] neg_14;
+    assign neg_14 = ~f[21:8];
+    wire [14:0] neg_15;
+    assign neg_15 = ~f[21:7];
+    wire [15:0] neg_16;
+    assign neg_16 = ~f[21:6];
+    wire [16:0] neg_17;
+    assign neg_17 = ~f[21:5];
+    wire [17:0] neg_18;
+    assign neg_18 = ~f[21:4];
+    wire [18:0] neg_19;
+    assign neg_19 = ~f[21:3];
+    wire [19:0] neg_20;
+    assign neg_20 = ~f[21:2];
+    wire [20:0] neg_21;
+    assign neg_21 = ~f[21:1];
+// End of auto-generated section
+
+
+// Auto-generated register declarations for 4 registers
+    reg [17:0] A1;
+    reg [17:0] A2;
+    reg [17:0] A3;
+    reg [17:0] A4;
+// End of auto-generated section
+
+    always @(*) begin
+        case(segment)
+            5'd0: begin A1 = {3'b111, neg_15}; A2 = {5'b11111, neg_13}; A3 = {7'b0000000, f[21:11]}; end
+            5'd1: begin A1 = {3'b111, neg_15}; A2 = {6'b111111, neg_12}; A3 = {9'b000000000, f[21:13]}; end
+            5'd2: begin A1 = {3'b111, neg_15}; A2 = {8'b11111111, neg_10}; A3 = {10'b0000000000, f[21:14]}; end
+            5'd3: begin A1 = {3'b111, neg_15}; A2 = {7'b0000000, f[21:11]}; A3 = {10'b1111111111, neg_8}; end
+            5'd4: begin A1 = {3'b111, neg_15}; A2 = {6'b000000, f[21:10]}; A3 = {9'b000000000, f[21:13]}; end
+            5'd5: begin A1 = {3'b111, neg_15}; A2 = {5'b00000, f[21:9]}; A3 = {8'b11111111, neg_10}; end
+            5'd6: begin A1 = {3'b111, neg_15}; A2 = {5'b00000, f[21:9]}; A3 = {7'b0000000, f[21:11]}; end
+            5'd7: begin A1 = {4'b1111, neg_14}; A2 = {6'b111111, neg_12}; A3 = {8'b00000000, f[21:12]}; end
+            5'd8: begin A1 = {4'b1111, neg_14}; A2 = {10'b0000000000, f[21:14]}; A3 = {12'b000000000000, f[21:16]}; end
+            5'd9: begin A1 = {4'b1111, neg_14}; A2 = {6'b000000, f[21:10]}; A3 = {8'b11111111, neg_10}; end
+            5'd10: begin A1 = {5'b11111, neg_13}; A2 = {7'b1111111, neg_11}; A3 = {12'b000000000000, f[21:16]}; end
+            5'd11: begin A1 = {5'b11111, neg_13}; A2 = {8'b00000000, f[21:12]}; A3 = {13'b1111111111111, neg_5}; end
+            5'd12: begin A1 = {6'b111111, neg_12}; A2 = {12'b111111111111, neg_6}; A3 = {14'b00000000000000, f[21:18]}; end
+            5'd13: begin A1 = {8'b11111111, neg_10}; A2 = {10'b0000000000, f[21:14]}; A3 = {12'b111111111111, neg_6}; end
+            5'd14: begin A1 = {7'b0000000, f[21:11]}; A2 = {9'b000000000, f[21:13]}; A3 = {18'b000000000000000000};end
+            5'd15: begin A1 = {5'b00000, f[21:9]}; A2 = {7'b1111111, neg_11}; A3 = {10'b1111111111, neg_8}; end
+            5'd16: begin A1 = {5'b00000, f[21:9]}; A2 = {8'b00000000, f[21:12]}; A3 = {14'b00000000000000, f[21:18]}; end
+            5'd17: begin A1 = {4'b0000, f[21:8]}; A2 = {6'b111111, neg_12}; A3 = {9'b000000000, f[21:13]}; end
+            5'd18: begin A1 = {4'b0000, f[21:8]}; A2 = {9'b111111111, neg_9}; A3 = {11'b00000000000, f[21:15]}; end
+            5'd19: begin A1 = {4'b0000, f[21:8]}; A2 = {6'b000000, f[21:10]}; A3 = {8'b11111111, neg_10}; end
+            5'd20: begin A1 = {3'b000, f[21:7]}; A2 = {5'b11111, neg_13}; A3 = {7'b1111111, neg_11}; end
+            5'd21: begin A1 = {3'b000, f[21:7]}; A2 = {5'b11111, neg_13}; A3 = {7'b0000000, f[21:11]}; end
+            5'd22: begin A1 = {3'b000, f[21:7]}; A2 = {6'b111111, neg_12}; A3 = {8'b00000000, f[21:12]}; end
+            5'd23: begin A1 = {3'b000, f[21:7]}; A2 = {9'b000000000, f[21:13]}; A3 = {13'b0000000000000, f[21:17]}; end
+            5'd24: begin A1 = {3'b000, f[21:7]}; A2 = {6'b000000, f[21:10]}; A3 = {12'b000000000000, f[21:16]}; end
+            5'd25: begin A1 = {3'b000, f[21:7]}; A2 = {5'b00000, f[21:9]}; A3 = {9'b111111111, neg_9}; end
+            5'd26: begin A1 = {2'b00, f[21:6]}; A2 = {4'b1111, neg_14}; A3 = {6'b111111, neg_12}; end
+            5'd27: begin A1 = {2'b00, f[21:6]}; A2 = {4'b1111, neg_14}; A3 = {8'b11111111, neg_10}; end
+            default: begin A1 = 18'b0; A2 = 18'b0; A3 = 18'b0; end //fixed default case to avoid latches
+      endcase
+    end
+
+// Auto-generated CSA tree for final_N=4, final_M=22, final_add_M=17
+    wire [17:0] csa1_carry, csa1_sum;
+    wire [17:0] csa2_carry, csa2_sum;
+    wire [17:0] csa3_carry, csa3_sum;
+    wire [17:0] final_sum;
+
+    CSA_anticonv1 csa1 (
+        .a({1'b0, f[21:5]}),  // f的高17位
+        .b(A1),
+        .c(A2),
+        .sum(csa1_sum),
+        .carry(csa1_carry)
+    );
+
+    CSA_anticonv1 csa2 (
+        .a(csa1_sum),
+        .b(A3),
+        .c({csa1_carry[16:0], 1'b0}),  // 左移1位
+        .sum(csa2_sum),
+        .carry(csa2_carry)
+    );
+
+    CSA_anticonv1 csa3 (
+        .a(csa2_sum),
+         .b(b),
+        .c({csa2_carry[16:0], 1'b0}),
+        .sum(csa3_sum),
+        .carry(csa3_carry)
+    );
+
+    CPA_anticonv1 cpa (
+        .a(csa3_sum),
+        .b({csa3_carry[16:0], 1'b0}),  // 左移1位
+        .sum(final_sum)
+    );
+
+    assign f_e2_out = {final_sum, f[4:0]};  // 拼接高位和原始低位
+// End of auto-generated CSA tree
+
+endmodule
+module CSA_anticonv1 #(parameter ADD_WIDTH = 18
+)(
+    input [ADD_WIDTH-1:0] a,
+    input [ADD_WIDTH-1:0] b,
+    input [ADD_WIDTH-1:0] c,
+    output [ADD_WIDTH-1:0] sum,
+    output [ADD_WIDTH-1:0] carry
+);
+    assign sum = a ^ b ^ c;          // XOR for sum
+    assign carry = (a & b) | (b & c) | (c & a); // Majority logic for carry
+endmodule
+
+// Carry-Propagate Adder (CPA) module
+module CPA_anticonv1 #(parameter ADD_WIDTH = 18
+)(
+    input [ADD_WIDTH-1:0] a,
+    input [ADD_WIDTH-1:0] b,
+    output [ADD_WIDTH-1:0] sum
+);
+    assign sum = a + b;  // Simple binary addition
+endmodule
+
+module  APP_22_18_9_4_32_anticonv2(
+    input [21:0] f,               // 22-bit input
+    output [22:0] f_e2_out     // 23-bit output 
+);
+    reg [5:0] segment;
+    reg [18:0] b;
+    always @(*) begin
+        case(f[21:13])
+            9'b000000000: begin segment = 6'd0; b = 19'b0111111111111111111; end
+            9'b000000001: begin segment = 6'd0; b = 19'b0111111111111111010; end
+            9'b000000010: begin segment = 6'd0; b = 19'b0111111111111110110; end
+            9'b000000011: begin segment = 6'd0; b = 19'b0111111111111110010; end
+            9'b000000100: begin segment = 6'd0; b = 19'b0111111111111101111; end
+            9'b000000101: begin segment = 6'd0; b = 19'b0111111111111101100; end
+            9'b000000110: begin segment = 6'd0; b = 19'b0111111111111101010; end
+            9'b000000111: begin segment = 6'd0; b = 19'b0111111111111101000; end
+            9'b000001000: begin segment = 6'd0; b = 19'b0111111111111100111; end
+            9'b000001001: begin segment = 6'd0; b = 19'b0111111111111100110; end
+            9'b000001010: begin segment = 6'd0; b = 19'b0111111111111100110; end
+            9'b000001011: begin segment = 6'd0; b = 19'b0111111111111100110; end
+            9'b000001100: begin segment = 6'd0; b = 19'b0111111111111100111; end
+            9'b000001101: begin segment = 6'd0; b = 19'b0111111111111101000; end
+            9'b000001110: begin segment = 6'd0; b = 19'b0111111111111101010; end
+            9'b000001111: begin segment = 6'd0; b = 19'b0111111111111101100; end
+            9'b000010000: begin segment = 6'd1; b = 19'b0111111111101110011; end
+            9'b000010001: begin segment = 6'd1; b = 19'b0111111111101101110; end
+            9'b000010010: begin segment = 6'd1; b = 19'b0111111111101101011; end
+            9'b000010011: begin segment = 6'd1; b = 19'b0111111111101100111; end
+            9'b000010100: begin segment = 6'd1; b = 19'b0111111111101100101; end
+            9'b000010101: begin segment = 6'd1; b = 19'b0111111111101100010; end
+            9'b000010110: begin segment = 6'd1; b = 19'b0111111111101100001; end
+            9'b000010111: begin segment = 6'd1; b = 19'b0111111111101011111; end
+            9'b000011000: begin segment = 6'd1; b = 19'b0111111111101011110; end
+            9'b000011001: begin segment = 6'd1; b = 19'b0111111111101011110; end
+            9'b000011010: begin segment = 6'd1; b = 19'b0111111111101011110; end
+            9'b000011011: begin segment = 6'd1; b = 19'b0111111111101011111; end
+            9'b000011100: begin segment = 6'd1; b = 19'b0111111111101100000; end
+            9'b000011101: begin segment = 6'd1; b = 19'b0111111111101100001; end
+            9'b000011110: begin segment = 6'd1; b = 19'b0111111111101100011; end
+            9'b000011111: begin segment = 6'd1; b = 19'b0111111111101100110; end
+            9'b000100000: begin segment = 6'd1; b = 19'b0111111111101101001; end
+            9'b000100001: begin segment = 6'd1; b = 19'b0111111111101101101; end
+            9'b000100010: begin segment = 6'd1; b = 19'b0111111111101110001; end
+            9'b000100011: begin segment = 6'd2; b = 19'b0111111111000100100; end
+            9'b000100100: begin segment = 6'd2; b = 19'b0111111111000100000; end
+            9'b000100101: begin segment = 6'd2; b = 19'b0111111111000011100; end
+            9'b000100110: begin segment = 6'd2; b = 19'b0111111111000011000; end
+            9'b000100111: begin segment = 6'd2; b = 19'b0111111111000010101; end
+            9'b000101000: begin segment = 6'd2; b = 19'b0111111111000010011; end
+            9'b000101001: begin segment = 6'd2; b = 19'b0111111111000010001; end
+            9'b000101010: begin segment = 6'd2; b = 19'b0111111111000010000; end
+            9'b000101011: begin segment = 6'd2; b = 19'b0111111111000001111; end
+            9'b000101100: begin segment = 6'd2; b = 19'b0111111111000001111; end
+            9'b000101101: begin segment = 6'd2; b = 19'b0111111111000001111; end
+            9'b000101110: begin segment = 6'd2; b = 19'b0111111111000010000; end
+            9'b000101111: begin segment = 6'd2; b = 19'b0111111111000010001; end
+            9'b000110000: begin segment = 6'd2; b = 19'b0111111111000010010; end
+            9'b000110001: begin segment = 6'd2; b = 19'b0111111111000010101; end
+            9'b000110010: begin segment = 6'd2; b = 19'b0111111111000010111; end
+            9'b000110011: begin segment = 6'd2; b = 19'b0111111111000011011; end
+            9'b000110100: begin segment = 6'd2; b = 19'b0111111111000011110; end
+            9'b000110101: begin segment = 6'd2; b = 19'b0111111111000100011; end
+            9'b000110110: begin segment = 6'd3; b = 19'b0111111110000100010; end
+            9'b000110111: begin segment = 6'd3; b = 19'b0111111110000011101; end
+            9'b000111000: begin segment = 6'd3; b = 19'b0111111110000011010; end
+            9'b000111001: begin segment = 6'd3; b = 19'b0111111110000010111; end
+            9'b000111010: begin segment = 6'd3; b = 19'b0111111110000010100; end
+            9'b000111011: begin segment = 6'd3; b = 19'b0111111110000010010; end
+            9'b000111100: begin segment = 6'd3; b = 19'b0111111110000010000; end
+            9'b000111101: begin segment = 6'd3; b = 19'b0111111110000010000; end
+            9'b000111110: begin segment = 6'd3; b = 19'b0111111110000001111; end
+            9'b000111111: begin segment = 6'd3; b = 19'b0111111110000001111; end
+            9'b001000000: begin segment = 6'd3; b = 19'b0111111110000001111; end
+            9'b001000001: begin segment = 6'd3; b = 19'b0111111110000010001; end
+            9'b001000010: begin segment = 6'd3; b = 19'b0111111110000010010; end
+            9'b001000011: begin segment = 6'd3; b = 19'b0111111110000010100; end
+            9'b001000100: begin segment = 6'd3; b = 19'b0111111110000010111; end
+            9'b001000101: begin segment = 6'd3; b = 19'b0111111110000011010; end
+            9'b001000110: begin segment = 6'd3; b = 19'b0111111110000011101; end
+            9'b001000111: begin segment = 6'd3; b = 19'b0111111110000100010; end
+            9'b001001000: begin segment = 6'd4; b = 19'b0111111100101110110; end
+            9'b001001001: begin segment = 6'd4; b = 19'b0111111100101110001; end
+            9'b001001010: begin segment = 6'd4; b = 19'b0111111100101101110; end
+            9'b001001011: begin segment = 6'd4; b = 19'b0111111100101101011; end
+            9'b001001100: begin segment = 6'd4; b = 19'b0111111100101101000; end
+            9'b001001101: begin segment = 6'd4; b = 19'b0111111100101100110; end
+            9'b001001110: begin segment = 6'd4; b = 19'b0111111100101100100; end
+            9'b001001111: begin segment = 6'd4; b = 19'b0111111100101100011; end
+            9'b001010000: begin segment = 6'd4; b = 19'b0111111100101100011; end
+            9'b001010001: begin segment = 6'd4; b = 19'b0111111100101100011; end
+            9'b001010010: begin segment = 6'd4; b = 19'b0111111100101100011; end
+            9'b001010011: begin segment = 6'd4; b = 19'b0111111100101100100; end
+            9'b001010100: begin segment = 6'd4; b = 19'b0111111100101100110; end
+            9'b001010101: begin segment = 6'd4; b = 19'b0111111100101101000; end
+            9'b001010110: begin segment = 6'd4; b = 19'b0111111100101101011; end
+            9'b001010111: begin segment = 6'd4; b = 19'b0111111100101101110; end
+            9'b001011000: begin segment = 6'd4; b = 19'b0111111100101110010; end
+            9'b001011001: begin segment = 6'd4; b = 19'b0111111100101110110; end
+            9'b001011010: begin segment = 6'd5; b = 19'b0111111010100111101; end
+            9'b001011011: begin segment = 6'd5; b = 19'b0111111010100110111; end
+            9'b001011100: begin segment = 6'd5; b = 19'b0111111010100110001; end
+            9'b001011101: begin segment = 6'd5; b = 19'b0111111010100101011; end
+            9'b001011110: begin segment = 6'd5; b = 19'b0111111010100100110; end
+            9'b001011111: begin segment = 6'd5; b = 19'b0111111010100100010; end
+            9'b001100000: begin segment = 6'd5; b = 19'b0111111010100011110; end
+            9'b001100001: begin segment = 6'd5; b = 19'b0111111010100011011; end
+            9'b001100010: begin segment = 6'd5; b = 19'b0111111010100011000; end
+            9'b001100011: begin segment = 6'd5; b = 19'b0111111010100010110; end
+            9'b001100100: begin segment = 6'd5; b = 19'b0111111010100010100; end
+            9'b001100101: begin segment = 6'd5; b = 19'b0111111010100010011; end
+            9'b001100110: begin segment = 6'd5; b = 19'b0111111010100010010; end
+            9'b001100111: begin segment = 6'd5; b = 19'b0111111010100010010; end
+            9'b001101000: begin segment = 6'd5; b = 19'b0111111010100010011; end
+            9'b001101001: begin segment = 6'd5; b = 19'b0111111010100010100; end
+            9'b001101010: begin segment = 6'd5; b = 19'b0111111010100010110; end
+            9'b001101011: begin segment = 6'd5; b = 19'b0111111010100011000; end
+            9'b001101100: begin segment = 6'd6; b = 19'b0111111000111010010; end
+            9'b001101101: begin segment = 6'd6; b = 19'b0111111000111001101; end
+            9'b001101110: begin segment = 6'd6; b = 19'b0111111000111001001; end
+            9'b001101111: begin segment = 6'd6; b = 19'b0111111000111000110; end
+            9'b001110000: begin segment = 6'd6; b = 19'b0111111000111000100; end
+            9'b001110001: begin segment = 6'd6; b = 19'b0111111000111000001; end
+            9'b001110010: begin segment = 6'd6; b = 19'b0111111000110111111; end
+            9'b001110011: begin segment = 6'd6; b = 19'b0111111000110111110; end
+            9'b001110100: begin segment = 6'd6; b = 19'b0111111000110111110; end
+            9'b001110101: begin segment = 6'd6; b = 19'b0111111000110111110; end
+            9'b001110110: begin segment = 6'd6; b = 19'b0111111000110111110; end
+            9'b001110111: begin segment = 6'd6; b = 19'b0111111000110111111; end
+            9'b001111000: begin segment = 6'd6; b = 19'b0111111000111000010; end
+            9'b001111001: begin segment = 6'd6; b = 19'b0111111000111000100; end
+            9'b001111010: begin segment = 6'd6; b = 19'b0111111000111000111; end
+            9'b001111011: begin segment = 6'd6; b = 19'b0111111000111001010; end
+            9'b001111100: begin segment = 6'd6; b = 19'b0111111000111001110; end
+            9'b001111101: begin segment = 6'd6; b = 19'b0111111000111010011; end
+            9'b001111110: begin segment = 6'd7; b = 19'b0111110110111000100; end
+            9'b001111111: begin segment = 6'd7; b = 19'b0111110110111000010; end
+            9'b010000000: begin segment = 6'd7; b = 19'b0111110110111000000; end
+            9'b010000001: begin segment = 6'd7; b = 19'b0111110110110111110; end
+            9'b010000010: begin segment = 6'd7; b = 19'b0111110110110111101; end
+            9'b010000011: begin segment = 6'd7; b = 19'b0111110110110111101; end
+            9'b010000100: begin segment = 6'd7; b = 19'b0111110110110111110; end
+            9'b010000101: begin segment = 6'd7; b = 19'b0111110110110111110; end
+            9'b010000110: begin segment = 6'd7; b = 19'b0111110110111000000; end
+            9'b010000111: begin segment = 6'd7; b = 19'b0111110110111000010; end
+            9'b010001000: begin segment = 6'd7; b = 19'b0111110110111000101; end
+            9'b010001001: begin segment = 6'd7; b = 19'b0111110110111001000; end
+            9'b010001010: begin segment = 6'd7; b = 19'b0111110110111001100; end
+            9'b010001011: begin segment = 6'd7; b = 19'b0111110110111010000; end
+            9'b010001100: begin segment = 6'd7; b = 19'b0111110110111010101; end
+            9'b010001101: begin segment = 6'd7; b = 19'b0111110110111011011; end
+            9'b010001110: begin segment = 6'd7; b = 19'b0111110110111100001; end
+            9'b010001111: begin segment = 6'd7; b = 19'b0111110110111100111; end
+            9'b010010000: begin segment = 6'd8; b = 19'b0111110011100101001; end
+            9'b010010001: begin segment = 6'd8; b = 19'b0111110011100100100; end
+            9'b010010010: begin segment = 6'd8; b = 19'b0111110011100100001; end
+            9'b010010011: begin segment = 6'd8; b = 19'b0111110011100011110; end
+            9'b010010100: begin segment = 6'd8; b = 19'b0111110011100011100; end
+            9'b010010101: begin segment = 6'd8; b = 19'b0111110011100011010; end
+            9'b010010110: begin segment = 6'd8; b = 19'b0111110011100011001; end
+            9'b010010111: begin segment = 6'd8; b = 19'b0111110011100011000; end
+            9'b010011000: begin segment = 6'd8; b = 19'b0111110011100011000; end
+            9'b010011001: begin segment = 6'd8; b = 19'b0111110011100011001; end
+            9'b010011010: begin segment = 6'd8; b = 19'b0111110011100011010; end
+            9'b010011011: begin segment = 6'd8; b = 19'b0111110011100011011; end
+            9'b010011100: begin segment = 6'd8; b = 19'b0111110011100011110; end
+            9'b010011101: begin segment = 6'd8; b = 19'b0111110011100100001; end
+            9'b010011110: begin segment = 6'd8; b = 19'b0111110011100100100; end
+            9'b010011111: begin segment = 6'd8; b = 19'b0111110011100101000; end
+            9'b010100000: begin segment = 6'd8; b = 19'b0111110011100101101; end
+            9'b010100001: begin segment = 6'd9; b = 19'b0111110000010010011; end
+            9'b010100010: begin segment = 6'd9; b = 19'b0111110000010001110; end
+            9'b010100011: begin segment = 6'd9; b = 19'b0111110000010001010; end
+            9'b010100100: begin segment = 6'd9; b = 19'b0111110000010000111; end
+            9'b010100101: begin segment = 6'd9; b = 19'b0111110000010000100; end
+            9'b010100110: begin segment = 6'd9; b = 19'b0111110000010000010; end
+            9'b010100111: begin segment = 6'd9; b = 19'b0111110000010000000; end
+            9'b010101000: begin segment = 6'd9; b = 19'b0111110000001111111; end
+            9'b010101001: begin segment = 6'd9; b = 19'b0111110000001111111; end
+            9'b010101010: begin segment = 6'd9; b = 19'b0111110000001111111; end
+            9'b010101011: begin segment = 6'd9; b = 19'b0111110000010000000; end
+            9'b010101100: begin segment = 6'd9; b = 19'b0111110000010000010; end
+            9'b010101101: begin segment = 6'd9; b = 19'b0111110000010000100; end
+            9'b010101110: begin segment = 6'd9; b = 19'b0111110000010000110; end
+            9'b010101111: begin segment = 6'd9; b = 19'b0111110000010001010; end
+            9'b010110000: begin segment = 6'd9; b = 19'b0111110000010001101; end
+            9'b010110001: begin segment = 6'd9; b = 19'b0111110000010010010; end
+            9'b010110010: begin segment = 6'd10; b = 19'b0111101100101000100; end
+            9'b010110011: begin segment = 6'd10; b = 19'b0111101100100111111; end
+            9'b010110100: begin segment = 6'd10; b = 19'b0111101100100111011; end
+            9'b010110101: begin segment = 6'd10; b = 19'b0111101100100111000; end
+            9'b010110110: begin segment = 6'd10; b = 19'b0111101100100110101; end
+            9'b010110111: begin segment = 6'd10; b = 19'b0111101100100110011; end
+            9'b010111000: begin segment = 6'd10; b = 19'b0111101100100110001; end
+            9'b010111001: begin segment = 6'd10; b = 19'b0111101100100110000; end
+            9'b010111010: begin segment = 6'd10; b = 19'b0111101100100101111; end
+            9'b010111011: begin segment = 6'd10; b = 19'b0111101100100110000; end
+            9'b010111100: begin segment = 6'd10; b = 19'b0111101100100110000; end
+            9'b010111101: begin segment = 6'd10; b = 19'b0111101100100110010; end
+            9'b010111110: begin segment = 6'd10; b = 19'b0111101100100110100; end
+            9'b010111111: begin segment = 6'd10; b = 19'b0111101100100110110; end
+            9'b011000000: begin segment = 6'd10; b = 19'b0111101100100111010; end
+            9'b011000001: begin segment = 6'd10; b = 19'b0111101100100111101; end
+            9'b011000010: begin segment = 6'd10; b = 19'b0111101100101000010; end
+            9'b011000011: begin segment = 6'd11; b = 19'b0111101000011100000; end
+            9'b011000100: begin segment = 6'd11; b = 19'b0111101000011011011; end
+            9'b011000101: begin segment = 6'd11; b = 19'b0111101000011010110; end
+            9'b011000110: begin segment = 6'd11; b = 19'b0111101000011010010; end
+            9'b011000111: begin segment = 6'd11; b = 19'b0111101000011001111; end
+            9'b011001000: begin segment = 6'd11; b = 19'b0111101000011001100; end
+            9'b011001001: begin segment = 6'd11; b = 19'b0111101000011001010; end
+            9'b011001010: begin segment = 6'd11; b = 19'b0111101000011001001; end
+            9'b011001011: begin segment = 6'd11; b = 19'b0111101000011001000; end
+            9'b011001100: begin segment = 6'd11; b = 19'b0111101000011001000; end
+            9'b011001101: begin segment = 6'd11; b = 19'b0111101000011001000; end
+            9'b011001110: begin segment = 6'd11; b = 19'b0111101000011001001; end
+            9'b011001111: begin segment = 6'd11; b = 19'b0111101000011001011; end
+            9'b011010000: begin segment = 6'd11; b = 19'b0111101000011001101; end
+            9'b011010001: begin segment = 6'd11; b = 19'b0111101000011010000; end
+            9'b011010010: begin segment = 6'd11; b = 19'b0111101000011010100; end
+            9'b011010011: begin segment = 6'd11; b = 19'b0111101000011011000; end
+            9'b011010100: begin segment = 6'd12; b = 19'b0111100100000100101; end
+            9'b011010101: begin segment = 6'd12; b = 19'b0111100100000100001; end
+            9'b011010110: begin segment = 6'd12; b = 19'b0111100100000011100; end
+            9'b011010111: begin segment = 6'd12; b = 19'b0111100100000011001; end
+            9'b011011000: begin segment = 6'd12; b = 19'b0111100100000010101; end
+            9'b011011001: begin segment = 6'd12; b = 19'b0111100100000010011; end
+            9'b011011010: begin segment = 6'd12; b = 19'b0111100100000010001; end
+            9'b011011011: begin segment = 6'd12; b = 19'b0111100100000010000; end
+            9'b011011100: begin segment = 6'd12; b = 19'b0111100100000001111; end
+            9'b011011101: begin segment = 6'd12; b = 19'b0111100100000010000; end
+            9'b011011110: begin segment = 6'd12; b = 19'b0111100100000010001; end
+            9'b011011111: begin segment = 6'd12; b = 19'b0111100100000010010; end
+            9'b011100000: begin segment = 6'd12; b = 19'b0111100100000010100; end
+            9'b011100001: begin segment = 6'd12; b = 19'b0111100100000010111; end
+            9'b011100010: begin segment = 6'd12; b = 19'b0111100100000011011; end
+            9'b011100011: begin segment = 6'd12; b = 19'b0111100100000011111; end
+            9'b011100100: begin segment = 6'd12; b = 19'b0111100100000100011; end
+            9'b011100101: begin segment = 6'd13; b = 19'b0111011111010111110; end
+            9'b011100110: begin segment = 6'd13; b = 19'b0111011111010111010; end
+            9'b011100111: begin segment = 6'd13; b = 19'b0111011111010110110; end
+            9'b011101000: begin segment = 6'd13; b = 19'b0111011111010110011; end
+            9'b011101001: begin segment = 6'd13; b = 19'b0111011111010110001; end
+            9'b011101010: begin segment = 6'd13; b = 19'b0111011111010101111; end
+            9'b011101011: begin segment = 6'd13; b = 19'b0111011111010101110; end
+            9'b011101100: begin segment = 6'd13; b = 19'b0111011111010101101; end
+            9'b011101101: begin segment = 6'd13; b = 19'b0111011111010101110; end
+            9'b011101110: begin segment = 6'd13; b = 19'b0111011111010101110; end
+            9'b011101111: begin segment = 6'd13; b = 19'b0111011111010110000; end
+            9'b011110000: begin segment = 6'd13; b = 19'b0111011111010110010; end
+            9'b011110001: begin segment = 6'd13; b = 19'b0111011111010110101; end
+            9'b011110010: begin segment = 6'd13; b = 19'b0111011111010111000; end
+            9'b011110011: begin segment = 6'd13; b = 19'b0111011111010111100; end
+            9'b011110100: begin segment = 6'd13; b = 19'b0111011111011000001; end
+            9'b011110101: begin segment = 6'd14; b = 19'b0111011010001011001; end
+            9'b011110110: begin segment = 6'd14; b = 19'b0111011010001010100; end
+            9'b011110111: begin segment = 6'd14; b = 19'b0111011010001010000; end
+            9'b011111000: begin segment = 6'd14; b = 19'b0111011010001001101; end
+            9'b011111001: begin segment = 6'd14; b = 19'b0111011010001001010; end
+            9'b011111010: begin segment = 6'd14; b = 19'b0111011010001001000; end
+            9'b011111011: begin segment = 6'd14; b = 19'b0111011010001000111; end
+            9'b011111100: begin segment = 6'd14; b = 19'b0111011010001000110; end
+            9'b011111101: begin segment = 6'd14; b = 19'b0111011010001000110; end
+            9'b011111110: begin segment = 6'd14; b = 19'b0111011010001000110; end
+            9'b011111111: begin segment = 6'd14; b = 19'b0111011010001001000; end
+            9'b100000000: begin segment = 6'd14; b = 19'b0111011010001001010; end
+            9'b100000001: begin segment = 6'd14; b = 19'b0111011010001001101; end
+            9'b100000010: begin segment = 6'd14; b = 19'b0111011010001010000; end
+            9'b100000011: begin segment = 6'd14; b = 19'b0111011010001010100; end
+            9'b100000100: begin segment = 6'd14; b = 19'b0111011010001011001; end
+            9'b100000101: begin segment = 6'd15; b = 19'b0111010100100110010; end
+            9'b100000110: begin segment = 6'd15; b = 19'b0111010100100101101; end
+            9'b100000111: begin segment = 6'd15; b = 19'b0111010100100101001; end
+            9'b100001000: begin segment = 6'd15; b = 19'b0111010100100100110; end
+            9'b100001001: begin segment = 6'd15; b = 19'b0111010100100100011; end
+            9'b100001010: begin segment = 6'd15; b = 19'b0111010100100100001; end
+            9'b100001011: begin segment = 6'd15; b = 19'b0111010100100011111; end
+            9'b100001100: begin segment = 6'd15; b = 19'b0111010100100011111; end
+            9'b100001101: begin segment = 6'd15; b = 19'b0111010100100011111; end
+            9'b100001110: begin segment = 6'd15; b = 19'b0111010100100100000; end
+            9'b100001111: begin segment = 6'd15; b = 19'b0111010100100100001; end
+            9'b100010000: begin segment = 6'd15; b = 19'b0111010100100100011; end
+            9'b100010001: begin segment = 6'd15; b = 19'b0111010100100100110; end
+            9'b100010010: begin segment = 6'd15; b = 19'b0111010100100101001; end
+            9'b100010011: begin segment = 6'd15; b = 19'b0111010100100101101; end
+            9'b100010100: begin segment = 6'd15; b = 19'b0111010100100110011; end
+            9'b100010101: begin segment = 6'd16; b = 19'b0111001110100010111; end
+            9'b100010110: begin segment = 6'd16; b = 19'b0111001110100010010; end
+            9'b100010111: begin segment = 6'd16; b = 19'b0111001110100001110; end
+            9'b100011000: begin segment = 6'd16; b = 19'b0111001110100001010; end
+            9'b100011001: begin segment = 6'd16; b = 19'b0111001110100000111; end
+            9'b100011010: begin segment = 6'd16; b = 19'b0111001110100000101; end
+            9'b100011011: begin segment = 6'd16; b = 19'b0111001110100000100; end
+            9'b100011100: begin segment = 6'd16; b = 19'b0111001110100000100; end
+            9'b100011101: begin segment = 6'd16; b = 19'b0111001110100000100; end
+            9'b100011110: begin segment = 6'd16; b = 19'b0111001110100000100; end
+            9'b100011111: begin segment = 6'd16; b = 19'b0111001110100000110; end
+            9'b100100000: begin segment = 6'd16; b = 19'b0111001110100001000; end
+            9'b100100001: begin segment = 6'd16; b = 19'b0111001110100001011; end
+            9'b100100010: begin segment = 6'd16; b = 19'b0111001110100001110; end
+            9'b100100011: begin segment = 6'd16; b = 19'b0111001110100010010; end
+            9'b100100100: begin segment = 6'd16; b = 19'b0111001110100010111; end
+            9'b100100101: begin segment = 6'd17; b = 19'b0111000111101011011; end
+            9'b100100110: begin segment = 6'd17; b = 19'b0111000111101010101; end
+            9'b100100111: begin segment = 6'd17; b = 19'b0111000111101010000; end
+            9'b100101000: begin segment = 6'd17; b = 19'b0111000111101001100; end
+            9'b100101001: begin segment = 6'd17; b = 19'b0111000111101001000; end
+            9'b100101010: begin segment = 6'd17; b = 19'b0111000111101000110; end
+            9'b100101011: begin segment = 6'd17; b = 19'b0111000111101000100; end
+            9'b100101100: begin segment = 6'd17; b = 19'b0111000111101000010; end
+            9'b100101101: begin segment = 6'd17; b = 19'b0111000111101000010; end
+            9'b100101110: begin segment = 6'd17; b = 19'b0111000111101000010; end
+            9'b100101111: begin segment = 6'd17; b = 19'b0111000111101000011; end
+            9'b100110000: begin segment = 6'd17; b = 19'b0111000111101000100; end
+            9'b100110001: begin segment = 6'd17; b = 19'b0111000111101000111; end
+            9'b100110010: begin segment = 6'd17; b = 19'b0111000111101001010; end
+            9'b100110011: begin segment = 6'd17; b = 19'b0111000111101001110; end
+            9'b100110100: begin segment = 6'd17; b = 19'b0111000111101010010; end
+            9'b100110101: begin segment = 6'd18; b = 19'b0111000001001011000; end
+            9'b100110110: begin segment = 6'd18; b = 19'b0111000001001010011; end
+            9'b100110111: begin segment = 6'd18; b = 19'b0111000001001001111; end
+            9'b100111000: begin segment = 6'd18; b = 19'b0111000001001001100; end
+            9'b100111001: begin segment = 6'd18; b = 19'b0111000001001001001; end
+            9'b100111010: begin segment = 6'd18; b = 19'b0111000001001000111; end
+            9'b100111011: begin segment = 6'd18; b = 19'b0111000001001000110; end
+            9'b100111100: begin segment = 6'd18; b = 19'b0111000001001000110; end
+            9'b100111101: begin segment = 6'd18; b = 19'b0111000001001000110; end
+            9'b100111110: begin segment = 6'd18; b = 19'b0111000001001000111; end
+            9'b100111111: begin segment = 6'd18; b = 19'b0111000001001001001; end
+            9'b101000000: begin segment = 6'd18; b = 19'b0111000001001001100; end
+            9'b101000001: begin segment = 6'd18; b = 19'b0111000001001001111; end
+            9'b101000010: begin segment = 6'd18; b = 19'b0111000001001010011; end
+            9'b101000011: begin segment = 6'd18; b = 19'b0111000001001011000; end
+            9'b101000100: begin segment = 6'd19; b = 19'b0110111010000011011; end
+            9'b101000101: begin segment = 6'd19; b = 19'b0110111010000010110; end
+            9'b101000110: begin segment = 6'd19; b = 19'b0110111010000010010; end
+            9'b101000111: begin segment = 6'd19; b = 19'b0110111010000001110; end
+            9'b101001000: begin segment = 6'd19; b = 19'b0110111010000001100; end
+            9'b101001001: begin segment = 6'd19; b = 19'b0110111010000001010; end
+            9'b101001010: begin segment = 6'd19; b = 19'b0110111010000001000; end
+            9'b101001011: begin segment = 6'd19; b = 19'b0110111010000001000; end
+            9'b101001100: begin segment = 6'd19; b = 19'b0110111010000001000; end
+            9'b101001101: begin segment = 6'd19; b = 19'b0110111010000001001; end
+            9'b101001110: begin segment = 6'd19; b = 19'b0110111010000001011; end
+            9'b101001111: begin segment = 6'd19; b = 19'b0110111010000001101; end
+            9'b101010000: begin segment = 6'd19; b = 19'b0110111010000010001; end
+            9'b101010001: begin segment = 6'd19; b = 19'b0110111010000010101; end
+            9'b101010010: begin segment = 6'd19; b = 19'b0110111010000011010; end
+            9'b101010011: begin segment = 6'd20; b = 19'b0110110010110001001; end
+            9'b101010100: begin segment = 6'd20; b = 19'b0110110010110000100; end
+            9'b101010101: begin segment = 6'd20; b = 19'b0110110010110000000; end
+            9'b101010110: begin segment = 6'd20; b = 19'b0110110010101111101; end
+            9'b101010111: begin segment = 6'd20; b = 19'b0110110010101111011; end
+            9'b101011000: begin segment = 6'd20; b = 19'b0110110010101111001; end
+            9'b101011001: begin segment = 6'd20; b = 19'b0110110010101111000; end
+            9'b101011010: begin segment = 6'd20; b = 19'b0110110010101111000; end
+            9'b101011011: begin segment = 6'd20; b = 19'b0110110010101111001; end
+            9'b101011100: begin segment = 6'd20; b = 19'b0110110010101111010; end
+            9'b101011101: begin segment = 6'd20; b = 19'b0110110010101111101; end
+            9'b101011110: begin segment = 6'd20; b = 19'b0110110010110000000; end
+            9'b101011111: begin segment = 6'd20; b = 19'b0110110010110000100; end
+            9'b101100000: begin segment = 6'd20; b = 19'b0110110010110001000; end
+            9'b101100001: begin segment = 6'd20; b = 19'b0110110010110001101; end
+            9'b101100010: begin segment = 6'd21; b = 19'b0110101010011110101; end
+            9'b101100011: begin segment = 6'd21; b = 19'b0110101010011110000; end
+            9'b101100100: begin segment = 6'd21; b = 19'b0110101010011101100; end
+            9'b101100101: begin segment = 6'd21; b = 19'b0110101010011101000; end
+            9'b101100110: begin segment = 6'd21; b = 19'b0110101010011100101; end
+            9'b101100111: begin segment = 6'd21; b = 19'b0110101010011100011; end
+            9'b101101000: begin segment = 6'd21; b = 19'b0110101010011100010; end
+            9'b101101001: begin segment = 6'd21; b = 19'b0110101010011100010; end
+            9'b101101010: begin segment = 6'd21; b = 19'b0110101010011100010; end
+            9'b101101011: begin segment = 6'd21; b = 19'b0110101010011100011; end
+            9'b101101100: begin segment = 6'd21; b = 19'b0110101010011100101; end
+            9'b101101101: begin segment = 6'd21; b = 19'b0110101010011101000; end
+            9'b101101110: begin segment = 6'd21; b = 19'b0110101010011101011; end
+            9'b101101111: begin segment = 6'd21; b = 19'b0110101010011110000; end
+            9'b101110000: begin segment = 6'd21; b = 19'b0110101010011110101; end
+            9'b101110001: begin segment = 6'd22; b = 19'b0110100001110101001; end
+            9'b101110010: begin segment = 6'd22; b = 19'b0110100001110100011; end
+            9'b101110011: begin segment = 6'd22; b = 19'b0110100001110011111; end
+            9'b101110100: begin segment = 6'd22; b = 19'b0110100001110011011; end
+            9'b101110101: begin segment = 6'd22; b = 19'b0110100001110011000; end
+            9'b101110110: begin segment = 6'd22; b = 19'b0110100001110010110; end
+            9'b101110111: begin segment = 6'd22; b = 19'b0110100001110010100; end
+            9'b101111000: begin segment = 6'd22; b = 19'b0110100001110010100; end
+            9'b101111001: begin segment = 6'd22; b = 19'b0110100001110010100; end
+            9'b101111010: begin segment = 6'd22; b = 19'b0110100001110010101; end
+            9'b101111011: begin segment = 6'd22; b = 19'b0110100001110010111; end
+            9'b101111100: begin segment = 6'd22; b = 19'b0110100001110011001; end
+            9'b101111101: begin segment = 6'd22; b = 19'b0110100001110011101; end
+            9'b101111110: begin segment = 6'd22; b = 19'b0110100001110100001; end
+            9'b101111111: begin segment = 6'd22; b = 19'b0110100001110100110; end
+            9'b110000000: begin segment = 6'd23; b = 19'b0110011000000100110; end
+            9'b110000001: begin segment = 6'd23; b = 19'b0110011000000011111; end
+            9'b110000010: begin segment = 6'd23; b = 19'b0110011000000011010; end
+            9'b110000011: begin segment = 6'd23; b = 19'b0110011000000010101; end
+            9'b110000100: begin segment = 6'd23; b = 19'b0110011000000010001; end
+            9'b110000101: begin segment = 6'd23; b = 19'b0110011000000001110; end
+            9'b110000110: begin segment = 6'd23; b = 19'b0110011000000001100; end
+            9'b110000111: begin segment = 6'd23; b = 19'b0110011000000001010; end
+            9'b110001000: begin segment = 6'd23; b = 19'b0110011000000001010; end
+            9'b110001001: begin segment = 6'd23; b = 19'b0110011000000001010; end
+            9'b110001010: begin segment = 6'd23; b = 19'b0110011000000001011; end
+            9'b110001011: begin segment = 6'd23; b = 19'b0110011000000001100; end
+            9'b110001100: begin segment = 6'd23; b = 19'b0110011000000001111; end
+            9'b110001101: begin segment = 6'd23; b = 19'b0110011000000010011; end
+            9'b110001110: begin segment = 6'd23; b = 19'b0110011000000010111; end
+            9'b110001111: begin segment = 6'd24; b = 19'b0110001110101100010; end
+            9'b110010000: begin segment = 6'd24; b = 19'b0110001110101011100; end
+            9'b110010001: begin segment = 6'd24; b = 19'b0110001110101010111; end
+            9'b110010010: begin segment = 6'd24; b = 19'b0110001110101010010; end
+            9'b110010011: begin segment = 6'd24; b = 19'b0110001110101001111; end
+            9'b110010100: begin segment = 6'd24; b = 19'b0110001110101001100; end
+            9'b110010101: begin segment = 6'd24; b = 19'b0110001110101001010; end
+            9'b110010110: begin segment = 6'd24; b = 19'b0110001110101001001; end
+            9'b110010111: begin segment = 6'd24; b = 19'b0110001110101001001; end
+            9'b110011000: begin segment = 6'd24; b = 19'b0110001110101001001; end
+            9'b110011001: begin segment = 6'd24; b = 19'b0110001110101001011; end
+            9'b110011010: begin segment = 6'd24; b = 19'b0110001110101001101; end
+            9'b110011011: begin segment = 6'd24; b = 19'b0110001110101010000; end
+            9'b110011100: begin segment = 6'd24; b = 19'b0110001110101010100; end
+            9'b110011101: begin segment = 6'd24; b = 19'b0110001110101011001; end
+            9'b110011110: begin segment = 6'd25; b = 19'b0110000100111110000; end
+            9'b110011111: begin segment = 6'd25; b = 19'b0110000100111101010; end
+            9'b110100000: begin segment = 6'd25; b = 19'b0110000100111100110; end
+            9'b110100001: begin segment = 6'd25; b = 19'b0110000100111100010; end
+            9'b110100010: begin segment = 6'd25; b = 19'b0110000100111011111; end
+            9'b110100011: begin segment = 6'd25; b = 19'b0110000100111011101; end
+            9'b110100100: begin segment = 6'd25; b = 19'b0110000100111011011; end
+            9'b110100101: begin segment = 6'd25; b = 19'b0110000100111011011; end
+            9'b110100110: begin segment = 6'd25; b = 19'b0110000100111011011; end
+            9'b110100111: begin segment = 6'd25; b = 19'b0110000100111011100; end
+            9'b110101000: begin segment = 6'd25; b = 19'b0110000100111011111; end
+            9'b110101001: begin segment = 6'd25; b = 19'b0110000100111100001; end
+            9'b110101010: begin segment = 6'd25; b = 19'b0110000100111100101; end
+            9'b110101011: begin segment = 6'd25; b = 19'b0110000100111101010; end
+            9'b110101100: begin segment = 6'd26; b = 19'b0101111011010100010; end
+            9'b110101101: begin segment = 6'd26; b = 19'b0101111011010011101; end
+            9'b110101110: begin segment = 6'd26; b = 19'b0101111011010011001; end
+            9'b110101111: begin segment = 6'd26; b = 19'b0101111011010010101; end
+            9'b110110000: begin segment = 6'd26; b = 19'b0101111011010010011; end
+            9'b110110001: begin segment = 6'd26; b = 19'b0101111011010010001; end
+            9'b110110010: begin segment = 6'd26; b = 19'b0101111011010010000; end
+            9'b110110011: begin segment = 6'd26; b = 19'b0101111011010010000; end
+            9'b110110100: begin segment = 6'd26; b = 19'b0101111011010010001; end
+            9'b110110101: begin segment = 6'd26; b = 19'b0101111011010010010; end
+            9'b110110110: begin segment = 6'd26; b = 19'b0101111011010010110; end
+            9'b110110111: begin segment = 6'd26; b = 19'b0101111011010011001; end
+            9'b110111000: begin segment = 6'd26; b = 19'b0101111011010011101; end
+            9'b110111001: begin segment = 6'd26; b = 19'b0101111011010100010; end
+            9'b110111010: begin segment = 6'd27; b = 19'b0101110000100011011; end
+            9'b110111011: begin segment = 6'd27; b = 19'b0101110000100010101; end
+            9'b110111100: begin segment = 6'd27; b = 19'b0101110000100010001; end
+            9'b110111101: begin segment = 6'd27; b = 19'b0101110000100001101; end
+            9'b110111110: begin segment = 6'd27; b = 19'b0101110000100001010; end
+            9'b110111111: begin segment = 6'd27; b = 19'b0101110000100001000; end
+            9'b111000000: begin segment = 6'd27; b = 19'b0101110000100000111; end
+            9'b111000001: begin segment = 6'd27; b = 19'b0101110000100000111; end
+            9'b111000010: begin segment = 6'd27; b = 19'b0101110000100000111; end
+            9'b111000011: begin segment = 6'd27; b = 19'b0101110000100001001; end
+            9'b111000100: begin segment = 6'd27; b = 19'b0101110000100001011; end
+            9'b111000101: begin segment = 6'd27; b = 19'b0101110000100001110; end
+            9'b111000110: begin segment = 6'd27; b = 19'b0101110000100010011; end
+            9'b111000111: begin segment = 6'd27; b = 19'b0101110000100011000; end
+            9'b111001000: begin segment = 6'd28; b = 19'b0101100101110111000; end
+            9'b111001001: begin segment = 6'd28; b = 19'b0101100101110110011; end
+            9'b111001010: begin segment = 6'd28; b = 19'b0101100101110101110; end
+            9'b111001011: begin segment = 6'd28; b = 19'b0101100101110101011; end
+            9'b111001100: begin segment = 6'd28; b = 19'b0101100101110101000; end
+            9'b111001101: begin segment = 6'd28; b = 19'b0101100101110100111; end
+            9'b111001110: begin segment = 6'd28; b = 19'b0101100101110100110; end
+            9'b111001111: begin segment = 6'd28; b = 19'b0101100101110100110; end
+            9'b111010000: begin segment = 6'd28; b = 19'b0101100101110101000; end
+            9'b111010001: begin segment = 6'd28; b = 19'b0101100101110101010; end
+            9'b111010010: begin segment = 6'd28; b = 19'b0101100101110101101; end
+            9'b111010011: begin segment = 6'd28; b = 19'b0101100101110110000; end
+            9'b111010100: begin segment = 6'd28; b = 19'b0101100101110110101; end
+            9'b111010101: begin segment = 6'd28; b = 19'b0101100101110111011; end
+            9'b111010110: begin segment = 6'd29; b = 19'b0101011010110110011; end
+            9'b111010111: begin segment = 6'd29; b = 19'b0101011010110101110; end
+            9'b111011000: begin segment = 6'd29; b = 19'b0101011010110101011; end
+            9'b111011001: begin segment = 6'd29; b = 19'b0101011010110101000; end
+            9'b111011010: begin segment = 6'd29; b = 19'b0101011010110100110; end
+            9'b111011011: begin segment = 6'd29; b = 19'b0101011010110100110; end
+            9'b111011100: begin segment = 6'd29; b = 19'b0101011010110100110; end
+            9'b111011101: begin segment = 6'd29; b = 19'b0101011010110100111; end
+            9'b111011110: begin segment = 6'd29; b = 19'b0101011010110101000; end
+            9'b111011111: begin segment = 6'd29; b = 19'b0101011010110101011; end
+            9'b111100000: begin segment = 6'd29; b = 19'b0101011010110101111; end
+            9'b111100001: begin segment = 6'd29; b = 19'b0101011010110110100; end
+            9'b111100010: begin segment = 6'd29; b = 19'b0101011010110111001; end
+            9'b111100011: begin segment = 6'd29; b = 19'b0101011010111000000; end
+            9'b111100100: begin segment = 6'd30; b = 19'b0101001111100010001; end
+            9'b111100101: begin segment = 6'd30; b = 19'b0101001111100001101; end
+            9'b111100110: begin segment = 6'd30; b = 19'b0101001111100001011; end
+            9'b111100111: begin segment = 6'd30; b = 19'b0101001111100001001; end
+            9'b111101000: begin segment = 6'd30; b = 19'b0101001111100001000; end
+            9'b111101001: begin segment = 6'd30; b = 19'b0101001111100001000; end
+            9'b111101010: begin segment = 6'd30; b = 19'b0101001111100001001; end
+            9'b111101011: begin segment = 6'd30; b = 19'b0101001111100001011; end
+            9'b111101100: begin segment = 6'd30; b = 19'b0101001111100001101; end
+            9'b111101101: begin segment = 6'd30; b = 19'b0101001111100010001; end
+            9'b111101110: begin segment = 6'd30; b = 19'b0101001111100010110; end
+            9'b111101111: begin segment = 6'd30; b = 19'b0101001111100011100; end
+            9'b111110000: begin segment = 6'd30; b = 19'b0101001111100100010; end
+            9'b111110001: begin segment = 6'd30; b = 19'b0101001111100101010; end
+            9'b111110010: begin segment = 6'd31; b = 19'b0101000000111111101; end
+            9'b111110011: begin segment = 6'd31; b = 19'b0101000000111110111; end
+            9'b111110100: begin segment = 6'd31; b = 19'b0101000000111110010; end
+            9'b111110101: begin segment = 6'd31; b = 19'b0101000000111101111; end
+            9'b111110110: begin segment = 6'd31; b = 19'b0101000000111101100; end
+            9'b111110111: begin segment = 6'd31; b = 19'b0101000000111101010; end
+            9'b111111000: begin segment = 6'd31; b = 19'b0101000000111101001; end
+            9'b111111001: begin segment = 6'd31; b = 19'b0101000000111101001; end
+            9'b111111010: begin segment = 6'd31; b = 19'b0101000000111101010; end
+            9'b111111011: begin segment = 6'd31; b = 19'b0101000000111101100; end
+            9'b111111100: begin segment = 6'd31; b = 19'b0101000000111101111; end
+            9'b111111101: begin segment = 6'd31; b = 19'b0101000000111110011; end
+            9'b111111110: begin segment = 6'd31; b = 19'b0101000000111111000; end
+            9'b111111111: begin segment = 6'd31; b = 19'b0101000000111111110; end
+      endcase
+    end
+
+// Auto-generated neg assignments for WIDTH=22
+    wire neg_1;
+    assign neg_1 = ~f[21];
+    wire [1:0] neg_2;
+    assign neg_2 = ~f[21:20];
+    wire [2:0] neg_3;
+    assign neg_3 = ~f[21:19];
+    wire [3:0] neg_4;
+    assign neg_4 = ~f[21:18];
+    wire [4:0] neg_5;
+    assign neg_5 = ~f[21:17];
+    wire [5:0] neg_6;
+    assign neg_6 = ~f[21:16];
+    wire [6:0] neg_7;
+    assign neg_7 = ~f[21:15];
+    wire [7:0] neg_8;
+    assign neg_8 = ~f[21:14];
+    wire [8:0] neg_9;
+    assign neg_9 = ~f[21:13];
+    wire [9:0] neg_10;
+    assign neg_10 = ~f[21:12];
+    wire [10:0] neg_11;
+    assign neg_11 = ~f[21:11];
+    wire [11:0] neg_12;
+    assign neg_12 = ~f[21:10];
+    wire [12:0] neg_13;
+    assign neg_13 = ~f[21:9];
+    wire [13:0] neg_14;
+    assign neg_14 = ~f[21:8];
+    wire [14:0] neg_15;
+    assign neg_15 = ~f[21:7];
+    wire [15:0] neg_16;
+    assign neg_16 = ~f[21:6];
+    wire [16:0] neg_17;
+    assign neg_17 = ~f[21:5];
+    wire [17:0] neg_18;
+    assign neg_18 = ~f[21:4];
+    wire [18:0] neg_19;
+    assign neg_19 = ~f[21:3];
+    wire [19:0] neg_20;
+    assign neg_20 = ~f[21:2];
+    wire [20:0] neg_21;
+    assign neg_21 = ~f[21:1];
+// End of auto-generated section
+
+
+// Auto-generated register declarations for 4 registers
+    reg [18:0] A1;
+    reg [18:0] A2;
+    reg [18:0] A3;
+    reg [18:0] A4;
+// End of auto-generated section
+
+    always @(*) begin
+        case(segment)
+            6'd0: begin A1 = {3'b111, neg_16}; A2 = {5'b11111, neg_14}; A3 = {7'b0000000, f[21:10]}; end
+            6'd1: begin A1 = {3'b111, neg_16}; A2 = {6'b111111, neg_13}; A3 = {11'b11111111111, neg_8}; end
+            6'd2: begin A1 = {3'b111, neg_16}; A2 = {7'b1111111, neg_12}; A3 = {10'b0000000000, f[21:13]}; end
+            6'd3: begin A1 = {3'b111, neg_16}; A2 = {9'b000000000, f[21:12]}; A3 = {11'b00000000000, f[21:14]}; end
+            6'd4: begin A1 = {3'b111, neg_16}; A2 = {6'b000000, f[21:9]}; A3 = {8'b11111111, neg_11}; end
+            6'd5: begin A1 = {3'b111, neg_16}; A2 = {5'b00000, f[21:8]}; A3 = {7'b1111111, neg_12}; end
+            6'd6: begin A1 = {3'b111, neg_16}; A2 = {5'b00000, f[21:8]}; A3 = {12'b111111111111, neg_7}; end
+            6'd7: begin A1 = {3'b111, neg_16}; A2 = {5'b00000, f[21:8]}; A3 = {7'b0000000, f[21:10]}; end
+            6'd8: begin A1 = {4'b1111, neg_15}; A2 = {6'b111111, neg_13}; A3 = {8'b00000000, f[21:11]}; end
+            6'd9: begin A1 = {4'b1111, neg_15}; A2 = {9'b111111111, neg_10}; A3 = {11'b00000000000, f[21:14]}; end
+            6'd10: begin A1 = {4'b1111, neg_15}; A2 = {7'b0000000, f[21:10]}; A3 = {10'b0000000000, f[21:13]}; end
+            6'd11: begin A1 = {4'b1111, neg_15}; A2 = {6'b000000, f[21:9]}; A3 = {8'b00000000, f[21:11]}; end
+            6'd12: begin A1 = {5'b11111, neg_14}; A2 = {9'b111111111, neg_10}; A3 = {11'b00000000000, f[21:14]}; end
+            6'd13: begin A1 = {5'b11111, neg_14}; A2 = {7'b0000000, f[21:10]}; A3 = {10'b0000000000, f[21:13]}; end
+            6'd14: begin A1 = {6'b111111, neg_13}; A2 = {8'b00000000, f[21:11]}; A3 = {13'b1111111111111, neg_6}; end
+            6'd15: begin A1 = {10'b1111111111, neg_9}; A2 = {12'b111111111111, neg_7}; A3 = {14'b00000000000000, f[21:17]}; end
+            6'd16: begin A1 = {7'b0000000, f[21:10]}; A2 = {9'b000000000, f[21:12]}; A3 = {19'b0000000000000000000};end
+            6'd17: begin A1 = {5'b00000, f[21:8]}; A2 = {7'b1111111, neg_12}; A3 = {9'b111111111, neg_10}; end
+            6'd18: begin A1 = {5'b00000, f[21:8]}; A2 = {10'b0000000000, f[21:13]}; A3 = {12'b111111111111, neg_7}; end
+            6'd19: begin A1 = {4'b0000, f[21:7]}; A2 = {6'b111111, neg_13}; A3 = {8'b11111111, neg_11}; end
+            6'd20: begin A1 = {4'b0000, f[21:7]}; A2 = {7'b1111111, neg_12}; A3 = {10'b1111111111, neg_9}; end
+            6'd21: begin A1 = {4'b0000, f[21:7]}; A2 = {8'b00000000, f[21:11]}; A3 = {10'b1111111111, neg_9}; end
+            6'd22: begin A1 = {4'b0000, f[21:7]}; A2 = {6'b000000, f[21:9]}; A3 = {10'b1111111111, neg_9}; end
+            6'd23: begin A1 = {3'b000, f[21:6]}; A2 = {5'b11111, neg_14}; A3 = {8'b11111111, neg_11}; end
+            6'd24: begin A1 = {3'b000, f[21:6]}; A2 = {5'b11111, neg_14}; A3 = {7'b0000000, f[21:10]}; end
+            6'd25: begin A1 = {3'b000, f[21:6]}; A2 = {6'b111111, neg_13}; A3 = {8'b00000000, f[21:11]}; end
+            6'd26: begin A1 = {3'b000, f[21:6]}; A2 = {11'b11111111111, neg_8}; A3 = {15'b000000000000000, f[21:18]}; end
+            6'd27: begin A1 = {3'b000, f[21:6]}; A2 = {6'b000000, f[21:9]}; A3 = {8'b11111111, neg_11}; end
+            6'd28: begin A1 = {3'b000, f[21:6]}; A2 = {5'b00000, f[21:8]}; A3 = {7'b1111111, neg_12}; end
+            6'd29: begin A1 = {3'b000, f[21:6]}; A2 = {5'b00000, f[21:8]}; A3 = {8'b00000000, f[21:11]}; end
+            6'd30: begin A1 = {2'b00, f[21:5]}; A2 = {4'b1111, neg_15}; A3 = {6'b111111, neg_13}; end
+            6'd31: begin A1 = {2'b00, f[21:5]}; A2 = {4'b1111, neg_15}; A3 = {10'b1111111111, neg_9}; end
+            default: begin A1 = 19'b0; A2 = 19'b0; A3 = 19'b0; end //fixed default case to avoid latches
+      endcase
+    end
+
+// Auto-generated CSA tree for final_N=4, final_M=22, final_add_M=18
+    wire [18:0] csa1_carry, csa1_sum;
+    wire [18:0] csa2_carry, csa2_sum;
+    wire [18:0] csa3_carry, csa3_sum;
+    wire [18:0] final_sum;
+
+    CSA_anticonv2 csa1 (
+        .a({1'b0, f[21:4]}),  // f的高18位
+        .b(A1),
+        .c(A2),
+        .sum(csa1_sum),
+        .carry(csa1_carry)
+    );
+
+    CSA_anticonv2 csa2 (
+        .a(csa1_sum),
+        .b(A3),
+        .c({csa1_carry[17:0], 1'b0}),  // 左移1位
+        .sum(csa2_sum),
+        .carry(csa2_carry)
+    );
+
+    CSA_anticonv2 csa3 (
+        .a(csa2_sum),
+         .b(b),
+        .c({csa2_carry[17:0], 1'b0}),
+        .sum(csa3_sum),
+        .carry(csa3_carry)
+    );
+
+    CPA_anticonv2 cpa (
+        .a(csa3_sum),
+        .b({csa3_carry[17:0], 1'b0}),  // 左移1位
+        .sum(final_sum)
+    );
+
+    assign f_e2_out = {final_sum, f[3:0]};  // 拼接高位和原始低位
+// End of auto-generated CSA tree
+
+endmodule
+module CSA_anticonv2 #(parameter ADD_WIDTH = 19
+)(
+    input [ADD_WIDTH-1:0] a,
+    input [ADD_WIDTH-1:0] b,
+    input [ADD_WIDTH-1:0] c,
+    output [ADD_WIDTH-1:0] sum,
+    output [ADD_WIDTH-1:0] carry
+);
+    assign sum = a ^ b ^ c;          // XOR for sum
+    assign carry = (a & b) | (b & c) | (c & a); // Majority logic for carry
+endmodule
+
+// Carry-Propagate Adder (CPA) module
+module CPA_anticonv2 #(parameter ADD_WIDTH = 19
+)(
+    input [ADD_WIDTH-1:0] a,
+    input [ADD_WIDTH-1:0] b,
+    output [ADD_WIDTH-1:0] sum
+);
+    assign sum = a + b;  // Simple binary addition
+endmodule
+
+module  APP_22_19_9_5_32_anticonv3(
+    input [21:0] f,               // 22-bit input
+    output [22:0] f_e2_out     // 23-bit output 
+);
+    reg [5:0] segment;
+    reg [19:0] b;
+    always @(*) begin
+        case(f[21:13])
+            9'b000000000: begin segment = 6'd0; b = 20'b01111111111111111110; end
+            9'b000000001: begin segment = 6'd0; b = 20'b01111111111111110110; end
+            9'b000000010: begin segment = 6'd0; b = 20'b01111111111111110000; end
+            9'b000000011: begin segment = 6'd0; b = 20'b01111111111111101011; end
+            9'b000000100: begin segment = 6'd0; b = 20'b01111111111111100110; end
+            9'b000000101: begin segment = 6'd0; b = 20'b01111111111111100011; end
+            9'b000000110: begin segment = 6'd0; b = 20'b01111111111111100001; end
+            9'b000000111: begin segment = 6'd0; b = 20'b01111111111111011111; end
+            9'b000001000: begin segment = 6'd0; b = 20'b01111111111111011111; end
+            9'b000001001: begin segment = 6'd0; b = 20'b01111111111111011111; end
+            9'b000001010: begin segment = 6'd0; b = 20'b01111111111111100001; end
+            9'b000001011: begin segment = 6'd0; b = 20'b01111111111111100011; end
+            9'b000001100: begin segment = 6'd0; b = 20'b01111111111111100111; end
+            9'b000001101: begin segment = 6'd0; b = 20'b01111111111111101011; end
+            9'b000001110: begin segment = 6'd0; b = 20'b01111111111111110000; end
+            9'b000001111: begin segment = 6'd0; b = 20'b01111111111111110111; end
+            9'b000010000: begin segment = 6'd1; b = 20'b01111111111011101010; end
+            9'b000010001: begin segment = 6'd1; b = 20'b01111111111011100001; end
+            9'b000010010: begin segment = 6'd1; b = 20'b01111111111011011010; end
+            9'b000010011: begin segment = 6'd1; b = 20'b01111111111011010011; end
+            9'b000010100: begin segment = 6'd1; b = 20'b01111111111011001110; end
+            9'b000010101: begin segment = 6'd1; b = 20'b01111111111011001001; end
+            9'b000010110: begin segment = 6'd1; b = 20'b01111111111011000110; end
+            9'b000010111: begin segment = 6'd1; b = 20'b01111111111011000011; end
+            9'b000011000: begin segment = 6'd1; b = 20'b01111111111011000010; end
+            9'b000011001: begin segment = 6'd1; b = 20'b01111111111011000001; end
+            9'b000011010: begin segment = 6'd1; b = 20'b01111111111011000010; end
+            9'b000011011: begin segment = 6'd1; b = 20'b01111111111011000100; end
+            9'b000011100: begin segment = 6'd1; b = 20'b01111111111011000110; end
+            9'b000011101: begin segment = 6'd1; b = 20'b01111111111011001010; end
+            9'b000011110: begin segment = 6'd1; b = 20'b01111111111011001110; end
+            9'b000011111: begin segment = 6'd1; b = 20'b01111111111011010011; end
+            9'b000100000: begin segment = 6'd1; b = 20'b01111111111011011010; end
+            9'b000100001: begin segment = 6'd1; b = 20'b01111111111011100001; end
+            9'b000100010: begin segment = 6'd1; b = 20'b01111111111011101010; end
+            9'b000100011: begin segment = 6'd2; b = 20'b01111111110001001100; end
+            9'b000100100: begin segment = 6'd2; b = 20'b01111111110001000011; end
+            9'b000100101: begin segment = 6'd2; b = 20'b01111111110000111011; end
+            9'b000100110: begin segment = 6'd2; b = 20'b01111111110000110101; end
+            9'b000100111: begin segment = 6'd2; b = 20'b01111111110000101111; end
+            9'b000101000: begin segment = 6'd2; b = 20'b01111111110000101011; end
+            9'b000101001: begin segment = 6'd2; b = 20'b01111111110000100111; end
+            9'b000101010: begin segment = 6'd2; b = 20'b01111111110000100101; end
+            9'b000101011: begin segment = 6'd2; b = 20'b01111111110000100011; end
+            9'b000101100: begin segment = 6'd2; b = 20'b01111111110000100010; end
+            9'b000101101: begin segment = 6'd2; b = 20'b01111111110000100011; end
+            9'b000101110: begin segment = 6'd2; b = 20'b01111111110000100100; end
+            9'b000101111: begin segment = 6'd2; b = 20'b01111111110000100111; end
+            9'b000110000: begin segment = 6'd2; b = 20'b01111111110000101011; end
+            9'b000110001: begin segment = 6'd2; b = 20'b01111111110000101111; end
+            9'b000110010: begin segment = 6'd2; b = 20'b01111111110000110101; end
+            9'b000110011: begin segment = 6'd2; b = 20'b01111111110000111011; end
+            9'b000110100: begin segment = 6'd2; b = 20'b01111111110001000011; end
+            9'b000110101: begin segment = 6'd2; b = 20'b01111111110001001100; end
+            9'b000110110: begin segment = 6'd3; b = 20'b01111111100001000011; end
+            9'b000110111: begin segment = 6'd3; b = 20'b01111111100000111011; end
+            9'b000111000: begin segment = 6'd3; b = 20'b01111111100000110011; end
+            9'b000111001: begin segment = 6'd3; b = 20'b01111111100000101101; end
+            9'b000111010: begin segment = 6'd3; b = 20'b01111111100000101000; end
+            9'b000111011: begin segment = 6'd3; b = 20'b01111111100000100100; end
+            9'b000111100: begin segment = 6'd3; b = 20'b01111111100000100001; end
+            9'b000111101: begin segment = 6'd3; b = 20'b01111111100000011111; end
+            9'b000111110: begin segment = 6'd3; b = 20'b01111111100000011110; end
+            9'b000111111: begin segment = 6'd3; b = 20'b01111111100000011110; end
+            9'b001000000: begin segment = 6'd3; b = 20'b01111111100000011111; end
+            9'b001000001: begin segment = 6'd3; b = 20'b01111111100000100001; end
+            9'b001000010: begin segment = 6'd3; b = 20'b01111111100000100100; end
+            9'b001000011: begin segment = 6'd3; b = 20'b01111111100000101000; end
+            9'b001000100: begin segment = 6'd3; b = 20'b01111111100000101110; end
+            9'b001000101: begin segment = 6'd3; b = 20'b01111111100000110100; end
+            9'b001000110: begin segment = 6'd3; b = 20'b01111111100000111011; end
+            9'b001000111: begin segment = 6'd3; b = 20'b01111111100001000100; end
+            9'b001001000: begin segment = 6'd4; b = 20'b01111111001011100110; end
+            9'b001001001: begin segment = 6'd4; b = 20'b01111111001011011110; end
+            9'b001001010: begin segment = 6'd4; b = 20'b01111111001011010111; end
+            9'b001001011: begin segment = 6'd4; b = 20'b01111111001011010000; end
+            9'b001001100: begin segment = 6'd4; b = 20'b01111111001011001011; end
+            9'b001001101: begin segment = 6'd4; b = 20'b01111111001011000111; end
+            9'b001001110: begin segment = 6'd4; b = 20'b01111111001011000100; end
+            9'b001001111: begin segment = 6'd4; b = 20'b01111111001011000001; end
+            9'b001010000: begin segment = 6'd4; b = 20'b01111111001010111111; end
+            9'b001010001: begin segment = 6'd4; b = 20'b01111111001010111111; end
+            9'b001010010: begin segment = 6'd4; b = 20'b01111111001011000001; end
+            9'b001010011: begin segment = 6'd4; b = 20'b01111111001011000011; end
+            9'b001010100: begin segment = 6'd4; b = 20'b01111111001011000110; end
+            9'b001010101: begin segment = 6'd4; b = 20'b01111111001011001010; end
+            9'b001010110: begin segment = 6'd4; b = 20'b01111111001011010000; end
+            9'b001010111: begin segment = 6'd4; b = 20'b01111111001011010110; end
+            9'b001011000: begin segment = 6'd4; b = 20'b01111111001011011110; end
+            9'b001011001: begin segment = 6'd4; b = 20'b01111111001011100111; end
+            9'b001011010: begin segment = 6'd5; b = 20'b01111110101111100100; end
+            9'b001011011: begin segment = 6'd5; b = 20'b01111110101111011011; end
+            9'b001011100: begin segment = 6'd5; b = 20'b01111110101111010011; end
+            9'b001011101: begin segment = 6'd5; b = 20'b01111110101111001100; end
+            9'b001011110: begin segment = 6'd5; b = 20'b01111110101111000110; end
+            9'b001011111: begin segment = 6'd5; b = 20'b01111110101111000001; end
+            9'b001100000: begin segment = 6'd5; b = 20'b01111110101110111101; end
+            9'b001100001: begin segment = 6'd5; b = 20'b01111110101110111011; end
+            9'b001100010: begin segment = 6'd5; b = 20'b01111110101110111001; end
+            9'b001100011: begin segment = 6'd5; b = 20'b01111110101110111001; end
+            9'b001100100: begin segment = 6'd5; b = 20'b01111110101110111001; end
+            9'b001100101: begin segment = 6'd5; b = 20'b01111110101110111011; end
+            9'b001100110: begin segment = 6'd5; b = 20'b01111110101110111110; end
+            9'b001100111: begin segment = 6'd5; b = 20'b01111110101111000010; end
+            9'b001101000: begin segment = 6'd5; b = 20'b01111110101111000111; end
+            9'b001101001: begin segment = 6'd5; b = 20'b01111110101111001110; end
+            9'b001101010: begin segment = 6'd5; b = 20'b01111110101111010101; end
+            9'b001101011: begin segment = 6'd5; b = 20'b01111110101111011101; end
+            9'b001101100: begin segment = 6'd6; b = 20'b01111110001110010110; end
+            9'b001101101: begin segment = 6'd6; b = 20'b01111110001110001100; end
+            9'b001101110: begin segment = 6'd6; b = 20'b01111110001110000101; end
+            9'b001101111: begin segment = 6'd6; b = 20'b01111110001101111110; end
+            9'b001110000: begin segment = 6'd6; b = 20'b01111110001101111000; end
+            9'b001110001: begin segment = 6'd6; b = 20'b01111110001101110011; end
+            9'b001110010: begin segment = 6'd6; b = 20'b01111110001101110000; end
+            9'b001110011: begin segment = 6'd6; b = 20'b01111110001101101101; end
+            9'b001110100: begin segment = 6'd6; b = 20'b01111110001101101101; end
+            9'b001110101: begin segment = 6'd6; b = 20'b01111110001101101101; end
+            9'b001110110: begin segment = 6'd6; b = 20'b01111110001101101110; end
+            9'b001110111: begin segment = 6'd6; b = 20'b01111110001101110000; end
+            9'b001111000: begin segment = 6'd6; b = 20'b01111110001101110011; end
+            9'b001111001: begin segment = 6'd6; b = 20'b01111110001101110111; end
+            9'b001111010: begin segment = 6'd6; b = 20'b01111110001101111110; end
+            9'b001111011: begin segment = 6'd6; b = 20'b01111110001110000100; end
+            9'b001111100: begin segment = 6'd6; b = 20'b01111110001110001100; end
+            9'b001111101: begin segment = 6'd6; b = 20'b01111110001110010101; end
+            9'b001111110: begin segment = 6'd7; b = 20'b01111101100110001110; end
+            9'b001111111: begin segment = 6'd7; b = 20'b01111101100110000100; end
+            9'b010000000: begin segment = 6'd7; b = 20'b01111101100101111101; end
+            9'b010000001: begin segment = 6'd7; b = 20'b01111101100101110110; end
+            9'b010000010: begin segment = 6'd7; b = 20'b01111101100101110000; end
+            9'b010000011: begin segment = 6'd7; b = 20'b01111101100101101100; end
+            9'b010000100: begin segment = 6'd7; b = 20'b01111101100101101001; end
+            9'b010000101: begin segment = 6'd7; b = 20'b01111101100101100110; end
+            9'b010000110: begin segment = 6'd7; b = 20'b01111101100101100101; end
+            9'b010000111: begin segment = 6'd7; b = 20'b01111101100101100110; end
+            9'b010001000: begin segment = 6'd7; b = 20'b01111101100101100111; end
+            9'b010001001: begin segment = 6'd7; b = 20'b01111101100101101001; end
+            9'b010001010: begin segment = 6'd7; b = 20'b01111101100101101101; end
+            9'b010001011: begin segment = 6'd7; b = 20'b01111101100101110010; end
+            9'b010001100: begin segment = 6'd7; b = 20'b01111101100101110111; end
+            9'b010001101: begin segment = 6'd7; b = 20'b01111101100101111111; end
+            9'b010001110: begin segment = 6'd7; b = 20'b01111101100110000111; end
+            9'b010001111: begin segment = 6'd7; b = 20'b01111101100110010000; end
+            9'b010010000: begin segment = 6'd8; b = 20'b01111100111000001000; end
+            9'b010010001: begin segment = 6'd8; b = 20'b01111100111000000000; end
+            9'b010010010: begin segment = 6'd8; b = 20'b01111100110111111000; end
+            9'b010010011: begin segment = 6'd8; b = 20'b01111100110111110010; end
+            9'b010010100: begin segment = 6'd8; b = 20'b01111100110111101100; end
+            9'b010010101: begin segment = 6'd8; b = 20'b01111100110111101001; end
+            9'b010010110: begin segment = 6'd8; b = 20'b01111100110111100101; end
+            9'b010010111: begin segment = 6'd8; b = 20'b01111100110111100100; end
+            9'b010011000: begin segment = 6'd8; b = 20'b01111100110111100011; end
+            9'b010011001: begin segment = 6'd8; b = 20'b01111100110111100100; end
+            9'b010011010: begin segment = 6'd8; b = 20'b01111100110111100101; end
+            9'b010011011: begin segment = 6'd8; b = 20'b01111100110111101001; end
+            9'b010011100: begin segment = 6'd8; b = 20'b01111100110111101101; end
+            9'b010011101: begin segment = 6'd8; b = 20'b01111100110111110010; end
+            9'b010011110: begin segment = 6'd8; b = 20'b01111100110111111001; end
+            9'b010011111: begin segment = 6'd8; b = 20'b01111100111000000001; end
+            9'b010100000: begin segment = 6'd8; b = 20'b01111100111000001001; end
+            9'b010100001: begin segment = 6'd9; b = 20'b01111100000100111001; end
+            9'b010100010: begin segment = 6'd9; b = 20'b01111100000100110000; end
+            9'b010100011: begin segment = 6'd9; b = 20'b01111100000100101000; end
+            9'b010100100: begin segment = 6'd9; b = 20'b01111100000100100001; end
+            9'b010100101: begin segment = 6'd9; b = 20'b01111100000100011100; end
+            9'b010100110: begin segment = 6'd9; b = 20'b01111100000100011000; end
+            9'b010100111: begin segment = 6'd9; b = 20'b01111100000100010100; end
+            9'b010101000: begin segment = 6'd9; b = 20'b01111100000100010011; end
+            9'b010101001: begin segment = 6'd9; b = 20'b01111100000100010011; end
+            9'b010101010: begin segment = 6'd9; b = 20'b01111100000100010011; end
+            9'b010101011: begin segment = 6'd9; b = 20'b01111100000100010101; end
+            9'b010101100: begin segment = 6'd9; b = 20'b01111100000100011000; end
+            9'b010101101: begin segment = 6'd9; b = 20'b01111100000100011100; end
+            9'b010101110: begin segment = 6'd9; b = 20'b01111100000100100001; end
+            9'b010101111: begin segment = 6'd9; b = 20'b01111100000100101000; end
+            9'b010110000: begin segment = 6'd9; b = 20'b01111100000100110000; end
+            9'b010110001: begin segment = 6'd9; b = 20'b01111100000100111001; end
+            9'b010110010: begin segment = 6'd10; b = 20'b01111011001011100010; end
+            9'b010110011: begin segment = 6'd10; b = 20'b01111011001011011000; end
+            9'b010110100: begin segment = 6'd10; b = 20'b01111011001011010001; end
+            9'b010110101: begin segment = 6'd10; b = 20'b01111011001011001010; end
+            9'b010110110: begin segment = 6'd10; b = 20'b01111011001011000101; end
+            9'b010110111: begin segment = 6'd10; b = 20'b01111011001011000000; end
+            9'b010111000: begin segment = 6'd10; b = 20'b01111011001010111110; end
+            9'b010111001: begin segment = 6'd10; b = 20'b01111011001010111100; end
+            9'b010111010: begin segment = 6'd10; b = 20'b01111011001010111100; end
+            9'b010111011: begin segment = 6'd10; b = 20'b01111011001010111100; end
+            9'b010111100: begin segment = 6'd10; b = 20'b01111011001010111111; end
+            9'b010111101: begin segment = 6'd10; b = 20'b01111011001011000001; end
+            9'b010111110: begin segment = 6'd10; b = 20'b01111011001011000110; end
+            9'b010111111: begin segment = 6'd10; b = 20'b01111011001011001100; end
+            9'b011000000: begin segment = 6'd10; b = 20'b01111011001011010011; end
+            9'b011000001: begin segment = 6'd10; b = 20'b01111011001011011011; end
+            9'b011000010: begin segment = 6'd10; b = 20'b01111011001011100101; end
+            9'b011000011: begin segment = 6'd11; b = 20'b01111010001010000100; end
+            9'b011000100: begin segment = 6'd11; b = 20'b01111010001001111010; end
+            9'b011000101: begin segment = 6'd11; b = 20'b01111010001001110010; end
+            9'b011000110: begin segment = 6'd11; b = 20'b01111010001001101011; end
+            9'b011000111: begin segment = 6'd11; b = 20'b01111010001001100101; end
+            9'b011001000: begin segment = 6'd11; b = 20'b01111010001001100001; end
+            9'b011001001: begin segment = 6'd11; b = 20'b01111010001001011110; end
+            9'b011001010: begin segment = 6'd11; b = 20'b01111010001001011100; end
+            9'b011001011: begin segment = 6'd11; b = 20'b01111010001001011011; end
+            9'b011001100: begin segment = 6'd11; b = 20'b01111010001001011011; end
+            9'b011001101: begin segment = 6'd11; b = 20'b01111010001001011101; end
+            9'b011001110: begin segment = 6'd11; b = 20'b01111010001001100000; end
+            9'b011001111: begin segment = 6'd11; b = 20'b01111010001001100101; end
+            9'b011010000: begin segment = 6'd11; b = 20'b01111010001001101010; end
+            9'b011010001: begin segment = 6'd11; b = 20'b01111010001001110001; end
+            9'b011010010: begin segment = 6'd11; b = 20'b01111010001001111001; end
+            9'b011010011: begin segment = 6'd11; b = 20'b01111010001010000011; end
+            9'b011010100: begin segment = 6'd12; b = 20'b01111001000010000000; end
+            9'b011010101: begin segment = 6'd12; b = 20'b01111001000001110110; end
+            9'b011010110: begin segment = 6'd12; b = 20'b01111001000001101101; end
+            9'b011010111: begin segment = 6'd12; b = 20'b01111001000001100110; end
+            9'b011011000: begin segment = 6'd12; b = 20'b01111001000001100001; end
+            9'b011011001: begin segment = 6'd12; b = 20'b01111001000001011100; end
+            9'b011011010: begin segment = 6'd12; b = 20'b01111001000001011001; end
+            9'b011011011: begin segment = 6'd12; b = 20'b01111001000001010110; end
+            9'b011011100: begin segment = 6'd12; b = 20'b01111001000001010110; end
+            9'b011011101: begin segment = 6'd12; b = 20'b01111001000001010111; end
+            9'b011011110: begin segment = 6'd12; b = 20'b01111001000001011000; end
+            9'b011011111: begin segment = 6'd12; b = 20'b01111001000001011100; end
+            9'b011100000: begin segment = 6'd12; b = 20'b01111001000001100000; end
+            9'b011100001: begin segment = 6'd12; b = 20'b01111001000001100110; end
+            9'b011100010: begin segment = 6'd12; b = 20'b01111001000001101101; end
+            9'b011100011: begin segment = 6'd12; b = 20'b01111001000001110101; end
+            9'b011100100: begin segment = 6'd12; b = 20'b01111001000001111111; end
+            9'b011100101: begin segment = 6'd13; b = 20'b01110111110101000011; end
+            9'b011100110: begin segment = 6'd13; b = 20'b01110111110100111010; end
+            9'b011100111: begin segment = 6'd13; b = 20'b01110111110100110010; end
+            9'b011101000: begin segment = 6'd13; b = 20'b01110111110100101100; end
+            9'b011101001: begin segment = 6'd13; b = 20'b01110111110100100111; end
+            9'b011101010: begin segment = 6'd13; b = 20'b01110111110100100011; end
+            9'b011101011: begin segment = 6'd13; b = 20'b01110111110100100000; end
+            9'b011101100: begin segment = 6'd13; b = 20'b01110111110100011111; end
+            9'b011101101: begin segment = 6'd13; b = 20'b01110111110100011111; end
+            9'b011101110: begin segment = 6'd13; b = 20'b01110111110100100001; end
+            9'b011101111: begin segment = 6'd13; b = 20'b01110111110100100100; end
+            9'b011110000: begin segment = 6'd13; b = 20'b01110111110100100111; end
+            9'b011110001: begin segment = 6'd13; b = 20'b01110111110100101100; end
+            9'b011110010: begin segment = 6'd13; b = 20'b01110111110100110011; end
+            9'b011110011: begin segment = 6'd13; b = 20'b01110111110100111100; end
+            9'b011110100: begin segment = 6'd13; b = 20'b01110111110101000100; end
+            9'b011110101: begin segment = 6'd14; b = 20'b01110110100010110101; end
+            9'b011110110: begin segment = 6'd14; b = 20'b01110110100010101011; end
+            9'b011110111: begin segment = 6'd14; b = 20'b01110110100010100011; end
+            9'b011111000: begin segment = 6'd14; b = 20'b01110110100010011101; end
+            9'b011111001: begin segment = 6'd14; b = 20'b01110110100010010111; end
+            9'b011111010: begin segment = 6'd14; b = 20'b01110110100010010011; end
+            9'b011111011: begin segment = 6'd14; b = 20'b01110110100010010000; end
+            9'b011111100: begin segment = 6'd14; b = 20'b01110110100010001111; end
+            9'b011111101: begin segment = 6'd14; b = 20'b01110110100010001111; end
+            9'b011111110: begin segment = 6'd14; b = 20'b01110110100010010000; end
+            9'b011111111: begin segment = 6'd14; b = 20'b01110110100010010011; end
+            9'b100000000: begin segment = 6'd14; b = 20'b01110110100010011000; end
+            9'b100000001: begin segment = 6'd14; b = 20'b01110110100010011101; end
+            9'b100000010: begin segment = 6'd14; b = 20'b01110110100010100100; end
+            9'b100000011: begin segment = 6'd14; b = 20'b01110110100010101100; end
+            9'b100000100: begin segment = 6'd14; b = 20'b01110110100010110110; end
+            9'b100000101: begin segment = 6'd15; b = 20'b01110101001001100011; end
+            9'b100000110: begin segment = 6'd15; b = 20'b01110101001001011010; end
+            9'b100000111: begin segment = 6'd15; b = 20'b01110101001001010001; end
+            9'b100001000: begin segment = 6'd15; b = 20'b01110101001001001010; end
+            9'b100001001: begin segment = 6'd15; b = 20'b01110101001001000100; end
+            9'b100001010: begin segment = 6'd15; b = 20'b01110101001001000000; end
+            9'b100001011: begin segment = 6'd15; b = 20'b01110101001000111101; end
+            9'b100001100: begin segment = 6'd15; b = 20'b01110101001000111101; end
+            9'b100001101: begin segment = 6'd15; b = 20'b01110101001000111101; end
+            9'b100001110: begin segment = 6'd15; b = 20'b01110101001000111110; end
+            9'b100001111: begin segment = 6'd15; b = 20'b01110101001001000001; end
+            9'b100010000: begin segment = 6'd15; b = 20'b01110101001001000101; end
+            9'b100010001: begin segment = 6'd15; b = 20'b01110101001001001010; end
+            9'b100010010: begin segment = 6'd15; b = 20'b01110101001001010001; end
+            9'b100010011: begin segment = 6'd15; b = 20'b01110101001001011010; end
+            9'b100010100: begin segment = 6'd15; b = 20'b01110101001001100100; end
+            9'b100010101: begin segment = 6'd16; b = 20'b01110011101000101110; end
+            9'b100010110: begin segment = 6'd16; b = 20'b01110011101000100100; end
+            9'b100010111: begin segment = 6'd16; b = 20'b01110011101000011011; end
+            9'b100011000: begin segment = 6'd16; b = 20'b01110011101000010100; end
+            9'b100011001: begin segment = 6'd16; b = 20'b01110011101000001111; end
+            9'b100011010: begin segment = 6'd16; b = 20'b01110011101000001011; end
+            9'b100011011: begin segment = 6'd16; b = 20'b01110011101000001000; end
+            9'b100011100: begin segment = 6'd16; b = 20'b01110011101000000111; end
+            9'b100011101: begin segment = 6'd16; b = 20'b01110011101000000111; end
+            9'b100011110: begin segment = 6'd16; b = 20'b01110011101000001000; end
+            9'b100011111: begin segment = 6'd16; b = 20'b01110011101000001011; end
+            9'b100100000: begin segment = 6'd16; b = 20'b01110011101000001111; end
+            9'b100100001: begin segment = 6'd16; b = 20'b01110011101000010101; end
+            9'b100100010: begin segment = 6'd16; b = 20'b01110011101000011100; end
+            9'b100100011: begin segment = 6'd16; b = 20'b01110011101000100100; end
+            9'b100100100: begin segment = 6'd16; b = 20'b01110011101000101110; end
+            9'b100100101: begin segment = 6'd17; b = 20'b01110001111111011010; end
+            9'b100100110: begin segment = 6'd17; b = 20'b01110001111111010000; end
+            9'b100100111: begin segment = 6'd17; b = 20'b01110001111111000111; end
+            9'b100101000: begin segment = 6'd17; b = 20'b01110001111111000000; end
+            9'b100101001: begin segment = 6'd17; b = 20'b01110001111110111010; end
+            9'b100101010: begin segment = 6'd17; b = 20'b01110001111110110101; end
+            9'b100101011: begin segment = 6'd17; b = 20'b01110001111110110010; end
+            9'b100101100: begin segment = 6'd17; b = 20'b01110001111110110001; end
+            9'b100101101: begin segment = 6'd17; b = 20'b01110001111110110001; end
+            9'b100101110: begin segment = 6'd17; b = 20'b01110001111110110010; end
+            9'b100101111: begin segment = 6'd17; b = 20'b01110001111110110101; end
+            9'b100110000: begin segment = 6'd17; b = 20'b01110001111110111001; end
+            9'b100110001: begin segment = 6'd17; b = 20'b01110001111110111111; end
+            9'b100110010: begin segment = 6'd17; b = 20'b01110001111111000110; end
+            9'b100110011: begin segment = 6'd17; b = 20'b01110001111111001111; end
+            9'b100110100: begin segment = 6'd17; b = 20'b01110001111111011001; end
+            9'b100110101: begin segment = 6'd18; b = 20'b01110000010010111001; end
+            9'b100110110: begin segment = 6'd18; b = 20'b01110000010010101111; end
+            9'b100110111: begin segment = 6'd18; b = 20'b01110000010010100111; end
+            9'b100111000: begin segment = 6'd18; b = 20'b01110000010010100001; end
+            9'b100111001: begin segment = 6'd18; b = 20'b01110000010010011011; end
+            9'b100111010: begin segment = 6'd18; b = 20'b01110000010010011000; end
+            9'b100111011: begin segment = 6'd18; b = 20'b01110000010010010101; end
+            9'b100111100: begin segment = 6'd18; b = 20'b01110000010010010101; end
+            9'b100111101: begin segment = 6'd18; b = 20'b01110000010010010101; end
+            9'b100111110: begin segment = 6'd18; b = 20'b01110000010010011000; end
+            9'b100111111: begin segment = 6'd18; b = 20'b01110000010010011011; end
+            9'b101000000: begin segment = 6'd18; b = 20'b01110000010010100010; end
+            9'b101000001: begin segment = 6'd18; b = 20'b01110000010010101000; end
+            9'b101000010: begin segment = 6'd18; b = 20'b01110000010010110001; end
+            9'b101000011: begin segment = 6'd18; b = 20'b01110000010010111010; end
+            9'b101000100: begin segment = 6'd19; b = 20'b01101110100010000111; end
+            9'b101000101: begin segment = 6'd19; b = 20'b01101110100001111101; end
+            9'b101000110: begin segment = 6'd19; b = 20'b01101110100001110100; end
+            9'b101000111: begin segment = 6'd19; b = 20'b01101110100001101101; end
+            9'b101001000: begin segment = 6'd19; b = 20'b01101110100001101001; end
+            9'b101001001: begin segment = 6'd19; b = 20'b01101110100001100101; end
+            9'b101001010: begin segment = 6'd19; b = 20'b01101110100001100011; end
+            9'b101001011: begin segment = 6'd19; b = 20'b01101110100001100010; end
+            9'b101001100: begin segment = 6'd19; b = 20'b01101110100001100011; end
+            9'b101001101: begin segment = 6'd19; b = 20'b01101110100001100101; end
+            9'b101001110: begin segment = 6'd19; b = 20'b01101110100001101001; end
+            9'b101001111: begin segment = 6'd19; b = 20'b01101110100001101110; end
+            9'b101010000: begin segment = 6'd19; b = 20'b01101110100001110110; end
+            9'b101010001: begin segment = 6'd19; b = 20'b01101110100001111110; end
+            9'b101010010: begin segment = 6'd19; b = 20'b01101110100010000111; end
+            9'b101010011: begin segment = 6'd20; b = 20'b01101100101001100111; end
+            9'b101010100: begin segment = 6'd20; b = 20'b01101100101001011101; end
+            9'b101010101: begin segment = 6'd20; b = 20'b01101100101001010101; end
+            9'b101010110: begin segment = 6'd20; b = 20'b01101100101001001110; end
+            9'b101010111: begin segment = 6'd20; b = 20'b01101100101001001001; end
+            9'b101011000: begin segment = 6'd20; b = 20'b01101100101001000101; end
+            9'b101011001: begin segment = 6'd20; b = 20'b01101100101001000011; end
+            9'b101011010: begin segment = 6'd20; b = 20'b01101100101001000010; end
+            9'b101011011: begin segment = 6'd20; b = 20'b01101100101001000100; end
+            9'b101011100: begin segment = 6'd20; b = 20'b01101100101001000110; end
+            9'b101011101: begin segment = 6'd20; b = 20'b01101100101001001010; end
+            9'b101011110: begin segment = 6'd20; b = 20'b01101100101001001111; end
+            9'b101011111: begin segment = 6'd20; b = 20'b01101100101001010111; end
+            9'b101100000: begin segment = 6'd20; b = 20'b01101100101001011111; end
+            9'b101100001: begin segment = 6'd20; b = 20'b01101100101001101001; end
+            9'b101100010: begin segment = 6'd21; b = 20'b01101010101000010110; end
+            9'b101100011: begin segment = 6'd21; b = 20'b01101010101000001100; end
+            9'b101100100: begin segment = 6'd21; b = 20'b01101010101000000100; end
+            9'b101100101: begin segment = 6'd21; b = 20'b01101010100111111100; end
+            9'b101100110: begin segment = 6'd21; b = 20'b01101010100111110111; end
+            9'b101100111: begin segment = 6'd21; b = 20'b01101010100111110011; end
+            9'b101101000: begin segment = 6'd21; b = 20'b01101010100111110001; end
+            9'b101101001: begin segment = 6'd21; b = 20'b01101010100111110000; end
+            9'b101101010: begin segment = 6'd21; b = 20'b01101010100111110001; end
+            9'b101101011: begin segment = 6'd21; b = 20'b01101010100111110011; end
+            9'b101101100: begin segment = 6'd21; b = 20'b01101010100111110111; end
+            9'b101101101: begin segment = 6'd21; b = 20'b01101010100111111101; end
+            9'b101101110: begin segment = 6'd21; b = 20'b01101010101000000100; end
+            9'b101101111: begin segment = 6'd21; b = 20'b01101010101000001100; end
+            9'b101110000: begin segment = 6'd21; b = 20'b01101010101000010111; end
+            9'b101110001: begin segment = 6'd22; b = 20'b01101000011110101101; end
+            9'b101110010: begin segment = 6'd22; b = 20'b01101000011110100010; end
+            9'b101110011: begin segment = 6'd22; b = 20'b01101000011110011001; end
+            9'b101110100: begin segment = 6'd22; b = 20'b01101000011110010011; end
+            9'b101110101: begin segment = 6'd22; b = 20'b01101000011110001101; end
+            9'b101110110: begin segment = 6'd22; b = 20'b01101000011110001000; end
+            9'b101110111: begin segment = 6'd22; b = 20'b01101000011110000110; end
+            9'b101111000: begin segment = 6'd22; b = 20'b01101000011110000110; end
+            9'b101111001: begin segment = 6'd22; b = 20'b01101000011110000110; end
+            9'b101111010: begin segment = 6'd22; b = 20'b01101000011110001000; end
+            9'b101111011: begin segment = 6'd22; b = 20'b01101000011110001100; end
+            9'b101111100: begin segment = 6'd22; b = 20'b01101000011110010010; end
+            9'b101111101: begin segment = 6'd22; b = 20'b01101000011110011001; end
+            9'b101111110: begin segment = 6'd22; b = 20'b01101000011110100001; end
+            9'b101111111: begin segment = 6'd22; b = 20'b01101000011110101011; end
+            9'b110000000: begin segment = 6'd23; b = 20'b01100110001101001100; end
+            9'b110000001: begin segment = 6'd23; b = 20'b01100110001101000001; end
+            9'b110000010: begin segment = 6'd23; b = 20'b01100110001100111000; end
+            9'b110000011: begin segment = 6'd23; b = 20'b01100110001100110000; end
+            9'b110000100: begin segment = 6'd23; b = 20'b01100110001100101011; end
+            9'b110000101: begin segment = 6'd23; b = 20'b01100110001100100110; end
+            9'b110000110: begin segment = 6'd23; b = 20'b01100110001100100100; end
+            9'b110000111: begin segment = 6'd23; b = 20'b01100110001100100011; end
+            9'b110001000: begin segment = 6'd23; b = 20'b01100110001100100100; end
+            9'b110001001: begin segment = 6'd23; b = 20'b01100110001100100110; end
+            9'b110001010: begin segment = 6'd23; b = 20'b01100110001100101010; end
+            9'b110001011: begin segment = 6'd23; b = 20'b01100110001100110000; end
+            9'b110001100: begin segment = 6'd23; b = 20'b01100110001100110111; end
+            9'b110001101: begin segment = 6'd23; b = 20'b01100110001101000000; end
+            9'b110001110: begin segment = 6'd23; b = 20'b01100110001101001011; end
+            9'b110001111: begin segment = 6'd24; b = 20'b01100011110111100010; end
+            9'b110010000: begin segment = 6'd24; b = 20'b01100011110111011000; end
+            9'b110010001: begin segment = 6'd24; b = 20'b01100011110111010000; end
+            9'b110010010: begin segment = 6'd24; b = 20'b01100011110111001001; end
+            9'b110010011: begin segment = 6'd24; b = 20'b01100011110111000100; end
+            9'b110010100: begin segment = 6'd24; b = 20'b01100011110111000000; end
+            9'b110010101: begin segment = 6'd24; b = 20'b01100011110110111110; end
+            9'b110010110: begin segment = 6'd24; b = 20'b01100011110110111110; end
+            9'b110010111: begin segment = 6'd24; b = 20'b01100011110111000000; end
+            9'b110011000: begin segment = 6'd24; b = 20'b01100011110111000011; end
+            9'b110011001: begin segment = 6'd24; b = 20'b01100011110111001000; end
+            9'b110011010: begin segment = 6'd24; b = 20'b01100011110111001110; end
+            9'b110011011: begin segment = 6'd24; b = 20'b01100011110111010110; end
+            9'b110011100: begin segment = 6'd24; b = 20'b01100011110111100000; end
+            9'b110011101: begin segment = 6'd24; b = 20'b01100011110111101100; end
+            9'b110011110: begin segment = 6'd25; b = 20'b01100001010101111110; end
+            9'b110011111: begin segment = 6'd25; b = 20'b01100001010101110100; end
+            9'b110100000: begin segment = 6'd25; b = 20'b01100001010101101100; end
+            9'b110100001: begin segment = 6'd25; b = 20'b01100001010101100101; end
+            9'b110100010: begin segment = 6'd25; b = 20'b01100001010101100000; end
+            9'b110100011: begin segment = 6'd25; b = 20'b01100001010101011100; end
+            9'b110100100: begin segment = 6'd25; b = 20'b01100001010101011011; end
+            9'b110100101: begin segment = 6'd25; b = 20'b01100001010101011011; end
+            9'b110100110: begin segment = 6'd25; b = 20'b01100001010101011101; end
+            9'b110100111: begin segment = 6'd25; b = 20'b01100001010101100000; end
+            9'b110101000: begin segment = 6'd25; b = 20'b01100001010101100101; end
+            9'b110101001: begin segment = 6'd25; b = 20'b01100001010101101100; end
+            9'b110101010: begin segment = 6'd25; b = 20'b01100001010101110101; end
+            9'b110101011: begin segment = 6'd25; b = 20'b01100001010101111111; end
+            9'b110101100: begin segment = 6'd26; b = 20'b01011110110101001000; end
+            9'b110101101: begin segment = 6'd26; b = 20'b01011110110100111101; end
+            9'b110101110: begin segment = 6'd26; b = 20'b01011110110100110101; end
+            9'b110101111: begin segment = 6'd26; b = 20'b01011110110100101110; end
+            9'b110110000: begin segment = 6'd26; b = 20'b01011110110100101000; end
+            9'b110110001: begin segment = 6'd26; b = 20'b01011110110100100100; end
+            9'b110110010: begin segment = 6'd26; b = 20'b01011110110100100011; end
+            9'b110110011: begin segment = 6'd26; b = 20'b01011110110100100011; end
+            9'b110110100: begin segment = 6'd26; b = 20'b01011110110100100100; end
+            9'b110110101: begin segment = 6'd26; b = 20'b01011110110100101000; end
+            9'b110110110: begin segment = 6'd26; b = 20'b01011110110100101101; end
+            9'b110110111: begin segment = 6'd26; b = 20'b01011110110100110100; end
+            9'b110111000: begin segment = 6'd26; b = 20'b01011110110100111101; end
+            9'b110111001: begin segment = 6'd26; b = 20'b01011110110101000111; end
+            9'b110111010: begin segment = 6'd27; b = 20'b01011100001100010011; end
+            9'b110111011: begin segment = 6'd27; b = 20'b01011100001100001000; end
+            9'b110111100: begin segment = 6'd27; b = 20'b01011100001011111111; end
+            9'b110111101: begin segment = 6'd27; b = 20'b01011100001011111000; end
+            9'b110111110: begin segment = 6'd27; b = 20'b01011100001011110011; end
+            9'b110111111: begin segment = 6'd27; b = 20'b01011100001011101111; end
+            9'b111000000: begin segment = 6'd27; b = 20'b01011100001011101110; end
+            9'b111000001: begin segment = 6'd27; b = 20'b01011100001011101101; end
+            9'b111000010: begin segment = 6'd27; b = 20'b01011100001011110000; end
+            9'b111000011: begin segment = 6'd27; b = 20'b01011100001011110011; end
+            9'b111000100: begin segment = 6'd27; b = 20'b01011100001011111000; end
+            9'b111000101: begin segment = 6'd27; b = 20'b01011100001011111111; end
+            9'b111000110: begin segment = 6'd27; b = 20'b01011100001100001000; end
+            9'b111000111: begin segment = 6'd27; b = 20'b01011100001100010010; end
+            9'b111001000: begin segment = 6'd28; b = 20'b01011001011010001010; end
+            9'b111001001: begin segment = 6'd28; b = 20'b01011001011010000000; end
+            9'b111001010: begin segment = 6'd28; b = 20'b01011001011001110111; end
+            9'b111001011: begin segment = 6'd28; b = 20'b01011001011001110000; end
+            9'b111001100: begin segment = 6'd28; b = 20'b01011001011001101010; end
+            9'b111001101: begin segment = 6'd28; b = 20'b01011001011001100111; end
+            9'b111001110: begin segment = 6'd28; b = 20'b01011001011001100100; end
+            9'b111001111: begin segment = 6'd28; b = 20'b01011001011001100101; end
+            9'b111010000: begin segment = 6'd28; b = 20'b01011001011001100110; end
+            9'b111010001: begin segment = 6'd28; b = 20'b01011001011001101010; end
+            9'b111010010: begin segment = 6'd28; b = 20'b01011001011001101111; end
+            9'b111010011: begin segment = 6'd28; b = 20'b01011001011001110111; end
+            9'b111010100: begin segment = 6'd28; b = 20'b01011001011001111111; end
+            9'b111010101: begin segment = 6'd28; b = 20'b01011001011010001011; end
+            9'b111010110: begin segment = 6'd29; b = 20'b01010110011110111000; end
+            9'b111010111: begin segment = 6'd29; b = 20'b01010110011110101101; end
+            9'b111011000: begin segment = 6'd29; b = 20'b01010110011110100100; end
+            9'b111011001: begin segment = 6'd29; b = 20'b01010110011110011100; end
+            9'b111011010: begin segment = 6'd29; b = 20'b01010110011110010111; end
+            9'b111011011: begin segment = 6'd29; b = 20'b01010110011110010011; end
+            9'b111011100: begin segment = 6'd29; b = 20'b01010110011110010010; end
+            9'b111011101: begin segment = 6'd29; b = 20'b01010110011110010010; end
+            9'b111011110: begin segment = 6'd29; b = 20'b01010110011110010011; end
+            9'b111011111: begin segment = 6'd29; b = 20'b01010110011110010111; end
+            9'b111100000: begin segment = 6'd29; b = 20'b01010110011110011100; end
+            9'b111100001: begin segment = 6'd29; b = 20'b01010110011110100100; end
+            9'b111100010: begin segment = 6'd29; b = 20'b01010110011110101101; end
+            9'b111100011: begin segment = 6'd29; b = 20'b01010110011110111000; end
+            9'b111100100: begin segment = 6'd30; b = 20'b01010011011010001111; end
+            9'b111100101: begin segment = 6'd30; b = 20'b01010011011010000100; end
+            9'b111100110: begin segment = 6'd30; b = 20'b01010011011001111011; end
+            9'b111100111: begin segment = 6'd30; b = 20'b01010011011001110011; end
+            9'b111101000: begin segment = 6'd30; b = 20'b01010011011001101101; end
+            9'b111101001: begin segment = 6'd30; b = 20'b01010011011001101001; end
+            9'b111101010: begin segment = 6'd30; b = 20'b01010011011001100111; end
+            9'b111101011: begin segment = 6'd30; b = 20'b01010011011001100111; end
+            9'b111101100: begin segment = 6'd30; b = 20'b01010011011001101000; end
+            9'b111101101: begin segment = 6'd30; b = 20'b01010011011001101100; end
+            9'b111101110: begin segment = 6'd30; b = 20'b01010011011001110001; end
+            9'b111101111: begin segment = 6'd30; b = 20'b01010011011001111001; end
+            9'b111110000: begin segment = 6'd30; b = 20'b01010011011010000010; end
+            9'b111110001: begin segment = 6'd30; b = 20'b01010011011010001101; end
+            9'b111110010: begin segment = 6'd31; b = 20'b01010000001101111100; end
+            9'b111110011: begin segment = 6'd31; b = 20'b01010000001101110001; end
+            9'b111110100: begin segment = 6'd31; b = 20'b01010000001101100111; end
+            9'b111110101: begin segment = 6'd31; b = 20'b01010000001101011111; end
+            9'b111110110: begin segment = 6'd31; b = 20'b01010000001101011010; end
+            9'b111110111: begin segment = 6'd31; b = 20'b01010000001101010110; end
+            9'b111111000: begin segment = 6'd31; b = 20'b01010000001101010011; end
+            9'b111111001: begin segment = 6'd31; b = 20'b01010000001101010011; end
+            9'b111111010: begin segment = 6'd31; b = 20'b01010000001101010110; end
+            9'b111111011: begin segment = 6'd31; b = 20'b01010000001101011010; end
+            9'b111111100: begin segment = 6'd31; b = 20'b01010000001101011111; end
+            9'b111111101: begin segment = 6'd31; b = 20'b01010000001101100111; end
+            9'b111111110: begin segment = 6'd31; b = 20'b01010000001101110000; end
+            9'b111111111: begin segment = 6'd31; b = 20'b01010000001101111100; end
+      endcase
+    end
+
+// Auto-generated neg assignments for WIDTH=22
+    wire neg_1;
+    assign neg_1 = ~f[21];
+    wire [1:0] neg_2;
+    assign neg_2 = ~f[21:20];
+    wire [2:0] neg_3;
+    assign neg_3 = ~f[21:19];
+    wire [3:0] neg_4;
+    assign neg_4 = ~f[21:18];
+    wire [4:0] neg_5;
+    assign neg_5 = ~f[21:17];
+    wire [5:0] neg_6;
+    assign neg_6 = ~f[21:16];
+    wire [6:0] neg_7;
+    assign neg_7 = ~f[21:15];
+    wire [7:0] neg_8;
+    assign neg_8 = ~f[21:14];
+    wire [8:0] neg_9;
+    assign neg_9 = ~f[21:13];
+    wire [9:0] neg_10;
+    assign neg_10 = ~f[21:12];
+    wire [10:0] neg_11;
+    assign neg_11 = ~f[21:11];
+    wire [11:0] neg_12;
+    assign neg_12 = ~f[21:10];
+    wire [12:0] neg_13;
+    assign neg_13 = ~f[21:9];
+    wire [13:0] neg_14;
+    assign neg_14 = ~f[21:8];
+    wire [14:0] neg_15;
+    assign neg_15 = ~f[21:7];
+    wire [15:0] neg_16;
+    assign neg_16 = ~f[21:6];
+    wire [16:0] neg_17;
+    assign neg_17 = ~f[21:5];
+    wire [17:0] neg_18;
+    assign neg_18 = ~f[21:4];
+    wire [18:0] neg_19;
+    assign neg_19 = ~f[21:3];
+    wire [19:0] neg_20;
+    assign neg_20 = ~f[21:2];
+    wire [20:0] neg_21;
+    assign neg_21 = ~f[21:1];
+// End of auto-generated section
+
+
+// Auto-generated register declarations for 5 registers
+    reg [19:0] A1;
+    reg [19:0] A2;
+    reg [19:0] A3;
+    reg [19:0] A4;
+    reg [19:0] A5;
+// End of auto-generated section
+
+    always @(*) begin
+        case(segment)
+            6'd0: begin A1 = {3'b111, neg_17}; A2 = {5'b11111, neg_15}; A3 = {7'b0000000, f[21:9]}; A4 = {10'b1111111111, neg_10}; end
+            6'd1: begin A1 = {3'b111, neg_17}; A2 = {6'b111111, neg_14}; A3 = {11'b11111111111, neg_9}; A4 = {13'b1111111111111, neg_7}; end
+            6'd2: begin A1 = {3'b111, neg_17}; A2 = {7'b1111111, neg_13}; A3 = {10'b0000000000, f[21:12]}; A4 = {14'b11111111111111, neg_6}; end
+            6'd3: begin A1 = {3'b111, neg_17}; A2 = {9'b000000000, f[21:11]}; A3 = {11'b00000000000, f[21:13]}; A4 = {19'b1111111111111111111, neg_1}; end
+            6'd4: begin A1 = {3'b111, neg_17}; A2 = {6'b000000, f[21:8]}; A3 = {8'b11111111, neg_12}; A4 = {15'b000000000000000, f[21:17]}; end
+            6'd5: begin A1 = {3'b111, neg_17}; A2 = {5'b00000, f[21:7]}; A3 = {7'b1111111, neg_13}; A4 = {9'b111111111, neg_11}; end
+            6'd6: begin A1 = {3'b111, neg_17}; A2 = {5'b00000, f[21:7]}; A3 = {12'b111111111111, neg_8}; A4 = {14'b00000000000000, f[21:16]}; end
+            6'd7: begin A1 = {3'b111, neg_17}; A2 = {5'b00000, f[21:7]}; A3 = {7'b0000000, f[21:9]}; A4 = {9'b000000000, f[21:11]}; end
+            6'd8: begin A1 = {4'b1111, neg_16}; A2 = {6'b111111, neg_14}; A3 = {8'b00000000, f[21:10]}; A4 = {12'b000000000000, f[21:14]}; end
+            6'd9: begin A1 = {4'b1111, neg_16}; A2 = {9'b111111111, neg_11}; A3 = {11'b00000000000, f[21:13]}; A4 = {14'b11111111111111, neg_6}; end
+            6'd10: begin A1 = {4'b1111, neg_16}; A2 = {7'b0000000, f[21:9]}; A3 = {10'b0000000000, f[21:12]}; A4 = {12'b111111111111, neg_8}; end
+            6'd11: begin A1 = {4'b1111, neg_16}; A2 = {6'b000000, f[21:8]}; A3 = {8'b00000000, f[21:10]}; A4 = {11'b11111111111, neg_9}; end
+            6'd12: begin A1 = {5'b11111, neg_15}; A2 = {9'b111111111, neg_11}; A3 = {11'b00000000000, f[21:13]}; A4 = {13'b1111111111111, neg_7}; end
+            6'd13: begin A1 = {5'b11111, neg_15}; A2 = {7'b0000000, f[21:9]}; A3 = {10'b0000000000, f[21:12]}; A4 = {13'b0000000000000, f[21:15]}; end
+            6'd14: begin A1 = {6'b111111, neg_14}; A2 = {8'b00000000, f[21:10]}; A3 = {13'b1111111111111, neg_7}; A4 = {17'b11111111111111111, neg_3}; end
+            6'd15: begin A1 = {10'b1111111111, neg_10}; A2 = {12'b111111111111, neg_8}; A3 = {14'b00000000000000, f[21:16]}; A4 = {20'b00000000000000000000};end
+            6'd16: begin A1 = {7'b0000000, f[21:9]}; A2 = {9'b000000000, f[21:11]}; A3 = {20'b00000000000000000000};A4 = {20'b00000000000000000000};end
+            6'd17: begin A1 = {5'b00000, f[21:7]}; A2 = {7'b1111111, neg_13}; A3 = {9'b111111111, neg_11}; A4 = {11'b11111111111, neg_9}; end
+            6'd18: begin A1 = {5'b00000, f[21:7]}; A2 = {10'b0000000000, f[21:12]}; A3 = {12'b111111111111, neg_8}; A4 = {16'b1111111111111111, neg_4}; end
+            6'd19: begin A1 = {4'b0000, f[21:6]}; A2 = {6'b111111, neg_14}; A3 = {8'b11111111, neg_12}; A4 = {13'b1111111111111, neg_7}; end
+            6'd20: begin A1 = {4'b0000, f[21:6]}; A2 = {7'b1111111, neg_13}; A3 = {10'b1111111111, neg_10}; A4 = {12'b000000000000, f[21:14]}; end
+            6'd21: begin A1 = {4'b0000, f[21:6]}; A2 = {8'b00000000, f[21:10]}; A3 = {10'b1111111111, neg_10}; A4 = {14'b11111111111111, neg_6}; end
+            6'd22: begin A1 = {4'b0000, f[21:6]}; A2 = {6'b000000, f[21:8]}; A3 = {10'b1111111111, neg_10}; A4 = {13'b1111111111111, neg_7}; end
+            6'd23: begin A1 = {3'b000, f[21:5]}; A2 = {5'b11111, neg_15}; A3 = {8'b11111111, neg_12}; A4 = {10'b1111111111, neg_10}; end
+            6'd24: begin A1 = {3'b000, f[21:5]}; A2 = {5'b11111, neg_15}; A3 = {7'b0000000, f[21:9]}; A4 = {10'b1111111111, neg_10}; end
+            6'd25: begin A1 = {3'b000, f[21:5]}; A2 = {6'b111111, neg_14}; A3 = {8'b00000000, f[21:10]}; A4 = {11'b11111111111, neg_9}; end
+            6'd26: begin A1 = {3'b000, f[21:5]}; A2 = {11'b11111111111, neg_9}; A3 = {15'b000000000000000, f[21:17]}; A4 = {18'b111111111111111111, neg_2}; end
+            6'd27: begin A1 = {3'b000, f[21:5]}; A2 = {6'b000000, f[21:8]}; A3 = {8'b11111111, neg_12}; A4 = {12'b111111111111, neg_8}; end
+            6'd28: begin A1 = {3'b000, f[21:5]}; A2 = {5'b00000, f[21:7]}; A3 = {7'b1111111, neg_13}; A4 = {12'b000000000000, f[21:14]}; end
+            6'd29: begin A1 = {3'b000, f[21:5]}; A2 = {5'b00000, f[21:7]}; A3 = {8'b00000000, f[21:10]}; A4 = {10'b0000000000, f[21:12]}; end
+            6'd30: begin A1 = {2'b00, f[21:4]}; A2 = {4'b1111, neg_16}; A3 = {6'b111111, neg_14}; A4 = {9'b000000000, f[21:11]}; end
+            6'd31: begin A1 = {2'b00, f[21:4]}; A2 = {4'b1111, neg_16}; A3 = {10'b1111111111, neg_10}; A4 = {13'b0000000000000, f[21:15]}; end
+            default begin A1 = 20'b0; A2 = 20'b0; A3 = 20'b0; A4 = 20'b0; end  //fixed: default case to avoid latches
+      endcase
+    end
+
+// Auto-generated CSA tree for final_N=5, final_M=22, final_add_M=19
+    wire [19:0] csa1_carry, csa1_sum;
+    wire [19:0] csa2_carry, csa2_sum;
+    wire [19:0] csa3_carry, csa3_sum;
+    wire [19:0] csa4_carry, csa4_sum;
+    wire [19:0] final_sum;
+
+    CSA_anticonv3 csa1 (
+        .a({1'b0, f[21:3]}),  // f的高19位
+        .b(A1),
+        .c(A2),
+        .sum(csa1_sum),
+        .carry(csa1_carry)
+    );
+
+    CSA_anticonv3 csa2 (
+        .a(csa1_sum),
+        .b(A3),
+        .c({csa1_carry[18:0], 1'b0}),  // 左移1位
+        .sum(csa2_sum),
+        .carry(csa2_carry)
+    );
+
+    CSA_anticonv3 csa3 (
+        .a(csa2_sum),
+        .b(A4),
+        .c({csa2_carry[18:0], 1'b0}),  // 左移1位
+        .sum(csa3_sum),
+        .carry(csa3_carry)
+    );
+
+    CSA_anticonv3 csa4 (
+        .a(csa3_sum),
+         .b(b),
+        .c({csa3_carry[18:0], 1'b0}),
+        .sum(csa4_sum),
+        .carry(csa4_carry)
+    );
+
+    CPA_anticonv3 cpa (
+        .a(csa4_sum),
+        .b({csa4_carry[18:0], 1'b0}),  // 左移1位
+        .sum(final_sum)
+    );
+
+    assign f_e2_out = {final_sum, f[2:0]};  // 拼接高位和原始低位
+// End of auto-generated CSA tree
+
+endmodule
+module CSA_anticonv3 #(parameter ADD_WIDTH = 20
+)(
+    input [ADD_WIDTH-1:0] a,
+    input [ADD_WIDTH-1:0] b,
+    input [ADD_WIDTH-1:0] c,
+    output [ADD_WIDTH-1:0] sum,
+    output [ADD_WIDTH-1:0] carry
+);
+    assign sum = a ^ b ^ c;          // XOR for sum
+    assign carry = (a & b) | (b & c) | (c & a); // Majority logic for carry
+endmodule
+
+// Carry-Propagate Adder (CPA) module
+module CPA_anticonv3 #(parameter ADD_WIDTH = 20
+)(
+    input [ADD_WIDTH-1:0] a,
+    input [ADD_WIDTH-1:0] b,
+    output [ADD_WIDTH-1:0] sum
+);
+    assign sum = a + b;  // Simple binary addition
+endmodule
+
+
+
+// `timescale 1ns / 1ps
+//@zou:多项式系数通过配置输入，最大支持段数为6段
+module LNS_Top #(parameter WIDTH = 32,
+             parameter WIDTH32 = 32  
+)(
+    input clk,
+    input rstn,
+    input [4:0] n,
+    input float_flag,
+    input [WIDTH32 - 1:0] x_0,
+    input [WIDTH32 - 1:0] y_0,
+    // input [2:0] TRI_select,//@yuan: 选择具体的函数
+    input VEC,//向量计算，或者乘除法计算
+    input qi,//是否开方
+    input Div,//是否除法
+    //@zou：五个channel
+    input [5*WIDTH-1:0] logc_in_0,//@yuan: 第一段多项式展开的logci输入
+    input [WIDTH-3:0] K_in_0,//@yuan: 第一段多项式展开的ki输入
+    input [5*WIDTH-1:0] logc_in_1,//@yuan: 第二段多项式展开的logci输入
+    input [WIDTH-3:0] K_in_1,//@yuan: 第二段多项式展开的ki输入
+    input [5*WIDTH-1:0] logc_in_2,//@yuan: 第三段多项式展开的logci输入
+    input [WIDTH-3:0] K_in_2,//@yuan: 第三段多项式展开的ki输入
+    input [5*WIDTH-1:0] logc_in_3,//@yuan: 第四段多项式展开的logci输入
+    input [WIDTH-3:0] K_in_3,//@yuan: 第四段多项式展开的ki输入
+    input [5*WIDTH-1:0] logc_in_4,//@yuan: 第五段多项式展开的logci输入
+    input [WIDTH-3:0] K_in_4,//@yuan: 第五段多项式展开的ki输入
+    input [5*WIDTH-1:0] logc_in_5,//@yuan: 第六段多项式展开的logci输入
+    input [WIDTH-3:0] K_in_5,//@yuan: 第六段多项式展开的ki输入
+    input [11:0] bias_sel, //@yuan: 各段的偏移选择信号；每段 2-bit * 5段；每段： 00 无偏移， 01 偏移量为1， 10 偏移量为x
+    input [5*WIDTH32-1 : 0] break_points, //@yuan: 因为最大的分段数是6，所以潜在的断点是5个；对于分段数不足6个的情况，对应的断点设置为当前数据格式下对应的正数的最大值：7FFFFFFF (由编译器决定)
+    input [6*WIDTH32-1 : 0] constant_bias_in, //@yuan: 输入的每一段的bias
+
+    input TRG,//@zou：booth计算5个6*Q8.22还是一个Q8.22*Q8.22
+    input power,//指数函数
+    input TRi,//三角函数
+    output TRG_overflow,//24*24的溢出
+    output VEC_overflow,
+    output CPA_float_overflow,
+    output CPA_float_underflow,
+    output CPA_cpa_overflow,
+    output [WIDTH32 - 1:0] channel0_log_result,
+    output [WIDTH32 - 1:0] channel2_tri_result,
+    output [WIDTH32 - 1:0] channel0_VEC_Power_result //@zou,每个类型都只有一个输出，且都转化成了Qm.n输出格式
+);
+    //wire power_sign;
+    //@zou：默认计算指数时不会出现负数为底数且指数为小数的不正确情况
+    //assign power_sign = ((float_flag == 1'b0 )&&(power == 1'b1) && (y_0[n] == 1'b0)) ? 1'b1 : 1'b0;//为1，则指数计算结果为正数，否则为x发符号
+    //@yuan:取消bias_one在内部，这个可以通过常数项的配置烧入
+    // reg [WIDTH32 - 1:0] fix_bias_one;
+    // always @(*) begin
+    //     fix_bias_one = (32'b1 << n);//@yuan: 使用移位即可
+    // end
+    // wire [WIDTH32 - 1:0] bias_one;//$zou, 浮点增加
+    // assign bias_one = (float_flag==1'b1) ? 32'b00111111_10000000_00000000_00000000 : fix_bias_one;
+
+    integer j;
+
+    //@zou: 计算段系数选择
+    //@yuan: 在第一个cycle进行段系数的选择，目的是节约寄存器的数量
+    wire [4:0] segSel_Out;
+    //@yuan: 根据输入选择对应范围段的系数
+    reg [5*WIDTH-1:0] logc_stage_logc_custom;
+    reg [WIDTH-3:0] logc_stage_K_custom;
+    reg [WIDTH - 1:0] segment_bias_constant [5 : 0];
+
+    //@yuan: each segment has its own constant bias
+    always@(*)begin
+        for(j = 0; j < 6; j = j + 1)begin
+            segment_bias_constant[j] = constant_bias_in[(j + 1)*WIDTH32 - 1 -: WIDTH32];//fixed <=
+        end
+    end
+    // reg [WIDTH32-1:0] bias_custom;
+    segSel #(.WIDTH32(WIDTH32)) sel (
+        .x_in(x_0),
+        .is_fp(float_flag),
+        .break_points_in(break_points),
+        .log2_out(segSel_Out)
+    );
+    always @(*) begin
+        casez(segSel_Out)
+            5'b1????: begin logc_stage_logc_custom = logc_in_5; logc_stage_K_custom = K_in_5; end //@yuan: 选择第六段的系数，下面各选择项依次递减
+            5'b01???: begin logc_stage_logc_custom = logc_in_4; logc_stage_K_custom = K_in_4; end
+            5'b001??: begin logc_stage_logc_custom = logc_in_3; logc_stage_K_custom = K_in_3; end
+            5'b0001?: begin logc_stage_logc_custom = logc_in_2; logc_stage_K_custom = K_in_2; end
+            5'b00001: begin logc_stage_logc_custom = logc_in_1; logc_stage_K_custom = K_in_1; end
+            5'b00000: begin logc_stage_logc_custom = logc_in_0; logc_stage_K_custom = K_in_0; end
+            default: begin logc_stage_logc_custom = logc_in_0; logc_stage_K_custom = K_in_0; end
+        endcase
+    end
+    reg [WIDTH32 - 1:0] bias_custom;
+    reg [WIDTH32 - 1:0] bias_seg [5:0];
+    always@(*)begin
+        for(j = 0; j < 6; j = j + 1)begin
+            case(bias_sel[(j+1)*2 - 1 -: 2])
+                2'b00: bias_seg[j] = 32'b0;
+                2'b01: bias_seg[j] = segment_bias_constant[j];
+                2'b10: bias_seg[j] = x_0;
+                2'b11: bias_seg[j] = y_0; //@yuan: used by cascaed LNS
+                default: bias_seg[j] = 32'b0;
+                //fixed <=
+            endcase
+        end
+    end
+    always @(*) begin
+        casez(segSel_Out)
+            5'b1????: begin bias_custom = bias_seg[5]; end //@yuan: 选择第六段的系数，下面各选择项依次递减
+            5'b01???: begin bias_custom = bias_seg[4]; end 
+            5'b001??: begin bias_custom = bias_seg[3]; end
+            5'b0001?: begin bias_custom = bias_seg[2]; end
+            5'b00001: begin bias_custom = bias_seg[1]; end
+            5'b00000: begin bias_custom = bias_seg[0]; end
+            default: begin bias_custom = bias_seg[0]; end
+        endcase
+    end
+
+    //@zou: 流水线寄存器
+    reg [WIDTH32 - 1:0] input_x;
+    reg [WIDTH32 - 1:0] input_y;
+    reg logc_stage_TRG;
+    reg logc_stage_TRi;
+    //reg logc_stage_power_sign;
+    reg logc_stage_power;
+    reg logc_stage_VEC;
+    reg logc_stage_qi;
+    reg logc_stage_Div;
+    //@yuan: 段系数寄存器
+    reg [5*WIDTH-1:0] logc_stage_logc_custom_reg;
+    reg [WIDTH-3:0] logc_stage_K_custom_reg;
+    reg [WIDTH32 - 1:0] logc_stage_bias;
+    // reg [WIDTH32 - 1:0] bias_one_reg;
+    // reg [11:0] bias_sel_reg;
+    reg [4:0] segSel_Out_reg;
+    // reg [2:0] logc_stage_TRI_select;
+    reg [4:0] input_n;
+    reg logc_stage_float_flag;
+
+    always @(posedge clk or negedge rstn) begin
+        if (rstn == 1'b0) begin
+            input_x <= 32'b0;
+            input_y <= 32'b0;
+            input_n <= 5'b0;
+            logc_stage_TRG <= 1'b1;
+            logc_stage_TRi <= 1'b0;
+            //logc_stage_power_sign <= 1'b0;
+            logc_stage_power <= 1'b0;
+            logc_stage_VEC <= 1'b0;
+            logc_stage_qi <= 1'b1;
+            logc_stage_Div <= 1'b0;
+            logc_stage_logc_custom_reg <= 160'b0;
+            logc_stage_K_custom_reg <= 31'b0; // more bit warning
+            // bias_one_reg <= 32'b0;
+            // bias_sel_reg <= 12'b0;
+            logc_stage_bias <= 32'b0;
+            segSel_Out_reg <= 5'b0;
+            logc_stage_float_flag <= 1'b0;
+        end 
+        else begin
+            // 在复位信号为高时，input_x 和 input_y 被赋值为 x_0 和 y_0
+            input_x <= x_0;
+            input_y <= y_0;
+            input_n <= n;
+            logc_stage_TRG <= TRG;
+            logc_stage_TRi <= TRi;
+            //logc_stage_power_sign <= power_sign;
+            logc_stage_power <= power;
+            logc_stage_VEC <= VEC;
+            logc_stage_qi <= qi;
+            logc_stage_Div <= Div;
+            logc_stage_logc_custom_reg <= logc_stage_logc_custom;
+            logc_stage_K_custom_reg <= logc_stage_K_custom;
+            // bias_one_reg <= bias_one;
+            // bias_sel_reg <= bias_sel;
+            logc_stage_bias <= bias_custom;
+            segSel_Out_reg <= segSel_Out;
+            logc_stage_float_flag <= float_flag;
+        end
+    end
+
+    //对数转换
+    wire [WIDTH - 1:0] log_x;
+    wire [WIDTH32-1:0] absx0;
+    genvar i; // 定义生成变量
+    converter logconv_x0 (
+        .x_in(input_x),
+        .n(input_n),
+        .float_flag(logc_stage_float_flag),
+        .abs_x(absx0),
+        .log2_out(log_x)
+    );
+
+    //指数运算会转换成Q8.22*Q8.22的乘法运算，需要对y的数据格式进行转换
+    wire [WIDTH-3:0] fix_new_y0;
+    wire [WIDTH-3:0] float_new_y0;
+    wire float_power_y0_overflow;
+    wire float_power_y0_underflow;
+    Tran_to_822 tran_to_822_0(
+        .B0(input_y),
+        .n(input_n),
+        .new_B0(fix_new_y0)
+    );
+    FLOAT_TRAN_TO_Q822 float_tran_to_q822(
+        .float_y(input_y),
+        .Q822y(float_new_y0),
+        .overflow_y(float_power_y0_overflow),
+        .underflow_y(float_power_y0_underflow)
+    );
+    wire [WIDTH-3:0] new_y0;
+    assign new_y0 = (logc_stage_float_flag==1'b1) ? float_new_y0 : fix_new_y0;
+
+    wire logc_stage_power_sign;
+    assign logc_stage_power_sign = ((logc_stage_power == 1'b1) && (new_y0[22] == 1'b0)) ? 1'b1 : 1'b0;//为1，则指数计算结果为正数，否则为x的符号
+
+    wire [WIDTH-3:0] logc_stage_input_CSA_B;
+    assign logc_stage_input_CSA_B = (logc_stage_TRG == 1'b0) ? new_y0 : logc_stage_K_custom_reg;//TRG为0有效，表示进行指数函数
+
+    reg [WIDTH - 1:0] input_logA;
+    reg [WIDTH32 - 1:0] input_B0;
+    reg [WIDTH32 - 1:0] lns_stage_bias;
+    reg lns_stage_TRG;
+    reg lns_stage_TRi;
+    reg lns_stage_power_sign;
+    reg lns_stage_VEC;
+    reg lns_stage_qi;
+    reg lns_stage_Div;
+    reg [5*WIDTH - 1:0] lns_stage_logc;
+    // reg [WIDTH - 3:0] lns_stage_B;
+    reg [WIDTH - 3:0] lns_stage_input_CSA_B;
+    reg [4:0] lns_stage_n;
+    reg lns_stage_float_flag;  
+
+    //每一项泰勒展开：logci + ki * logx; logc_stage_logc_custom_reg： logci; logc_stage_K_custom_reg: ki
+    always @(posedge clk or negedge rstn) begin
+        if (~rstn) begin
+            input_logA <= 32'b0;
+            input_B0 <= 32'b0;
+            lns_stage_logc <= 159'b0;
+            // lns_stage_B <= 30'b0;
+            lns_stage_input_CSA_B <= 30'b0;
+            lns_stage_bias <= 32'b0;
+
+            lns_stage_TRG <= 1'b1;
+            lns_stage_TRi <= 1'b0;
+            lns_stage_power_sign <= 1'b0;
+            lns_stage_VEC <= 1'b0;
+            lns_stage_qi <= 1'b1;
+            lns_stage_Div <= 1'b0;
+            lns_stage_n <= 5'b0;
+            lns_stage_float_flag <= 1'b0;
+        end else begin
+            input_logA <= log_x;
+            input_B0 <= input_y;//用于指数函数、对数转换
+            lns_stage_logc <= logc_stage_logc_custom_reg;
+            // lns_stage_B <= logc_stage_K_custom_reg;
+            lns_stage_input_CSA_B <= logc_stage_input_CSA_B;
+
+            lns_stage_bias <= logc_stage_bias;
+            lns_stage_TRG <= logc_stage_TRG;
+            lns_stage_TRi <= logc_stage_TRi;
+            lns_stage_power_sign <= logc_stage_power_sign;
+            lns_stage_VEC <= logc_stage_VEC;
+            lns_stage_qi <= logc_stage_qi;
+            lns_stage_Div <= logc_stage_Div;
+            lns_stage_n <= input_n;
+            lns_stage_float_flag <= logc_stage_float_flag;
+        end
+    end
+
+    wire [9:0] y_zero_sign_k0;//@zou, CSA只处理一个y0
+    wire [WIDTH + 5:0] cpa_channel0, cpa_channel1, cpa_channel2, cpa_channel3, cpa_channel4;
+    CSA_tree csa_tree(
+        .A(input_logA),
+        .B(lns_stage_input_CSA_B),
+        .n(lns_stage_n),
+        .float_flag(lns_stage_float_flag),
+        .B0(input_B0),
+        
+        .log_c1(lns_stage_logc[5*WIDTH-3:4*WIDTH]),
+        .log_c2(lns_stage_logc[4*WIDTH-3:3*WIDTH]),
+        .log_c3(lns_stage_logc[3*WIDTH-3:2*WIDTH]),
+        .log_c4(lns_stage_logc[2*WIDTH-3:WIDTH]),
+        .log_c5(lns_stage_logc[WIDTH-3:0]),
+        .TRG(lns_stage_TRG),
+        .VEC(lns_stage_VEC),
+
+        .zero_sign_k0(y_zero_sign_k0),
+        .cpa_channel0(cpa_channel0),
+        .cpa_channel1(cpa_channel1),
+        .cpa_channel2(cpa_channel2),
+        .cpa_channel3(cpa_channel3),
+        .cpa_channel4(cpa_channel4)
+    );
+
+    reg alogc_stage_float_flag; 
+    reg alogc_stage_TRi;
+    reg alogc_stage_TRG;
+    reg alogc_stage_VEC;
+    reg alogc_stage_qi;
+    reg alogc_stage_Div;
+    reg alogc_stage_power_sign;
+    reg alogc_stage_tri_sign [4:0];
+
+    reg alogc_stage_logA_sign;
+    reg alogc_stage_B_sign [4:0];//指数项是否为偶数
+    reg [WIDTH32-1:0] alogc_stage_bias;
+    reg [WIDTH-1:0] alogc_logA;//@yuan: 只有一个输入通道
+    reg [9:0] alogc_y_zero_sign_k0;
+    reg [WIDTH+5:0] alogc_cpa_channel [4:0];
+    reg [1:0] alogc_stage_logc_zero_sign [4:0];
+    reg [4:0] alogc_stage_n;
+    reg alogc_stage_TRG_sign_B;
+
+    always @(posedge clk or negedge rstn) begin
+        if (~rstn) begin
+            // 当复位信号为低时，所有 input_x 和 input_y 都被清零
+            alogc_logA <= 32'b0;//@yuan: 只有一个输入通道
+            for (j = 0; j < 5; j = j + 1) begin
+                alogc_stage_tri_sign[j] <= 1'b0;
+                alogc_stage_B_sign[j] <= 1'b0;
+                alogc_cpa_channel[j] <= 32'b0;
+                alogc_stage_logc_zero_sign[j] <= 2'b00;
+            end
+            alogc_y_zero_sign_k0 <= 10'b0;
+            alogc_stage_qi <= 1'b1;
+            alogc_stage_Div <= 1'b0;
+            alogc_stage_bias <= 32'b0;
+            alogc_stage_TRi <= 1'b0;
+            alogc_stage_TRG <= 1'b1;
+            alogc_stage_VEC <= 1'b0;
+            alogc_stage_power_sign <= 1'b0;
+            alogc_stage_logA_sign <= 1'b0;
+            alogc_stage_n <= 5'b0;  
+            alogc_stage_TRG_sign_B <= 1'b0;
+            alogc_stage_float_flag <= 1'b0;
+
+        end else begin
+            // 在复位信号为高时，input_x 和 input_y 被赋值为 x_0 和 y_0
+            alogc_logA <= input_logA;
+            for (j = 0; j < 5; j = j + 1) begin
+                alogc_stage_tri_sign[j] <= lns_stage_input_CSA_B[6*j];//@zou:分段近似指数项是否为偶数
+                alogc_stage_B_sign[j] <= lns_stage_input_CSA_B[6*j+5];//@zou:分段近似指数项是否为正数
+            end
+            alogc_stage_logc_zero_sign[0] <= lns_stage_logc[5*WIDTH-1:5*WIDTH-2];
+            alogc_stage_logc_zero_sign[1] <= lns_stage_logc[4*WIDTH-1:4*WIDTH-2];
+            alogc_stage_logc_zero_sign[2] <= lns_stage_logc[3*WIDTH-1:3*WIDTH-2];
+            alogc_stage_logc_zero_sign[3] <= lns_stage_logc[2*WIDTH-1:2*WIDTH-2];
+            alogc_stage_logc_zero_sign[4] <= lns_stage_logc[WIDTH-1:WIDTH-2];
+
+            alogc_cpa_channel[0] <= cpa_channel0;
+            alogc_cpa_channel[1] <= cpa_channel1;
+            alogc_cpa_channel[2] <= cpa_channel2;
+            alogc_cpa_channel[3] <= cpa_channel3;
+            alogc_cpa_channel[4] <= cpa_channel4;
+
+            alogc_y_zero_sign_k0 <= y_zero_sign_k0;
+            
+            alogc_stage_qi <= lns_stage_qi;
+            alogc_stage_Div <= lns_stage_Div;
+            alogc_stage_bias <= lns_stage_bias;
+            alogc_stage_TRi <= lns_stage_TRi;
+            alogc_stage_TRG <= lns_stage_TRG;
+            alogc_stage_VEC <= lns_stage_VEC;
+            alogc_stage_power_sign <= lns_stage_power_sign;
+            alogc_stage_logA_sign <= input_logA[WIDTH - 3];
+            alogc_stage_n <= lns_stage_n;
+            alogc_stage_TRG_sign_B <= input_B0[31];
+            alogc_stage_float_flag <= lns_stage_float_flag;
+        end
+    end
+
+    // 补一位的原因在于防止溢出，溢出在sat中判断；但实际可以直接在CPA中判断
+    wire [WIDTH-2: 0] shift_log_y;
+    assign shift_log_y = (alogc_stage_qi == 1'b0) ? {{2{alogc_y_zero_sign_k0[7]}}, alogc_y_zero_sign_k0[7:0], alogc_cpa_channel[0][21:1]}: {alogc_y_zero_sign_k0[7], alogc_y_zero_sign_k0[7:0], alogc_cpa_channel[0][21:0]};
+    wire [WIDTH-2:0] CPA_ALOGC_a;
+    assign CPA_ALOGC_a = {alogc_logA[WIDTH-3], alogc_logA[WIDTH-3 : 0]};
+    wire [WIDTH-2:0] CPA_ALOGC_sum;
+    //@yuan: 指数的加减也只有一个通道
+    CPA_ALOGC CPA_ALOGC_inst0 (
+        .a(CPA_ALOGC_a),
+        .b(shift_log_y),
+        .Div(alogc_stage_Div),
+        .sum(CPA_ALOGC_sum)
+    );
+
+    wire [WIDTH+5:0] input_sat [4:0];
+    assign input_sat[0] = (alogc_stage_VEC == 1'b1) ? ((CPA_ALOGC_sum[WIDTH-2] == 1'b0) ? {7'b0000000, CPA_ALOGC_sum} : {7'b1111111, CPA_ALOGC_sum}) : alogc_cpa_channel[0];
+    assign input_sat[1] = alogc_cpa_channel[1];
+    assign input_sat[2] = alogc_cpa_channel[2];
+    assign input_sat[3] = alogc_cpa_channel[3];
+    assign input_sat[4] = alogc_cpa_channel[4];
+
+    wire [WIDTH-1:0] pre_input_anti [4:0];
+    wire Tri_overflow_one [4:0];
+    wire SAT_VEC_overflow;
+
+    SAT_with_TRG_VEC_overflow sat_inst0(
+        .input_sat(input_sat[0]),
+        .TRi(alogc_stage_TRi),
+        .TRG(alogc_stage_TRG),
+        .VEC(alogc_stage_VEC),
+        .TRG_B_sign(alogc_stage_TRG_sign_B), //计算power时，y的符号
+        .Tri_sign(alogc_stage_tri_sign[0]), //三角函数计算时，判断如果指数是偶数，则结果是正数
+        .alogc_stage_power_sign(alogc_stage_power_sign),//计算power时，判断如果指数是偶数，则结果是正数
+        .input_logA_zero_sign(alogc_logA[WIDTH-1:WIDTH-2]),//logA，A的零标志和负标志
+        .input_logB_zero_sign(alogc_y_zero_sign_k0[9:8]), //VEC计算时，B的零标志和负标志
+        .input_logC_zero_sign(alogc_stage_logc_zero_sign[0]),//三角函数计算式，ci的零标志和负标志
+        .alogc_stage_logA_sign(alogc_stage_logA_sign),//logA的正负标志
+        .alogc_stage_B_sign(alogc_stage_B_sign[0]),//三角函数计算时，指数的正负标志
+
+        .Tri_overflow_one(Tri_overflow_one[0]),
+        .TRG_overflow(TRG_overflow),//TOP输出
+        .VEC_overflow(SAT_VEC_overflow),
+        .input_anti(pre_input_anti[0])
+    );
+
+    generate
+        for (i = 1; i < 5; i = i + 1) begin: sat_gen // 给生成的代码块命名为 sat_gen
+            SAT_with_VEC_overflow sat_inst (
+                .input_sat(input_sat[i]),
+                .TRi(alogc_stage_TRi),
+                .Tri_sign(alogc_stage_tri_sign[i]),
+                .input_logA_zero_sign(alogc_logA[WIDTH-1:WIDTH-2]),
+                .input_logC_zero_sign(alogc_stage_logc_zero_sign[i]), //应该是logc的zero和符号位
+                .alogc_stage_logA_sign(alogc_stage_logA_sign),
+                .alogc_stage_B_sign(alogc_stage_B_sign[i]),
+                .Tri_overflow_one(Tri_overflow_one[i]),
+                .input_anti(pre_input_anti[i])
+            );
+        end
+    endgenerate
+
+
+    wire [WIDTH32-1:0] alogc_stage_log_result0;
+    wire [WIDTH32-1:0] alogc_stage_log_result0_fix;
+    wire [WIDTH32-1:0] alogc_stage_log_result0_float;
+    Tran_log_to_mn tran_log_to_mn_0(
+        .log30(pre_input_anti[0][WIDTH-3:0]),
+        .n(alogc_stage_n),
+        .log32(alogc_stage_log_result0_fix)
+    );
+    Tran_Q822_to_float tran_q822_to_float0(
+        .log30(pre_input_anti[0][WIDTH-3:0]),
+        .log32(alogc_stage_log_result0_float)
+    );
+    assign alogc_stage_log_result0 = (alogc_stage_float_flag==1'b1) ? alogc_stage_log_result0_float : alogc_stage_log_result0_fix;
+
+    wire [WIDTH32-1:0] output_anti [4:0];
+    generate
+        for (i = 0; i < 5; i = i + 1) begin: anticonv_gen // 给生成的代码块命名为 sat_gen
+            anticonverter anticonv_inst (
+                .x(pre_input_anti[i]),
+                .float_flag(alogc_stage_float_flag),
+                .Tri_overflow_one(Tri_overflow_one[i]),
+                .n(alogc_stage_n),
+                .x_output(output_anti[i])
+            );
+        end
+    endgenerate
+
+    //指数对数在第4周期输出
+    reg [WIDTH32-1:0] channel0_log_result0;
+    reg [WIDTH32-1:0] CPA_tree_input_t [4:0];
+    reg [WIDTH32-1:0] fxp_stage_bias;
+    reg fxp_stage_TRi;
+    reg fxp_stage_VEC;
+    reg fxp_stage_SAT_VEC_overflow;
+    reg fxp_stage_float_flag;
+
+    always @(posedge clk or negedge rstn) begin
+        if (~rstn) begin
+            for (j = 0; j < 5; j = j + 1) begin
+                CPA_tree_input_t[j] <= 32'b0; 
+            end
+            fxp_stage_SAT_VEC_overflow <= 1'b0;
+            fxp_stage_bias <= 32'b0;
+            fxp_stage_TRi <= 1'b0;
+            fxp_stage_VEC <= 1'b0;
+            channel0_log_result0 <= 32'b0;
+            fxp_stage_float_flag <= 1'b0;
+        end
+        else begin
+            for (j = 0; j < 5; j = j + 1) begin
+                CPA_tree_input_t[j] <= output_anti[j];
+            end
+            fxp_stage_SAT_VEC_overflow <= SAT_VEC_overflow;
+            fxp_stage_TRi <= alogc_stage_TRi;
+            fxp_stage_VEC <= alogc_stage_VEC;
+            fxp_stage_float_flag <= alogc_stage_float_flag;
+
+            fxp_stage_bias <= alogc_stage_bias;
+            channel0_log_result0 <= alogc_stage_log_result0;
+            
+        end
+    end
+
+    assign VEC_overflow = fxp_stage_VEC & fxp_stage_SAT_VEC_overflow;
+    wire [WIDTH32-1:0] channel2_tri_result0;
+    CPA_tree_with_MAD cpa_tree(
+        .clk(clk),
+        .rstn(rstn),
+        .t0(CPA_tree_input_t[0]),
+        .t1(CPA_tree_input_t[1]),
+        .t2(CPA_tree_input_t[2]),
+        .t3(CPA_tree_input_t[3]),
+        .t4(CPA_tree_input_t[4]),
+        .float_flag(fxp_stage_float_flag),
+        .bias(fxp_stage_bias),
+
+        .float_overflow(CPA_float_overflow),
+        .float_underflow(CPA_float_underflow),
+        .cpa_overflow(CPA_cpa_overflow),
+        .tri_result(channel2_tri_result0)
+    );
+
+    //VEC、指数、对数在第四个clk后输出
+    assign channel0_VEC_Power_result = CPA_tree_input_t[0]; //@yuan: 指数和VEC结果
+
+    assign channel0_log_result = channel0_log_result0;// 对数结果
+
+    assign channel2_tri_result = channel2_tri_result0;//三角函数结果
+
+
+
+endmodule
+
+
+module Tran_to_822 #(parameter WIDTH = 32,
+                    parameter WIDTH32 = 32)
+(
+    input [WIDTH32-1:0] B0,
+    input [4:0] n,
+    output reg [WIDTH-3:0] new_B0
+);
+//保留符号位
+    always @(*) begin
+        case(n)
+            5'd0: new_B0 = {B0[WIDTH32-1], B0[6:0], 22'b0};
+            5'd1: new_B0 = {B0[WIDTH32-1], B0[7:0], 21'b0};
+            5'd2: new_B0 = {B0[WIDTH32-1], B0[8:0], 20'b0};
+            5'd3: new_B0 = {B0[WIDTH32-1], B0[9:0], 19'b0};
+            5'd4: new_B0 = {B0[WIDTH32-1], B0[10:0], 18'b0};
+            5'd5: new_B0 = {B0[WIDTH32-1], B0[11:0], 17'b0};
+            5'd6: new_B0 = {B0[WIDTH32-1], B0[12:0], 16'b0};
+            5'd7: new_B0 = {B0[WIDTH32-1], B0[13:0], 15'b0};
+            5'd8: new_B0 = {B0[WIDTH32-1], B0[14:0], 14'b0};
+            5'd9: new_B0 = {B0[WIDTH32-1], B0[15:0], 13'b0};
+            5'd10: new_B0 = {B0[WIDTH32-1], B0[16:0], 12'b0};
+            5'd11: new_B0 = {B0[WIDTH32-1], B0[17:0], 11'b0};
+            5'd12: new_B0 = {B0[WIDTH32-1], B0[18:0], 10'b0};
+            5'd13: new_B0 = {B0[WIDTH32-1], B0[19:0], 9'b0};
+            5'd14: new_B0 = {B0[WIDTH32-1], B0[20:0], 8'b0};
+            5'd15: new_B0 = {B0[WIDTH32-1], B0[21:0], 7'b0};
+            5'd16: new_B0 = {B0[WIDTH32-1], B0[22:0], 6'b0};
+            5'd17: new_B0 = {B0[WIDTH32-1], B0[23:0], 5'b0};
+            5'd18: new_B0 = {B0[WIDTH32-1], B0[24:0], 4'b0};
+            5'd19: new_B0 = {B0[WIDTH32-1], B0[25:0], 3'b0};
+            5'd20: new_B0 = {B0[WIDTH32-1], B0[26:0], 2'b0};
+            5'd21: new_B0 = {B0[WIDTH32-1], B0[27:0], 1'b0};
+            5'd22: new_B0 = {B0[WIDTH32-1], B0[28:0]};
+            5'd23: new_B0 = {B0[WIDTH32-1], B0[29:1]};
+            5'd24: new_B0 = {B0[WIDTH32-1], B0[30:2]};
+            5'd25: new_B0 = {B0[31], B0[31:3]};
+            5'd26: new_B0 = {{2{B0[31]}}, B0[31:4]};
+            5'd27: new_B0 = {{3{B0[31]}}, B0[31:5]};
+            5'd28: new_B0 = {{4{B0[31]}}, B0[31:6]};
+            5'd29: new_B0 = {{5{B0[31]}}, B0[31:7]};
+            5'd30: new_B0 = {{6{B0[31]}}, B0[31:8]};
+            5'd31: new_B0 = {{7{B0[31]}}, B0[31:9]};
+            default: new_B0 = B0[31:2];
+        endcase
+    end
+endmodule
+
+
+module FLOAT_TRAN_TO_Q822(
+    input [31:0] float_y,
+    output reg [29:0] Q822y,
+    output overflow_y,
+    output underflow_y
+);
+
+    wire [7:0] exponent;
+    assign exponent = {1'b0, float_y[30:23]} + 8'b10000001; //one more bit warning
+    wire [24:0] Q2_23;
+    assign Q2_23 = (float_y[31] == 1'b0) ? {1'b0, 1'b1, float_y[22:0]} : {1'b1, 1'b0, ~float_y[22:0]} + 1'b1;
+    reg incase;
+    always @(*) begin
+        case(exponent)
+            8'b00000000: begin Q822y = {{6{Q2_23[24]}}, Q2_23[24:1]}; incase = 1'b1; end
+            8'b00000001: begin Q822y = {{5{Q2_23[24]}}, Q2_23[24:0]}; incase = 1'b1; end
+            8'b00000010: begin Q822y = {{4{Q2_23[24]}}, Q2_23[24:0], 1'b0}; incase = 1'b1; end
+            8'b00000011: begin Q822y = {{3{Q2_23[24]}}, Q2_23[24:0], 2'b0}; incase = 1'b1; end
+            8'b00000100: begin Q822y = {{2{Q2_23[24]}}, Q2_23[24:0], 3'b0}; incase = 1'b1; end
+            8'b00000101: begin Q822y = {{1{Q2_23[24]}}, Q2_23[24:0], 4'b0}; incase = 1'b1; end
+            8'b00000110: begin Q822y = {Q2_23[24:0], 4'b0}; incase = 1'b1; end
+            8'b11111111: begin Q822y = {{7{Q2_23[24]}}, Q2_23[24:2]}; incase = 1'b1; end
+            8'b11111110: begin Q822y = {{8{Q2_23[24]}}, Q2_23[24:3]}; incase = 1'b1; end
+            8'b11111101: begin Q822y = {{9{Q2_23[24]}}, Q2_23[24:4]}; incase = 1'b1; end
+            8'b11111100: begin Q822y = {{10{Q2_23[24]}}, Q2_23[24:5]}; incase = 1'b1; end
+            8'b11111011: begin Q822y = {{11{Q2_23[24]}}, Q2_23[24:6]}; incase = 1'b1; end
+            8'b11111010: begin Q822y = {{12{Q2_23[24]}}, Q2_23[24:7]}; incase = 1'b1; end
+            8'b11111001: begin Q822y = {{13{Q2_23[24]}}, Q2_23[24:8]}; incase = 1'b1; end
+            8'b11111000: begin Q822y = {{14{Q2_23[24]}}, Q2_23[24:9]}; incase = 1'b1; end
+            8'b11110111: begin Q822y = {{15{Q2_23[24]}}, Q2_23[24:10]}; incase = 1'b1; end
+            8'b11110110: begin Q822y = {{16{Q2_23[24]}}, Q2_23[24:11]}; incase = 1'b1; end
+            8'b11110101: begin Q822y = {{17{Q2_23[24]}}, Q2_23[24:12]}; incase = 1'b1; end
+            8'b11110100: begin Q822y = {{18{Q2_23[24]}}, Q2_23[24:13]}; incase = 1'b1; end
+            8'b11110011: begin Q822y = {{19{Q2_23[24]}}, Q2_23[24:14]}; incase = 1'b1; end
+            8'b11110010: begin Q822y = {{20{Q2_23[24]}}, Q2_23[24:15]}; incase = 1'b1; end
+            8'b11110001: begin Q822y = {{21{Q2_23[24]}}, Q2_23[24:16]}; incase = 1'b1; end
+            8'b11110000: begin Q822y = {{22{Q2_23[24]}}, Q2_23[24:17]}; incase = 1'b1; end
+            default: begin Q822y = {30'b0}; incase = 1'b0; end
+        endcase
+    end
+    assign overflow_y = (exponent[7] == 1'b0 && incase == 1'b0);
+    assign underflow_y = (exponent[7] == 1'b1 && incase == 1'b0);
+
+endmodule
+
+
+module SAT_with_TRG_VEC_overflow #(parameter WIDTH = 32)(
+    input [WIDTH+5:0] input_sat,
+    input TRi,
+    input TRG,
+    input VEC,
+    input TRG_B_sign,//计算power时，y的符号
+    input Tri_sign, //三角函数计算时，判断如果指数是偶数，则结果是正数
+    input alogc_stage_power_sign,//计算power时，判断如果指数是偶数，则结果是正数
+    input [1:0] input_logA_zero_sign,//logA，A的零标志和负标志
+    input [1:0] input_logB_zero_sign,//VEC计算时，B的零标志和负标志
+    input [1:0] input_logC_zero_sign,//三角函数计算式，ci的零标志和负标志
+    input alogc_stage_logA_sign,//logA的正负标志
+    input alogc_stage_B_sign,//三角函数计算时，指数的正负标志
+    output reg Tri_overflow_one,
+    output reg TRG_overflow,
+    output reg VEC_overflow,
+    output reg [WIDTH-1:0] input_anti
+);
+always @(*) begin
+    if(VEC == 1'b1)
+        input_anti = {input_logA_zero_sign[1]|input_logB_zero_sign[1], input_logA_zero_sign[0]^input_logB_zero_sign[0], input_sat[WIDTH-3:0]};
+        //这里对于开方的情况，没有进行考虑，即如果输入的B是负数也可以进行开方，相当于B的符号在开方符号外，所以要求开方输入的值不能是负数
+    else if(alogc_stage_power_sign == 1'b1)
+        input_anti = {input_logA_zero_sign[1], 1'b0, input_sat[WIDTH-3:0]};
+    else if(TRG==1'b0 && input_logB_zero_sign[1] == 1'b1)
+        input_anti = 32'b0;
+    else if(TRG==1'b0)
+        input_anti = {input_logA_zero_sign[1], input_logA_zero_sign[0], input_sat[WIDTH-3:0]};
+    else if(TRi == 1'b1 && Tri_sign == 1'b0)
+        // input_anti = {input_logC_zero_sign[1] | (input_logA_zero_sign[1] & (~input_logB_zero_sign[1])), 1'b0^input_logC_zero_sign[0], input_sat[WIDTH-3:0]};//@yuan: we treat 0^0 = 1 here
+        input_anti = {input_logA_zero_sign[1]|input_logC_zero_sign[1], 1'b0^input_logC_zero_sign[0], input_sat[WIDTH-3:0]};
+    else
+        input_anti = {input_logA_zero_sign[1]|input_logC_zero_sign[1], input_logA_zero_sign[0]^input_logC_zero_sign[0], input_sat[WIDTH-3:0]};
     
-    genvar j;
-    wire [4:0] is_both_zero;
-    wire [4:0] is_same_sign;
-    generate
-        for(j = 0; j < 5; j = j + 1)begin: break_is_zero
-            assign is_both_zero[j] = (~|break_point[j]) & (~|x_op);
-            assign is_same_sign[j] = break_point_sign[j] == x_in[WIDTH32 - 1];
-        end    
-    endgenerate
-
-    wire [4:0] cmp_result;
-    generate
-        for(j = 0; j < 5; j = j + 1)begin: cmp//@yuan: reusing the comparator
-            assign cmp_result[j] = $signed(x_op) > $signed(break_point[j]) ? 1'b1 : 1'b0 ;
-        end    
-    endgenerate
-
+    if(TRi == 1'b0 || (TRi==1'b1 && ( (input_sat[WIDTH+5:WIDTH-3] == 9'b111111111) || (input_sat[WIDTH+5:WIDTH-3] == 9'b000000000))))
+        Tri_overflow_one = 1'b0;
+    else
+        Tri_overflow_one = 1'b1;
     
-    //if the break point is 0, the segment should be selected the right side
-    generate
-        for(j = 0; j < 5; j = j + 1)begin: result
-            assign log2_out[j] = is_fp ?  is_both_zero[j] ? 1'b1 : is_same_sign[j] ? x_in[WIDTH32 - 1] ^ cmp_result[j] : !x_in[WIDTH32 - 1] : cmp_result[j];
-        end    
-    endgenerate
+    if(TRG == 1'b1 || (TRG==1'b0 && ((alogc_stage_logA_sign^TRG_B_sign == 1'b1 && input_sat[WIDTH+5:WIDTH-3] == 9'b111111111) || (alogc_stage_logA_sign^TRG_B_sign == 1'b0 && input_sat[WIDTH+5:WIDTH-3] == 9'b000000000))))
+        TRG_overflow = 1'b0;
+    else
+        TRG_overflow = 1'b1;
+    
+    if(VEC==1'b0 || (VEC == 1'b1 && (input_sat[WIDTH+5:WIDTH-3] == 9'b111111111 || input_sat[WIDTH+5:WIDTH-3] == 9'b000000000)))
+        VEC_overflow = 1'b0;
+    else
+        VEC_overflow = 1'b1;
+end
+endmodule
 
-    // assign log2_out[0] = is_fp ?  is_both_zero[0] ? 1'b1 : is_same_sign[0] ? x_in[WIDTH32 - 1] ^ cmp_result[0] : !x_in[WIDTH32 - 1] : cmp_result[0];
-    // assign log2_out[1] = is_fp ?  is_both_zero[1] ? 1'b1 : is_same_sign[1] ? x_in[WIDTH32 - 1] ^ cmp_result[1] : !x_in[WIDTH32 - 1] : cmp_result[1];
-    // assign log2_out[2] = is_fp ?  is_both_zero[2] ? 1'b1 : is_same_sign[2] ? x_in[WIDTH32 - 1] ^ cmp_result[2] : !x_in[WIDTH32 - 1] : cmp_result[2];
-    // assign log2_out[3] = is_fp ?  is_both_zero[3] ? 1'b1 : is_same_sign[3] ? x_in[WIDTH32 - 1] ^ cmp_result[3] : !x_in[WIDTH32 - 1] : cmp_result[3];
-    // assign log2_out[4] = is_fp ?  is_both_zero[4] ? 1'b1 : is_same_sign[4] ? x_in[WIDTH32 - 1] ^ cmp_result[4] : !x_in[WIDTH32 - 1] : cmp_result[4];
-endmodule 
+
+module SAT_with_VEC_overflow #(parameter WIDTH = 32)(
+    input [WIDTH+5:0] input_sat,
+    input TRi,
+    input [1:0] input_logA_zero_sign,
+    input [1:0] input_logC_zero_sign,
+    input alogc_stage_logA_sign,
+    input alogc_stage_B_sign,
+    input Tri_sign,
+    output reg Tri_overflow_one,
+    output reg [WIDTH-1:0] input_anti
+
+);
+
+always @(*) begin
+    if(TRi == 1'b1 && Tri_sign == 1'b0)
+        input_anti = {input_logA_zero_sign[1]|input_logC_zero_sign[1], 1'b0^input_logC_zero_sign[0], input_sat[WIDTH-3:0]};
+    else
+        input_anti = {input_logA_zero_sign[1]|input_logC_zero_sign[1], input_logA_zero_sign[0]^input_logC_zero_sign[0], input_sat[WIDTH-3:0]};
+    
+    if(TRi == 1'b0 || (TRi==1'b1 && ( (input_sat[WIDTH+5:WIDTH-3] == 9'b111111111) || (input_sat[WIDTH+5:WIDTH-3] == 9'b000000000))))
+        Tri_overflow_one = 1'b0;
+    else
+        Tri_overflow_one = 1'b1;
+end
+endmodule
+
+module Tran_log_to_mn #(parameter WIDTH = 32,
+                    parameter WIDTH32 = 32)
+(
+        input [WIDTH-3:0] log30,
+        input [4:0] n,
+        output reg [WIDTH32-1:0] log32
+);
+always @(*) begin
+    case(n)
+        5'd0: log32 = { {24{log30[WIDTH-3]}}, log30[WIDTH-3:22]};
+        5'd1: log32 = { {23{log30[WIDTH-3]}}, log30[WIDTH-3:21]};
+        5'd2: log32 = { {22{log30[WIDTH-3]}}, log30[WIDTH-3:20]};
+        5'd3: log32 = { {21{log30[WIDTH-3]}}, log30[WIDTH-3:19]};
+        5'd4: log32 = { {20{log30[WIDTH-3]}}, log30[WIDTH-3:18]};
+        5'd5: log32 = { {19{log30[WIDTH-3]}}, log30[WIDTH-3:17]};
+        5'd6: log32 = { {18{log30[WIDTH-3]}}, log30[WIDTH-3:16]};
+        5'd7: log32 = { {17{log30[WIDTH-3]}}, log30[WIDTH-3:15]};
+        5'd8: log32 = { {16{log30[WIDTH-3]}}, log30[WIDTH-3:14]};
+        5'd9: log32 = { {15{log30[WIDTH-3]}}, log30[WIDTH-3:13]};
+        5'd10: log32 = { {14{log30[WIDTH-3]}}, log30[WIDTH-3:12]};
+        5'd11: log32 = { {13{log30[WIDTH-3]}}, log30[WIDTH-3:11]};
+        5'd12: log32 = { {12{log30[WIDTH-3]}}, log30[WIDTH-3:10]};
+        5'd13: log32 = { {11{log30[WIDTH-3]}}, log30[WIDTH-3:9]};
+        5'd14: log32 = { {10{log30[WIDTH-3]}}, log30[WIDTH-3:8]};
+        5'd15: log32 = { {9{log30[WIDTH-3]}}, log30[WIDTH-3:7]};
+        5'd16: log32 = { {8{log30[WIDTH-3]}}, log30[WIDTH-3:6]};
+        5'd17: log32 = { {7{log30[WIDTH-3]}}, log30[WIDTH-3:5]};
+        5'd18: log32 = { {6{log30[WIDTH-3]}}, log30[WIDTH-3:4]};
+        5'd19: log32 = { {5{log30[WIDTH-3]}}, log30[WIDTH-3:3]};
+        5'd20: log32 = { {4{log30[WIDTH-3]}}, log30[WIDTH-3:2]};
+        5'd21: log32 = { {3{log30[WIDTH-3]}}, log30[WIDTH-3:1]};
+        5'd22: log32 = { {2{log30[WIDTH-3]}}, log30[WIDTH-3:0]};
+        5'd23: log32 = { {1{log30[WIDTH-3]}}, log30[WIDTH-3:0], 1'b0};
+        5'd24: log32 = {log30[WIDTH-3:0], 2'b0};
+        5'd25: log32 = {log30[WIDTH-3], log30[WIDTH-5:0], 3'b0};
+        5'd26: log32 = {log30[WIDTH-3], log30[WIDTH-6:0], 4'b0};
+        5'd27: log32 = {log30[WIDTH-3], log30[WIDTH-7:0], 5'b0};
+        5'd28: log32 = {log30[WIDTH-3], log30[WIDTH-8:0], 6'b0};
+        5'd29: log32 = {log30[WIDTH-3], log30[WIDTH-9:0], 7'b0};
+        5'd30: log32 = {log30[WIDTH-3], log30[WIDTH-10:0], 8'b0};
+        5'd31: log32 = {log30[WIDTH-3], log30[WIDTH-11:0], 9'b0};
+        default: log32 = {{2{log30[WIDTH-3]}}, log30[WIDTH-3:0]};
+    endcase
+end
+endmodule
+
+
+module Tran_Q822_to_float(
+    input [29:0] log30,
+    output reg [31:0] log32
+);
+    wire sign;
+    wire [29:0] abs_x30;
+    ABS0_Tran_Q822_to_float abs0_Tran_Q822_to_float0(
+        .x_in(log30),
+        .sign(sign),
+        .abs_x(abs_x30)
+    );
+    wire [4:0] k;
+    LOD1_Tran_Q822_to_float_24 lod1_Tran_Q822_to_float_24_0(
+        .in(abs_x30),
+        .msb_pos(k)  
+    );
+
+    always @(*) begin
+        case(k)
+            5'd2: log32 = {sign, 8'b10000110, 23'b00000000000000000000000};
+            5'd3: log32 = {sign, 8'b10000101, abs_x30[27:5]};
+            5'd4: log32 = {sign, 8'b10000100, abs_x30[26:4]};
+            5'd5: log32 = {sign, 8'b10000011, abs_x30[25:3]};
+            5'd6: log32 = {sign, 8'b10000010, abs_x30[24:2]};
+            5'd7: log32 = {sign, 8'b10000001, abs_x30[23:1]};
+            5'd8: log32 = {sign, 8'b10000000, abs_x30[22:0]};
+            5'd9: log32 = {sign, 8'b01111111, abs_x30[21:0], 1'b0};
+            5'd10: log32 = {sign, 8'b01111110, abs_x30[20:0], 2'b0};
+            5'd11: log32 = {sign, 8'b01111101, abs_x30[19:0], 3'b0};
+            5'd12: log32 = {sign, 8'b01111100, abs_x30[18:0], 4'b0};
+            5'd13: log32 = {sign, 8'b01111011, abs_x30[17:0], 5'b0};
+            5'd14: log32 = {sign, 8'b01111010, abs_x30[16:0], 6'b0};
+            5'd15: log32 = {sign, 8'b01111001, abs_x30[15:0], 7'b0};
+            5'd16: log32 = {sign, 8'b01111000, abs_x30[14:0], 8'b0};
+            5'd17: log32 = {sign, 8'b01110111, abs_x30[13:0], 9'b0};
+            5'd18: log32 = {sign, 8'b01110110, abs_x30[12:0], 10'b0};
+            5'd19: log32 = {sign, 8'b01110101, abs_x30[11:0], 11'b0};
+            5'd20: log32 = {sign, 8'b01110100, abs_x30[10:0], 12'b0};
+            5'd21: log32 = {sign, 8'b01110011, abs_x30[9:0], 13'b0};
+            5'd22: log32 = {sign, 8'b01110010, abs_x30[8:0], 14'b0};
+            5'd23: log32 = {sign, 8'b01110001, abs_x30[7:0], 15'b0};
+            5'd24: log32 = {sign, 8'b01110000, abs_x30[6:0], 16'b0};
+            5'd25: log32 = {sign, 8'b01101111, abs_x30[5:0], 17'b0};
+            5'd26: log32 = {sign, 8'b01101110, abs_x30[4:0], 18'b0};
+            5'd27: log32 = {sign, 8'b01101101, abs_x30[3:0], 19'b0};
+            5'd28: log32 = {sign, 8'b01101100, abs_x30[2:0], 20'b0};
+            5'd29: log32 = {sign, 8'b01101011, abs_x30[1:0], 21'b0};
+            5'd30: log32 = {sign, 8'b01101010, abs_x30[0], 22'b0};
+            5'd31: log32 = {sign, 8'b01101001, 23'b0};
+            default: log32 = {1'b0, 8'b0, 23'b0};
+        endcase
+    end
+
+
+endmodule
+
+
+module ABS0_Tran_Q822_to_float(
+    input [29:0] x_in,        // 输入 x 为 32 位定点数
+    output reg sign,
+    output reg [29:0] abs_x // 输出 abs_x 为 x 的绝对值
+);
+
+    always @(*) begin
+        if (x_in[29] == 1'b1) begin      // 如果符号位为1，表示负数
+            abs_x = ~x_in + 1'b1;  // 取反并加1，得到绝对值
+            sign = 1'b1;
+        end
+        else
+        begin
+            abs_x = x_in;       // 如果符号位为0，表示正数，直接输出 x
+            sign = 1'b0;
+        end
+    end
+endmodule
+
+module leading_one_detector_4bit_Tran_Q816_to_float (
+    input [3:0] in,      // 4-bit input
+    output reg [1:0] msb_pos,  // MSB position within the 4 bits, 2-bit output (0-3)
+    output reg signal
+);
+    always @(*) begin
+        if(in == 4'b0000)
+            signal = 1'b0;
+        else
+            signal = 1'b1;
+        casez (in)
+            4'b1???: msb_pos = 2'd0;
+            4'b01??: msb_pos = 2'd1;
+            4'b001?: msb_pos = 2'd2;
+            4'b0001: msb_pos = 2'd3;
+            default: msb_pos = 2'd0;  // Default case (this should never happen)
+        endcase
+    end
+endmodule
+
+
+module LOD1_Tran_Q822_to_float_24 (
+    input [29:0] in,     // 32-bit input
+    output reg [4:0] msb_pos  // MSB position, 5-bit output (0-31)
+);
+
+    wire [1:0] msb_group_1, msb_group_2, msb_group_3, msb_group_4;
+    wire [1:0] msb_group_5, msb_group_6, msb_group_7, msb_group_8;
+    wire signal1, signal2, signal3, signal4;
+    wire  signal5, signal6, signal7, signal8;
+
+    // Instantiate 8 4-bit Leading-One Detectors for each group
+    leading_one_detector_4bit_Tran_Q816_to_float group1 (.in({2'b00, in[29:28]}), .msb_pos(msb_group_1), .signal(signal1));
+    leading_one_detector_4bit_Tran_Q816_to_float group2 (.in(in[27:24]), .msb_pos(msb_group_2), .signal(signal2));
+    leading_one_detector_4bit_Tran_Q816_to_float group3 (.in(in[23:20]), .msb_pos(msb_group_3), .signal(signal3));
+    leading_one_detector_4bit_Tran_Q816_to_float group4 (.in(in[19:16]), .msb_pos(msb_group_4), .signal(signal4));
+    leading_one_detector_4bit_Tran_Q816_to_float group5 (.in(in[15:12]), .msb_pos(msb_group_5), .signal(signal5));
+    leading_one_detector_4bit_Tran_Q816_to_float group6 (.in(in[11:8]), .msb_pos(msb_group_6), .signal(signal6));
+    leading_one_detector_4bit_Tran_Q816_to_float group7 (.in(in[7:4]), .msb_pos(msb_group_7), .signal(signal7));
+    leading_one_detector_4bit_Tran_Q816_to_float group8 (.in(in[3:0]), .msb_pos(msb_group_8), .signal(signal8));
+    always @(*) begin
+        // Combine results from each group to determine the final MSB position
+        //@zou 若in全为0，则会使得ms_pos为0，对于浮点是不正确的，会输出最小的浮点数
+        if (signal1) msb_pos = {3'b000, msb_group_1};  // Position in the first group (0-3)
+        else if (signal2) msb_pos = {3'b001, msb_group_2};
+        else if (signal3) msb_pos = {3'b010, msb_group_3};
+        else if (signal4) msb_pos = {3'b011, msb_group_4};
+        else if (signal5) msb_pos = {3'b100, msb_group_5};
+        else if (signal6) msb_pos = {3'b101, msb_group_6};
+        else if (signal7) msb_pos = {3'b110, msb_group_7};
+        else if (signal8) msb_pos = {3'b111, msb_group_8};
+        else msb_pos = 5'b00000;  // Default case (this should never happen)
+    end
+
+endmodule
+
+
+module CPA_ALOGC (
+    input [30:0] a,
+    input [30:0] b,
+    input Div,
+    output [30:0] sum
+);
+    wire [30:0] rev_b;
+    assign rev_b = ~b;
+    wire [30:0] operator_b;
+    assign operator_b = (Div == 1'b0) ? b : rev_b;
+    assign sum = a + operator_b + Div;  // Simple binary addition
+endmodule

@@ -4,6 +4,10 @@ export COCOTB_RESOLVE_X
 TOPLEVEL_LANG = verilog
 
 SIM ?= verilator
+
+# VERILATOR_BIN_DIR ?= $(abspath ../oss-cad-suite/bin)
+# VERILATOR_BIN_DIR ?= $(abspath ../verilator/bin)
+# VERILATOR_BIN_DIR ?= $(abspath ../../CGRA-SoC/verilator/bin)
 WAVES ?= 0
 
 COCOTB_HDL_TIMEUNIT = 1ns
@@ -43,10 +47,14 @@ ifeq ($(SIM),icarus)
 
 
 else ifeq ($(SIM),verilator)
+    ifneq ($(filter default undefined,$(origin CXX)),)
+        CXX := $(or $(wildcard $(abspath ../llvm-project/install/bin/clang++)),clang++)
+    endif
+    BUILD_ARGS ?= CXX=$(CXX) OPT_FAST=-O2 OPT_SLOW=-O2
 
     EXTRA_ARGS += -Wno-SELRANGE
     EXTRA_ARGS += -Wno-WIDTH
-    EXTRA_ARGS += -Wno-CASEINCOMPLETE
+#     EXTRA_ARGS += -Wno-CASEINCOMPLETE
 #     EXTRA_ARGS += -Wno-fatal ###
 
     EXTRA_ARGS += $(foreach v,$(filter PARAM_%,$(.VARIABLES)), \

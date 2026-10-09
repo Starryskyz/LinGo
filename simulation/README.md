@@ -47,6 +47,30 @@ export PYTHONPATH=$(pwd)/workspace:$PYTHONPATH
 make [-j8]
 ```
 
+GEMM 测试使用数值断言检查结果，数值不一致会报告 FAIL。若重新生成 RTL 后
+结果异常，先固定 Verilator 安装目录，并使用独立构建目录重新编译，避免复用
+其他工具链生成的程序。cocotb 支持通过 `VERILATOR_BIN_DIR` 指定安装目录：
+
+```bash
+make -j16 SIM=verilator VERILATOR_BIN_DIR=/path/to/verilator/bin SIM_BUILD=sim_build_verified
+```
+
+可用 `make SIM=icarus SIM_BUILD=sim_build_icarus` 对同一份 RTL 做交叉检查。
+
+### 使用 VCS 对照仿真
+
+在已配置 cocotb 和 VCS 许可证的环境中运行：
+
+```bash
+export PYTHONPATH="$PWD/server:$PWD/workspace:$PYTHONPATH"
+make SIM=vcs
+```
+
+也可以使用 `make vcs`。如果 VCS 不在 PATH 中，追加
+`VCS_BIN_DIR=/path/to/vcs/bin`。VCS 使用独立的 `sim_build_vcs` 目录，
+通过 `-pvalue+` 传入与其他仿真器相同的顶层参数；编译和运行日志分别位于
+`sim_build_vcs/compile.log` 和 `sim_build_vcs/vcs-sim.log`。
+
 ### 运行server与C++ API示例（C++）
 
 将`Makefile`中修改为`MODULE = $(SERVER)`
@@ -185,5 +209,3 @@ kill -9 <PID>
    2. void enableArray();
    3. void sendData();
    4. void fetchData();
-
-
