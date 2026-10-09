@@ -158,11 +158,13 @@ cd .. && ./dot2json.sh
 
 ```
 cd ./mapper
-../run.sh [example] cocotb
+./run.sh [example] cocotb
 cp ../benchmarks/[example]/xxx_cocotb.py ../simulation/workspace/[example].py
 ```
 
 4. Verfication
+
+First you need to write testbench like 'simulation/workspace/test_cgra.py'
 
 ```
 cd simulation
